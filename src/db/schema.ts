@@ -24,7 +24,6 @@ export const clubs = pgTable("clubs", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   abbreviation: text("abbreviation").notNull().unique(),
-  adminEmail: text("admin_email").notNull(),
   // googleToken: text("google_token").notNull(), might not be neccessary to store, will see when creating OAuth flow
   signupUrl: text("signup_url").notNull(),
   spreadsheetUrl: text("spreadsheet_url").notNull(),
@@ -32,6 +31,19 @@ export const clubs = pgTable("clubs", {
     .defaultNow()
     .notNull(),
 });
+
+export const adminOf = pgTable(
+    "admin_of",
+    {
+      userId: integer("user_id")
+        .notNull()
+        .references(() => users.id, { onDelete: "cascade" }),
+      clubId: integer("club_id")
+        .notNull()
+        .references(() => clubs.id, { onDelete: "cascade" }),
+    },
+    (table) => [primaryKey({ columns: [table.userId, table.clubId] })],
+  );
 
 export const events = pgTable("events", {
   id: serial("id").primaryKey(),
