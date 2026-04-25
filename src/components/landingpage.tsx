@@ -1,4 +1,6 @@
-import Link from "next/link";
+"use client";
+
+import { signIn } from "next-auth/react";
 
 export default function LandingPage() {
   return (
@@ -10,15 +12,18 @@ export default function LandingPage() {
           >
             WDCC Calendar
           </h1>
-          <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-            <Link
-              href="/sign-in"
-              className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-base font-semibold text-black transition hover:bg-white/90"
+            <p className="mt-4 text-base leading-7 text-white/75">
+              Sign in with your Google account to continue to the app.
+            </p>
+            <button
+              type="button"
+              onClick={() => signIn("google", { callbackUrl: "/" })}
+              className="mt-8 inline-flex items-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
             >
-              Get Started
-            </Link>
+              Sign in with Google
+            </button>
+            
           </div>
-        </div>
     </main>
   );
 }

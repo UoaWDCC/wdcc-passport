@@ -11,17 +11,21 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
+    "db:start": "docker compose up -d --wait",
+    "db:stop": "docker compose down",
+    "db:reset": "docker compose down -v && docker compose up -d --wait && npm run db:migrate && npm run db:seed",
+    "db:seed": "docker compose exec -T db psql -U postgres -d wdcc_calendar < src/db/seed.sql",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^1.1.0",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.44.7",
     "next": "16.2.3",
     "next-auth": "^4.24.14",
+    "postgres": "^3.4.9",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
