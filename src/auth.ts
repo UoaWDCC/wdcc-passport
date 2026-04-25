@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
@@ -20,6 +21,37 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async signIn({ user }) {
       return Boolean(user.email);
+    },
+    async jwt({ token, user }) {
+      // Re-check on sign-in or while still pending sign-up
+      if (user || token.role === "needs-sign-up") {
+        const email = token.email;
+        if (email) {
+          const { db, users, adminOf } = await import("@/db");
+
+          const [dbUser] = await db
+            .select({ id: users.id })
+            .from(users)
+            .where(eq(users.email, email))
+            .limit(1);
+
+          if (!dbUser) {
+            token.role = "needs-sign-up";
+          } else {
+            const [adminClub] = await db
+              .select({ clubId: adminOf.clubId })
+              .from(adminOf)
+              .where(eq(adminOf.userId, dbUser.id))
+              .limit(1);
+            token.role = adminClub ? "admin" : "user";
+          }
+        }
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      session.user.role = token.role as string;
+      return session;
     },
   },
 };

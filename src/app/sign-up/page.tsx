@@ -1,21 +1,10 @@
-import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
 
-import { getCurrentUserAccess } from "@/lib/access";
+import { authOptions } from "@/auth";
 
 export default async function SignUpPage() {
-  const access = await getCurrentUserAccess();
-
-  if (access.status === "signed-out") {
-    redirect("/");
-  }
-
-  if (access.status === "admin") {
-    redirect("/admin");
-  }
-
-  if (access.status === "user") {
-    redirect("/user");
-  }
+  const session = await getServerSession(authOptions);
+  const email = session?.user?.email ?? "";
 
   return (
     <main className="flex min-h-screen flex-1 items-center justify-center bg-white px-6 py-16 text-black">
@@ -27,7 +16,7 @@ export default async function SignUpPage() {
           Finish creating your account
         </h1>
         <p className="mt-4 text-base leading-7 text-black/70">
-          {access.email} is signed in with Google, but it is not linked to a
+          {email} is signed in with Google, but it is not linked to a
           WDCC Calendar user account yet.
         </p>
       </section>

@@ -2,10 +2,7 @@ import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const AUTH_ROUTES = ["/sign-in"];
-const PROTECTED_ROUTES = ["/user", "/admin", "/sign-up"];
-
-function matchesRoute(pathname: string, routes: string[]) {
+function matches(pathname: string, routes: string[]) {
   return routes.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
@@ -17,19 +14,37 @@ export async function proxy(request: NextRequest) {
     req: request,
     secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   });
-  const isSignedIn = Boolean(token?.email);
+  const role = token?.role;
 
-  if (matchesRoute(pathname, PROTECTED_ROUTES) && !isSignedIn) {
+  // Not signed in — block all protected routes
+  if (!token && matches(pathname, ["/user", "/admin", "/sign-up"])) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  if (matchesRoute(pathname, AUTH_ROUTES) && isSignedIn) {
-    return NextResponse.redirect(new URL("/", request.url));
+  // Signed in but needs sign-up — only allow /sign-up
+  if (role === "needs-sign-up" && matches(pathname, ["/user", "/admin"])) {
+    return NextResponse.redirect(new URL("/sign-up", request.url));
+  }
+
+  // Already set up — redirect away from /sign-up and /admin
+  if (
+    role === "user" &&
+    matches(pathname, ["/sign-up", "/admin"])
+  ) {
+    return NextResponse.redirect(new URL("/user", request.url));
+  }
+
+  //Redirect admin from /sign-up and /user
+  if (
+    role === "admin" &&
+    matches(pathname, ["/sign-up", "/user"])
+  ) {
+    return NextResponse.redirect(new URL("/admin", request.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/user/:path*", "/admin/:path*", "/sign-up/:path*", "/sign-in"],
+  matcher: ["/user/:path*", "/admin/:path*", "/sign-up/:path*"],
 };
