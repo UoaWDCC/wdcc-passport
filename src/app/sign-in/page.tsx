@@ -1,4 +1,6 @@
-import Link from "next/link";
+"use client";
+
+import { signIn } from "next-auth/react";
 
 export default function SignInPage() {
   return (
@@ -17,16 +19,15 @@ export default function SignInPage() {
           Auth is the next piece to wire up
         </h1>
         <p className="mt-4 text-base leading-7 text-white/75">
-          The landing page and root-route split are in place. Once you connect
-          Google OAuth or your chosen auth provider, this route can become the
-          real sign-in entry point.
+          Sign in with your Google account to continue to the WDCC calendar.
         </p>
-        <Link
-          href="/"
+        <button
+          type="button"
+          onClick={() => signIn("google", { callbackUrl: "/" })}
           className="mt-8 inline-flex items-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
         >
-          Return home
-        </Link>
+          Sign in with Google
+        </button>
       </section>
     </main>
   );
