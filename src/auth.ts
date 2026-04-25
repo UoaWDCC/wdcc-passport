@@ -6,6 +6,7 @@ const googleClientId =
   process.env.AUTH_GOOGLE_ID ?? process.env.GOOGLE_CLIENT_ID ?? "";
 const googleClientSecret =
   process.env.AUTH_GOOGLE_SECRET ?? process.env.GOOGLE_CLIENT_SECRET ?? "";
+const sessionMaxAge = 30 * 60;
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -19,6 +20,13 @@ export const authOptions: NextAuthOptions = {
     error: "/",
   },
   secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+  session: {
+    strategy: "jwt",
+    maxAge: sessionMaxAge,
+  },
+  jwt: {
+    maxAge: sessionMaxAge,
+  },
   callbacks: {
     async signIn({ user }) {
       return Boolean(user.email);
