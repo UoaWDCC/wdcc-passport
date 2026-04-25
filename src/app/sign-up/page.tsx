@@ -16,8 +16,8 @@ export default async function SignUpPage() {
           Finish creating your account
         </h1>
         <p className="mt-4 text-base leading-7 text-black/70">
-          {email} is signed in with Google, but it is not linked to a
-          WDCC Calendar user account yet.
+          {email} is signed in with Google, but it is not linked to a WDCC
+          Calendar user account yet.
         </p>
       </section>
     </main>

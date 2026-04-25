@@ -17,6 +17,7 @@
 | `npm run format:check` | Check Prettier formatting    |
 | `npm run format`       | Auto-fix Prettier formatting |
 | `npm run typecheck`    | Run TypeScript type checking |
+| `npm run check`        |                              |
 
 ## Database
 

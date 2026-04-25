@@ -27,18 +27,12 @@ export async function proxy(request: NextRequest) {
   }
 
   // Already set up — redirect away from /sign-up and /admin
-  if (
-    role === "user" &&
-    matches(pathname, ["/sign-up", "/admin"])
-  ) {
+  if (role === "user" && matches(pathname, ["/sign-up", "/admin"])) {
     return NextResponse.redirect(new URL("/user", request.url));
   }
 
   //Redirect admin from /sign-up and /user
-  if (
-    role === "admin" &&
-    matches(pathname, ["/sign-up", "/user"])
-  ) {
+  if (role === "admin" && matches(pathname, ["/sign-up", "/user"])) {
     return NextResponse.redirect(new URL("/admin", request.url));
   }
 
