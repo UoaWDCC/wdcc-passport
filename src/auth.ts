@@ -29,7 +29,7 @@ export const authOptions: NextAuthOptions = {
         const email = token.email;
         if (email) {
           const { db, users, adminOf } = await import("@/db");
-          
+
           const [dbUser] = await db
             .select({ id: users.id })
             .from(users)
