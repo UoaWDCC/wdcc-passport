@@ -20,16 +20,16 @@
 
 ## Database
 
-| Command               | Description                                  |
-| --------------------- | -------------------------------------------- |
-| `npm run db:start` | Start the local Docker Postgres database     |
-| `npm run db:stop` | Stop the local Docker Postgres database    |
-| `npm run db:reset` | Reset local Docker Postgres, migrate, and seed |
-| `npm run db:seed`    | Seed the local Docker Postgres database     |
-| `npm run db:generate` | Generate Drizzle migrations                  |
-| `npm run db:migrate`  | Run migrations                               |
-| `npm run db:push`     | Push schema changes directly to the database |
-| `npm run db:studio`   | Open Drizzle Studio                          |
+| Command               | Description                                    |
+| --------------------- | ---------------------------------------------- |
+| `npm run db:start`    | Start the local Docker Postgres database       |
+| `npm run db:stop`     | Stop the local Docker Postgres database        |
+| `npm run db:reset`    | Reset local Docker Postgres, migrate, and seed |
+| `npm run db:seed`     | Seed the local Docker Postgres database        |
+| `npm run db:generate` | Generate Drizzle migrations                    |
+| `npm run db:migrate`  | Run migrations                                 |
+| `npm run db:push`     | Push schema changes directly to the database   |
+| `npm run db:studio`   | Open Drizzle Studio                            |
 
 ## Local Database
 

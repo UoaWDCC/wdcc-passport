@@ -6,24 +6,21 @@ export default function LandingPage() {
   return (
     <main className="relative flex min-h-screen flex-1 items-center justify-center overflow-hidden bg-black px-6 py-10 text-white">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.08),_transparent_28%),radial-gradient(circle_at_bottom_left,_rgba(255,255,255,0.06),_transparent_30%)]" />
-        <div className="max-w-3xl">
-          <h1
-            className="mt-5 text-5xl font-semibold leading-none text-white md:text-7xl"
-          >
-            WDCC Calendar
-          </h1>
-            <p className="mt-4 text-base leading-7 text-white/75">
-              Sign in with your Google account to continue to the app.
-            </p>
-            <button
-              type="button"
-              onClick={() => signIn("google", { callbackUrl: "/" })}
-              className="mt-8 inline-flex items-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
-            >
-              Sign in with Google
-            </button>
-            
-          </div>
+      <div className="max-w-3xl">
+        <h1 className="mt-5 text-5xl font-semibold leading-none text-white md:text-7xl">
+          WDCC Calendar
+        </h1>
+        <p className="mt-4 text-base leading-7 text-white/75">
+          Sign in with your Google account to continue to the app.
+        </p>
+        <button
+          type="button"
+          onClick={() => signIn("google", { callbackUrl: "/" })}
+          className="mt-8 inline-flex items-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
+        >
+          Sign in with Google
+        </button>
+      </div>
     </main>
   );
 }

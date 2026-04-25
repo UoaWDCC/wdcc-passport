@@ -33,17 +33,17 @@ export const clubs = pgTable("clubs", {
 });
 
 export const adminOf = pgTable(
-    "admin_of",
-    {
-      userId: integer("user_id")
-        .notNull()
-        .references(() => users.id, { onDelete: "cascade" }),
-      clubId: integer("club_id")
-        .notNull()
-        .references(() => clubs.id, { onDelete: "cascade" }),
-    },
-    (table) => [primaryKey({ columns: [table.userId, table.clubId] })],
-  );
+  "admin_of",
+  {
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    clubId: integer("club_id")
+      .notNull()
+      .references(() => clubs.id, { onDelete: "cascade" }),
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.clubId] })],
+);
 
 export const events = pgTable("events", {
   id: serial("id").primaryKey(),
