@@ -1,12 +1,45 @@
 "use client";
 
 import { signIn } from "next-auth/react";
+import { useState } from "react";
 
-export default function LandingPage() {
+export default function LandingPage({
+  error: initialError,
+}: {
+  error: string | null;
+}) {
+  const [localError, setLocalError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const error = localError ?? initialError;
+
+  async function handleSignIn() {
+    setLoading(true);
+    try {
+      const result = await signIn("google", {
+        callbackUrl: "/",
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setLocalError("Sign in failed. Please try again.");
+      }
+    } catch {
+      setLocalError("Sign in failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <main className="relative flex min-h-screen flex-1 items-center justify-center overflow-hidden bg-black px-6 py-10 text-white">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.08),_transparent_28%),radial-gradient(circle_at_bottom_left,_rgba(255,255,255,0.06),_transparent_30%)]" />
+    <div className="relative flex min-h-screen flex-1 items-center justify-center overflow-hidden bg-gray-900 px-6 py-10 text-white">
       <div className="max-w-3xl">
+        {error && (
+          <div className="rounded-lg bg-red-100 px-4 py-3 text-center text-red-700">
+            <p className="text-sm font-semibold">
+              Sign in failed. Please try again.
+            </p>
+          </div>
+        )}
         <h1 className="mt-5 text-5xl font-semibold leading-none text-white md:text-7xl">
           WDCC Calendar
         </h1>
@@ -15,12 +48,13 @@ export default function LandingPage() {
         </p>
         <button
           type="button"
-          onClick={() => signIn("google", { callbackUrl: "/" })}
-          className="mt-8 inline-flex items-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
+          onClick={handleSignIn}
+          disabled={loading}
+          className="mt-8 inline-flex items-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90 disabled:opacity-50"
         >
-          Sign in with Google
+          {loading ? "Signing in..." : "Sign in with Google"}
         </button>
       </div>
-    </main>
+    </div>
   );
 }

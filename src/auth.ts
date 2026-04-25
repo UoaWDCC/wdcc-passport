@@ -15,7 +15,8 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   pages: {
-    signIn: "/sign-in",
+    signIn: "/",
+    error: "/",
   },
   secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   callbacks: {
@@ -28,7 +29,7 @@ export const authOptions: NextAuthOptions = {
         const email = token.email;
         if (email) {
           const { db, users, adminOf } = await import("@/db");
-
+          
           const [dbUser] = await db
             .select({ id: users.id })
             .from(users)
