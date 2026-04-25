@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 const AUTH_ROUTES = ["/sign-in"];
-const PROTECTED_ROUTES = ["/user-side", "/admin-side", "/sign-up"];
+const PROTECTED_ROUTES = ["/user", "/admin", "/sign-up"];
 
 function matchesRoute(pathname: string, routes: string[]) {
   return routes.some(
@@ -31,5 +31,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/user-side/:path*", "/admin-side/:path*", "/sign-up/:path*", "/sign-in"],
+  matcher: ["/user/:path*", "/admin/:path*", "/sign-up/:path*", "/sign-in"],
 };

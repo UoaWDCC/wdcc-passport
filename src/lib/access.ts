@@ -77,5 +77,5 @@ export async function getSignedInDestination() {
     return "/sign-up";
   }
 
-  return access.status === "admin" ? "/admin-side" : "/user-side";
+  return access.status === "admin" ? "/admin" : "/user";
 }

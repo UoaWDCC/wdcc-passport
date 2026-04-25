@@ -18,7 +18,7 @@ export default async function AdminSideLayout({
   }
 
   if (access.status !== "admin") {
-    redirect("/user-side");
+    redirect("/user");
   }
 
   return children;

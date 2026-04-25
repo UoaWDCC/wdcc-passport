@@ -10,11 +10,11 @@ export default async function SignUpPage() {
   }
 
   if (access.status === "admin") {
-    redirect("/admin-side");
+    redirect("/admin");
   }
 
   if (access.status === "user") {
-    redirect("/user-side");
+    redirect("/user");
   }
 
   return (
