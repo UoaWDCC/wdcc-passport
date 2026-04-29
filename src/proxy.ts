@@ -20,9 +20,7 @@ export async function proxy(request: NextRequest) {
 
   // Anything that isn't a known role (including undefined or a forged value)
   const rawRole = token?.role;
-  const role: KnownRole | "no_role" = KNOWN_ROLES.includes(
-    rawRole as KnownRole,
-  )
+  const role: KnownRole | "no_role" = KNOWN_ROLES.includes(rawRole as KnownRole)
     ? (rawRole as KnownRole)
     : "no_role";
 
