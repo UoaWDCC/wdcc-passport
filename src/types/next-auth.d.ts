@@ -1,18 +1,20 @@
 import "next-auth";
 import "next-auth/jwt";
 
+export type AuthRole = "admin" | "user" | "no_role";
+
 declare module "next-auth" {
   interface Session {
     user: {
-      name?: string | null;
-      email: string;
-      role?: string;
+      user_id?: number;
+      role?: AuthRole;
     };
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
-    role?: string;
+    user_id?: number;
+    role?: AuthRole;
   }
 }

@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import type { AuthRole } from "@/types/next-auth";
 
 const googleClientId =
   process.env.AUTH_GOOGLE_ID ?? process.env.GOOGLE_CLIENT_ID ?? "";
@@ -13,6 +14,11 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: googleClientId,
       clientSecret: googleClientSecret,
+      authorization: {
+        params: {
+          prompt: "select_account",
+        },
+      },
     }),
   ],
   pages: {
@@ -32,9 +38,11 @@ export const authOptions: NextAuthOptions = {
       return Boolean(user.email);
     },
     async jwt({ token, user }) {
-      // Re-check on sign-in or while still pending sign-up
-      if (user || token.role === "needs-sign-up") {
-        const email = token.email;
+      token.role ??= "no_role";
+
+      // Re-check on sign-in
+      if (user) {
+        const email = user.email;
         if (email) {
           const { db, users, adminOf } = await import("@/db");
 
@@ -44,22 +52,39 @@ export const authOptions: NextAuthOptions = {
             .where(eq(users.email, email))
             .limit(1);
 
+          let userId = dbUser?.id;
+          let role: AuthRole = "user";
+
           if (!dbUser) {
-            token.role = "needs-sign-up";
+            const [newUser] = await db
+              .insert(users)
+              .values({
+                email,
+              })
+              .returning({ id: users.id });
+
+            userId = newUser.id;
           } else {
             const [adminClub] = await db
               .select({ clubId: adminOf.clubId })
               .from(adminOf)
               .where(eq(adminOf.userId, dbUser.id))
               .limit(1);
-            token.role = adminClub ? "admin" : "user";
+            role = adminClub ? "admin" : "user";
           }
+
+          token.user_id = userId;
+          token.role = role;
         }
+        delete token.email;
+        delete token.name;
+        delete token.picture;
       }
       return token;
     },
     async session({ session, token }) {
-      session.user.role = token.role as string;
+      session.user.user_id = token.user_id;
+      session.user.role = token.role ?? "no_role";
       return session;
     },
   },

@@ -14,14 +14,12 @@
    - Can access calendar without signing in
    - Optional field for makng a membership
 
-
    - mem checker for admin, checks whether someone is in spreadsheet
    - Passport functionality, qr code/code for each event, adds them to even attended and adds to their passport
    - make calendar when you press on a event it takes you to a google form
    - api = /api/v1/'api thingy'
 
    - change jwt to user id not email
-
 
 3. Build route protection and redirects after auth exists
    - protect student pages

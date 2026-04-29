@@ -14,25 +14,21 @@ export async function proxy(request: NextRequest) {
     req: request,
     secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   });
-  const role = token?.role;
+  const role = token?.role ?? "no_role";
 
-  // Not signed in — block all protected routes
-  if (!token && matches(pathname, ["/user", "/admin", "/sign-up"])) {
+  // Not signed in, or signed in without an app role — block protected routes.
+  if (
+    (!token || role === "no_role") &&
+    matches(pathname, ["/user", "/admin"])
+  ) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // Signed in but needs sign-up — only allow /sign-up
-  if (role === "needs-sign-up" && matches(pathname, ["/user", "/admin"])) {
-    return NextResponse.redirect(new URL("/sign-up", request.url));
-  }
-
-  // Already set up — redirect away from /sign-up and /admin
-  if (role === "user" && matches(pathname, ["/sign-up", "/admin"])) {
+  if (matches(pathname, ["/admin"]) && role !== "admin") {
     return NextResponse.redirect(new URL("/user", request.url));
   }
 
-  //Redirect admin from /sign-up and /user
-  if (role === "admin" && matches(pathname, ["/sign-up", "/user"])) {
+  if (role === "admin" && matches(pathname, ["/user"])) {
     return NextResponse.redirect(new URL("/admin", request.url));
   }
 
@@ -40,5 +36,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/user/:path*", "/admin/:path*", "/sign-up/:path*"],
+  matcher: ["/user/:path*", "/admin/:path*"],
 };

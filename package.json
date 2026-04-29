@@ -15,7 +15,7 @@
     "db:start": "docker compose up -d --wait",
     "db:stop": "docker compose down",
     "db:reset": "docker compose down -v && docker compose up -d --wait && npm run db:migrate && npm run db:seed",
-    "db:seed": "docker compose exec -T db psql -U postgres -d wdcc_calendar < src/db/seed.sql",
+    "db:seed": "docker compose exec -T db psql -U postgres -d wdcc_passport < src/db/seed.sql",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",

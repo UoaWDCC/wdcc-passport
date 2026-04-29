@@ -4,23 +4,17 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
 
 export type UserAccess =
-  | { status: "signed-out" }
-  | { status: "needs-sign-up"; email: string; name: string | null }
-  | { status: "user"; userId: number; email: string; name: string }
-  | { status: "admin"; userId: number; email: string; name: string };
+  | { status: "no_role" }
+  | { status: "user"; userId: number; email: string }
+  | { status: "admin"; userId: number; email: string };
 
-export async function isSignedIn() {
-  const session = await getServerSession(authOptions);
-
-  return Boolean(session?.user?.email);
-}
 
 export async function getCurrentUserAccess(): Promise<UserAccess> {
   const session = await getServerSession(authOptions);
-  const email = session?.user?.email;
+  const userId = session?.user?.user_id;
 
-  if (!email) {
-    return { status: "signed-out" };
+  if (!userId) {
+    return { status: "no_role" };
   }
 
   const { adminOf, db, users } = await import("@/db");
@@ -32,14 +26,12 @@ export async function getCurrentUserAccess(): Promise<UserAccess> {
       name: users.name,
     })
     .from(users)
-    .where(eq(users.email, email))
+    .where(eq(users.id, userId))
     .limit(1);
 
   if (!user) {
     return {
-      status: "needs-sign-up",
-      email,
-      name: session.user?.name ?? null,
+      status: "no_role",
     };
   }
 
@@ -54,7 +46,6 @@ export async function getCurrentUserAccess(): Promise<UserAccess> {
       status: "admin",
       userId: user.id,
       email: user.email,
-      name: user.name,
     };
   }
 
@@ -62,19 +53,14 @@ export async function getCurrentUserAccess(): Promise<UserAccess> {
     status: "user",
     userId: user.id,
     email: user.email,
-    name: user.name,
   };
 }
 
 export async function getSignedInDestination() {
   const access = await getCurrentUserAccess();
 
-  if (access.status === "signed-out") {
+  if (access.status === "no_role") {
     return null;
-  }
-
-  if (access.status === "needs-sign-up") {
-    return "/sign-up";
   }
 
   return access.status === "admin" ? "/admin" : "/user";
