@@ -8,7 +8,6 @@ export type UserAccess =
   | { status: "user"; userId: number; email: string }
   | { status: "admin"; userId: number; email: string };
 
-
 export async function getCurrentUserAccess(): Promise<UserAccess> {
   const session = await getServerSession(authOptions);
   const userId = session?.user?.user_id;
