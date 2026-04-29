@@ -1,7 +1,6 @@
 name: Quality and Build
 
 on:
-  push:
   pull_request:
     branches-ignore:
       - main

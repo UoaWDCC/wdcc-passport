@@ -1,3 +1,3 @@
-export default function UserSidePage() {
+export default function UserPage() {
   return <p> user page</p>;
 }

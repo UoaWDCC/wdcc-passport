@@ -1,21 +1,21 @@
 services:
   db:
     image: postgres:16
-    container_name: wdcc-calendar-db
+    container_name: wdcc-passport-db
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: wdcc_calendar
+      POSTGRES_DB: wdcc_passport
     ports:
       - "5433:5432"
     volumes:
-      - wdcc-calendar-db:/var/lib/postgresql/data
+      - wdcc-passport-db:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d wdcc_calendar"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d wdcc_passport"]
       interval: 5s
       timeout: 5s
       retries: 10
 
 volumes:
-  wdcc-calendar-db:
+  wdcc-passport-db:
