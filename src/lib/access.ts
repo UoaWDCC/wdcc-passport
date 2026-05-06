@@ -1,57 +1,40 @@
-import { eq } from "drizzle-orm";
-import { getServerSession } from "next-auth";
+import { headers } from "next/headers";
 
-import { authOptions } from "@/auth";
+import { auth, type AppRole } from "@/auth";
 
 export type UserAccess =
   | { status: "no_role" }
   | { status: "user"; userId: number; email: string }
   | { status: "admin"; userId: number; email: string };
 
-export async function getCurrentUserAccess(): Promise<UserAccess> {
-  const session = await getServerSession(authOptions);
-  const userId = session?.user?.user_id;
+function isAppRole(value: string): value is AppRole {
+  return value === "user" || value === "admin";
+}
 
-  if (!userId) {
+export async function getCurrentUserAccess(): Promise<UserAccess> {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  console.log(
+    "[auth] cookie session payload:",
+    JSON.stringify(session, null, 2),
+  );
+
+  if (!session?.user?.email) {
     return { status: "no_role" };
   }
 
-  const { adminOf, db, users } = await import("@/db");
+  const { appUserId, role } = session.session;
 
-  const [user] = await db
-    .select({
-      id: users.id,
-      email: users.email,
-      name: users.name,
-    })
-    .from(users)
-    .where(eq(users.id, userId))
-    .limit(1);
-
-  if (!user) {
-    return {
-      status: "no_role",
-    };
-  }
-
-  const [adminClub] = await db
-    .select({ clubId: adminOf.clubId })
-    .from(adminOf)
-    .where(eq(adminOf.userId, user.id))
-    .limit(1);
-
-  if (adminClub) {
-    return {
-      status: "admin",
-      userId: user.id,
-      email: user.email,
-    };
+  if (!isAppRole(role)) {
+    return { status: "no_role" };
   }
 
   return {
-    status: "user",
-    userId: user.id,
-    email: user.email,
+    status: role,
+    userId: appUserId,
+    email: session.user.email,
   };
 }
 

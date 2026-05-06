@@ -1,6 +1,6 @@
 "use client";
 
-import { signIn } from "next-auth/react";
+import { authClient } from "@/lib/auth-client";
 import { useState } from "react";
 
 export default function LandingPage({
@@ -15,17 +15,18 @@ export default function LandingPage({
   async function handleSignIn() {
     setLoading(true);
     try {
-      const result = await signIn("google", {
-        callbackUrl: "/",
-        redirect: false,
+      const { error } = await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/",
+        errorCallbackURL: "/?error=oauth",
       });
 
-      if (result?.error) {
+      if (error) {
         setLocalError("Sign in failed. Please try again.");
+        setLoading(false);
       }
     } catch {
       setLocalError("Sign in failed. Please try again.");
-    } finally {
       setLoading(false);
     }
   }
