@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import type { UserAccess } from "@/lib/access";
@@ -16,25 +15,27 @@ export default function NavBar({
 }: {
   access: Extract<UserAccess, { status: "admin" | "user" }>;
 }) {
-  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
   const isAdmin = access.status === "admin";
   const isUser = access.status === "user";
   let menuItems: MenuItem[] = [];
-  let title = "WDCC Calendar";
   let homeHref = "/";
 
   if (isAdmin) {
-    title = "Admin Dashboard";
     homeHref = "/admin";
     menuItems = [{ name: "Dashboard", href: "/admin" }];
   }
 
   if (isUser) {
-    title = "User Calendar";
     homeHref = "/user/calendar";
-    menuItems = [{ name: "Calendar", href: "/user/calendar" }];
+    menuItems = [
+      { name: "Calendar", href: "/user/calendar" },
+      { name: "Passport", href: "/user/calendar" },
+      { name: "Collection", href: "/user/calendar" },
+      { name: "Profile", href: "/user/calendar" },
+      { name: "Scan", href: "/user/calendar" },
+    ];
   }
 
   return (
@@ -55,7 +56,7 @@ export default function NavBar({
             onClick={() => setIsOpen(false)}
             className="truncate text-base font-semibold"
           >
-            {title}
+            Passport
           </Link>
         </div>
 
@@ -64,7 +65,6 @@ export default function NavBar({
             <NavLink
               key={item.name}
               item={item}
-              pathname={pathname}
               onNavigate={() => setIsOpen(false)}
             />
           ))}
@@ -96,7 +96,6 @@ export default function NavBar({
               <NavLink
                 key={item.name}
                 item={item}
-                pathname={pathname}
                 onNavigate={() => setIsOpen(false)}
               />
             ))}
@@ -109,25 +108,16 @@ export default function NavBar({
 
 function NavLink({
   item,
-  pathname,
   onNavigate,
 }: {
   item: MenuItem;
-  pathname: string;
   onNavigate: () => void;
 }) {
-  const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-
   return (
     <Link
       href={item.href}
-      aria-current={active ? "page" : undefined}
       onClick={onNavigate}
-      className={`flex items-center rounded-full px-4 py-3 text-sm font-medium transition md:py-2 ${
-        active
-          ? "bg-gray-700 text-orange-400"
-          : "text-gray-300 hover:bg-gray-800 hover:text-white"
-      }`}
+      className="flex items-center px-4 py-3 text-sm font-medium text-white transition hover:text-gray-300 md:py-2"
     >
       {item.name}
     </Link>
