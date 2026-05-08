@@ -1,6 +1,7 @@
 import { getCurrentUserAccess } from "@/lib/access";
+import { redirect } from "next/navigation";
 
 export default async function UserPage() {
   await getCurrentUserAccess();
-  return <p> user page</p>;
+  redirect("/user/calendar");
 }
