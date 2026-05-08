@@ -1,5 +1,6 @@
 import Calendar from "@/components/user/calendar/Calendar";
 import CardsCollectedCard from "@/components/user/calendar/CardsCollectedCard";
+import EventsCurrentlyOn from "@/components/user/calendar/EventsCurrentlyOn";
 import EventsAttendedCard from "@/components/user/calendar/EventsAttendedCard";
 import PacksCard from "@/components/user/calendar/PacksCard";
 import RsvpCard from "@/components/user/calendar/RsvpCard";
@@ -17,7 +18,10 @@ export default function CalendarMainContent() {
 
       <div className="grid flex-1 gap-4 lg:grid-cols-[3fr_2fr]">
         <Calendar />
-        <UpcomingEvent />
+        <div className="grid gap-4 lg:grid-rows-2">
+          <UpcomingEvent />
+          <EventsCurrentlyOn />
+        </div>
       </div>
     </div>
   );
