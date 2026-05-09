@@ -34,7 +34,13 @@ export default function NavBar({
   if (isUser) {
     title = "User Calendar";
     homeHref = "/user/calendar";
-    menuItems = [{ name: "Calendar", href: "/user/calendar" }];
+    menuItems = [
+      { name: "Calendar", href: "/user/calendar" },
+      { name: "Passport", href: "/user/calendar" },
+      { name: "Collection", href: "/user/collection" },
+      { name: "Profile", href: "/user/calendar" },
+      { name: "Scan", href: "/user/calendar" },
+    ];
   }
 
   return (
