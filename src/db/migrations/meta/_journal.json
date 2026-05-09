@@ -22,6 +22,20 @@
       "when": 1778035024207,
       "tag": "0002_sad_demogoblin",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1778293686835,
+      "tag": "0003_yummy_big_bertha",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1778293686836,
+      "tag": "0004_fix_collection_card_rarity",
+      "breakpoints": true
     }
   ]
 }

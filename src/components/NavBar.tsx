@@ -32,7 +32,7 @@ export default function NavBar({
     menuItems = [
       { name: "Calendar", href: "/user/calendar" },
       { name: "Passport", href: "/user/calendar" },
-      { name: "Collection", href: "/user/calendar" },
+      { name: "Collection", href: "/user/collection" },
       { name: "Profile", href: "/user/calendar" },
       { name: "Scan", href: "/user/calendar" },
     ];

@@ -1,5 +1,6 @@
 insert into users (name, email)
-values ('Shuaib', 'alkhudairi.sa@gmail.com')
+values ('Shuaib', 'alkhudairi.sa@gmail.com'),
+('test', 'salk147@aucklanduni.ac.nz')
 on conflict (email) do update
 set name = excluded.name;
 

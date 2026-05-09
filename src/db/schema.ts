@@ -1,8 +1,8 @@
 import {
   boolean,
   integer,
-  pgTable,
   primaryKey,
+  pgTable,
   serial,
   text,
   timestamp,
@@ -188,3 +188,61 @@ export const memberOf = pgTable(
   },
   (table) => [primaryKey({ columns: [table.userId, table.clubId] })],
 );
+
+export const cards = pgTable("cards", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+  imageUrl: text("image_url"),
+  pokemonTypes: text("pokemon_types").array().notNull(),
+  eventId: integer("event_id").references(() => events.id, {
+    onDelete: "set null",
+  }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const userPacks = pgTable("user_packs", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  eventId: integer("event_id").references(() => events.id, {
+    onDelete: "set null",
+  }),
+  grantedAt: timestamp("granted_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  openedAt: timestamp("opened_at", { withTimezone: true }),
+  scanToken: text("scan_token").notNull().unique(),
+});
+
+export const userPackCards = pgTable("user_pack_cards", {
+  id: serial("id").primaryKey(),
+  packId: integer("pack_id")
+    .notNull()
+    .references(() => userPacks.id, { onDelete: "cascade" }),
+  cardId: integer("card_id")
+    .notNull()
+    .references(() => cards.id, { onDelete: "cascade" }),
+  slot: integer("slot").notNull(),
+  rarity: text("rarity").notNull(),
+});
+
+export const userCollection = pgTable("user_collection", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  cardId: integer("card_id")
+    .notNull()
+    .references(() => cards.id, { onDelete: "cascade" }),
+  rarity: text("rarity").notNull(),
+  obtainedAt: timestamp("obtained_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  fromPack: integer("from_pack").references(() => userPacks.id, {
+    onDelete: "set null",
+  }),
+});

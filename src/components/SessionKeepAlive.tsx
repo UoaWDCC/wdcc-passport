@@ -5,10 +5,14 @@ import { useEffect } from "react";
 const SESSION_REFRESH_INTERVAL_MS = 3 * 60 * 1000;
 
 async function refreshSession() {
-  await fetch("/api/auth/get-session", {
-    cache: "no-store",
-    credentials: "same-origin",
-  });
+  try {
+    await fetch("/api/auth/get-session", {
+      cache: "no-store",
+      credentials: "same-origin",
+    });
+  } catch {
+    // Best-effort background refresh. Auth-gated views handle expired sessions.
+  }
 }
 
 export default function SessionKeepAlive() {
