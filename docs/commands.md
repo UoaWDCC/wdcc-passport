@@ -2,27 +2,65 @@
 
 ## Development
 
-| Command         | Description                  |
-| --------------- | ---------------------------- |
-| `npm run dev`   | Start the development server |
-| `npm run build` | Build for production         |
-| `npm run start` | Start the production server  |
+| Command      | Description                  |
+| ------------ | ---------------------------- |
+| `pnpm dev`   | Start the development server |
+| `pnpm build` | Build for production         |
+| `pnpm start` | Start the production server  |
 
 ## Code Quality
 
-| Command                | Description                  |
-| ---------------------- | ---------------------------- |
-| `npm run lint`         | Check for ESLint issues      |
-| `npm run lint:fix`     | Auto-fix ESLint issues       |
-| `npm run format:check` | Check Prettier formatting    |
-| `npm run format`       | Auto-fix Prettier formatting |
-| `npm run typecheck`    | Run TypeScript type checking |
+| Command             | Description                  |
+| ------------------- | ---------------------------- |
+| `pnpm lint`         | Check for ESLint issues      |
+| `pnpm lint:fix`     | Auto-fix ESLint issues       |
+| `pnpm format:check` | Check Prettier formatting    |
+| `pnpm format`       | Auto-fix Prettier formatting |
+| `pnpm typecheck`    | Run TypeScript type checking |
+| `pnpm check`        |                              |
 
 ## Database
 
-| Command               | Description                                  |
-| --------------------- | -------------------------------------------- |
-| `npm run db:generate` | Generate Drizzle migrations                  |
-| `npm run db:migrate`  | Run migrations                               |
-| `npm run db:push`     | Push schema changes directly to the database |
-| `npm run db:studio`   | Open Drizzle Studio                          |
+| Command            | Description                                    |
+| ------------------ | ---------------------------------------------- |
+| `pnpm db:start`    | Start the local Docker Postgres database       |
+| `pnpm db:stop`     | Stop the local Docker Postgres database        |
+| `pnpm db:reset`    | Reset local Docker Postgres, migrate, and seed |
+| `pnpm db:seed`     | Seed the local Docker Postgres database        |
+| `pnpm db:generate` | Generate Drizzle migrations                    |
+| `pnpm db:migrate`  | Run migrations                                 |
+| `pnpm db:push`     | Push schema changes directly to the database   |
+| `pnpm db:studio`   | Open Drizzle Studio                            |
+
+## Local Database
+
+set `.env` to local testing variables, then start Postgres and
+wait for it to be healthy:
+
+```bash
+pnpm db:start
+```
+
+Generate migrations after schema changes:
+
+```bash
+pnpm db:generate
+```
+
+Apply migrations to the database from `DATABASE_URL`:
+
+```bash
+pnpm db:migrate
+```
+
+Reset the Docker database, re-apply migrations, and seed test data:
+
+```bash
+pnpm db:reset
+```
+
+Seed the local Docker database with test user and club data:
+
+```bash
+pnpm db:seed
+```
