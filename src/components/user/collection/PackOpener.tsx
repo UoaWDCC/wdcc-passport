@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 import { openPack, type RevealedCard } from "@/app/user/collection/actions";
@@ -124,12 +125,14 @@ function RevealOverlay({
       <div
         className={`flex w-full max-w-xs flex-col gap-3 rounded-xl border-4 bg-white p-4 shadow-2xl ${border}`}
       >
-        <div className="aspect-square w-full overflow-hidden rounded-lg bg-gray-50">
+        <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-gray-50">
           {card.imageUrl ? (
-            <img
+            <Image
               src={card.imageUrl}
               alt={card.name}
-              className="h-full w-full object-contain p-2"
+              fill
+              sizes="(max-width: 640px) 100vw, 320px"
+              className="object-contain p-2"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-sm text-gray-400">
