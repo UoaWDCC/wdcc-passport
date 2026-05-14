@@ -6,7 +6,11 @@ ALTER TABLE "cards" ALTER COLUMN "slug" SET NOT NULL;
 --> statement-breakpoint
 ALTER TABLE "cards" ADD CONSTRAINT "cards_slug_unique" UNIQUE("slug");
 --> statement-breakpoint
-ALTER TABLE "cards" ADD COLUMN "pokemon_types" text[] DEFAULT ARRAY[]::text[] NOT NULL;
+ALTER TABLE "cards" ADD COLUMN "rarity" text;
+--> statement-breakpoint
+UPDATE "cards" SET "rarity" = COALESCE("type", 'common');
+--> statement-breakpoint
+ALTER TABLE "cards" ALTER COLUMN "rarity" SET NOT NULL;
 --> statement-breakpoint
 ALTER TABLE "user_pack_cards" ADD COLUMN "rarity" text;
 --> statement-breakpoint

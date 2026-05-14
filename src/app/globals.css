@@ -1,1 +1,73 @@
 @import "tailwindcss";
+
+@keyframes pack-card-reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(34px) scale(0.78) rotate(-5deg);
+    filter: blur(12px) saturate(1.6);
+  }
+  45% {
+    opacity: 1;
+    transform: translateY(-10px) scale(1.06) rotate(2deg);
+    filter: blur(0) saturate(1.35);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0deg);
+    filter: blur(0) saturate(1);
+  }
+}
+
+@keyframes pack-rarity-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0);
+  }
+  18% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(4.8);
+  }
+}
+
+@keyframes pack-rarity-wash {
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.pack-card-reveal {
+  animation: pack-card-reveal 900ms both cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pack-rarity-burst {
+  background:
+    radial-gradient(circle, var(--pack-rarity-color) 0 8%, transparent 9% 100%),
+    conic-gradient(
+      from 0deg,
+      transparent,
+      var(--pack-rarity-color),
+      transparent,
+      var(--pack-rarity-color),
+      transparent
+    );
+  animation: pack-rarity-burst 950ms both ease-out;
+}
+
+.pack-rarity-wash {
+  background: radial-gradient(
+    circle,
+    var(--pack-rarity-color) 0%,
+    color-mix(in oklab, var(--pack-rarity-color) 45%, transparent) 24%,
+    transparent 68%
+  );
+  animation: pack-rarity-wash 850ms both ease-out;
+}

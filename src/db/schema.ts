@@ -194,7 +194,7 @@ export const cards = pgTable("cards", {
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(),
   imageUrl: text("image_url"),
-  pokemonTypes: text("pokemon_types").array().notNull(),
+  rarity: text("rarity").notNull(),
   eventId: integer("event_id").references(() => events.id, {
     onDelete: "set null",
   }),

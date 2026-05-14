@@ -8,7 +8,6 @@ export type CollectedCard = {
   name: string;
   rarity: string;
   imageUrl: string | null;
-  pokemonTypes: string[];
   obtainedAt: Date;
   eventTitle: string | null;
 };
@@ -18,7 +17,6 @@ export type CollectedCardGroup = {
   name: string;
   rarity: string;
   imageUrl: string | null;
-  pokemonTypes: string[];
   count: number;
   eventTitle: string | null;
 };
@@ -39,9 +37,8 @@ export async function getUserCollection(
       collectionId: userCollection.id,
       cardId: cards.id,
       name: cards.name,
-      rarity: userCollection.rarity,
+      rarity: cards.rarity,
       imageUrl: cards.imageUrl,
-      pokemonTypes: cards.pokemonTypes,
       obtainedAt: userCollection.obtainedAt,
       eventTitle: events.title,
     })
@@ -61,9 +58,8 @@ export async function getUserCollectionGrouped(
     .select({
       cardId: cards.id,
       name: cards.name,
-      rarity: userCollection.rarity,
+      rarity: cards.rarity,
       imageUrl: cards.imageUrl,
-      pokemonTypes: cards.pokemonTypes,
       count: sql<number>`count(*)::int`,
       eventTitle: events.title,
     })
@@ -71,14 +67,7 @@ export async function getUserCollectionGrouped(
     .innerJoin(cards, eq(cards.id, userCollection.cardId))
     .leftJoin(events, eq(events.id, cards.eventId))
     .where(eq(userCollection.userId, userId))
-    .groupBy(
-      cards.id,
-      cards.name,
-      userCollection.rarity,
-      cards.imageUrl,
-      cards.pokemonTypes,
-      events.title,
-    )
+    .groupBy(cards.id, cards.name, cards.rarity, cards.imageUrl, events.title)
     .orderBy(desc(sql`max(${userCollection.obtainedAt})`));
 
   return rows;

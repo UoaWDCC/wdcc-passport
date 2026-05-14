@@ -28,7 +28,6 @@ export default async function CollectionMainContent() {
     imageUrl: card.imageUrl,
     count: card.count,
     eventTitle: card.eventTitle,
-    pokemonTypes: card.pokemonTypes,
   }));
 
   const totalCardsHeld = collection.reduce((sum, c) => sum + c.count, 0);

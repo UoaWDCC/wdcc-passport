@@ -1,22 +1,27 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { type CSSProperties, useState, useTransition } from "react";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 import { openPack, type RevealedCard } from "@/app/user/collection/actions";
-import {
-  RARITY_BACKDROP_STYLES,
-  RARITY_BORDER_STYLES,
-  RARITY_LABEL,
-} from "@/lib/rarity";
+import { RARITY_BACKDROP_STYLES } from "@/lib/rarity";
+
+import { CollectionCardDisplay } from "./CardDisplay";
+import InteractiveCardDisplay from "./InteractiveCardDisplay";
 
 const dateFormatter = new Intl.DateTimeFormat("en-NZ", {
   day: "numeric",
   month: "short",
   year: "numeric",
 });
+
+const rarityAnimationColor: Record<string, string> = {
+  common: "#f8fafc",
+  uncommon: "#4ade80",
+  rare: "#60a5fa",
+  event_rare: "#fbbf24",
+};
 
 export type PackOpenerProps = {
   packId: number;
@@ -109,51 +114,62 @@ function RevealOverlay({
 }) {
   const isLast = index === total - 1;
   const backdrop = RARITY_BACKDROP_STYLES[card.rarity] ?? "bg-gray-300";
-  const border = RARITY_BORDER_STYLES[card.rarity] ?? "border-gray-500";
+  const rarityColor = rarityAnimationColor[card.rarity] ?? "#f8fafc";
 
   return (
     <div
       role="dialog"
       aria-modal="true"
-      onClick={onAdvance}
-      className={`fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 p-4 transition-colors ${backdrop}`}
+      style={{ "--pack-rarity-color": rarityColor } as CSSProperties}
+      className={`fixed inset-0 z-50 flex flex-col items-center justify-between overflow-hidden p-4 transition-colors sm:p-6 ${backdrop}`}
     >
-      <p className="text-sm font-semibold text-gray-900/80">
-        Card {index + 1} of {total}
-      </p>
-
       <div
-        className={`flex w-full max-w-xs flex-col gap-3 rounded-xl border-4 bg-white p-4 shadow-2xl ${border}`}
-      >
-        <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-gray-50">
-          {card.imageUrl ? (
-            <Image
-              src={card.imageUrl}
-              alt={card.name}
-              fill
-              sizes="(max-width: 640px) 100vw, 320px"
-              className="object-contain p-2"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-sm text-gray-400">
-              No image
-            </div>
-          )}
-        </div>
+        key={`wash-${card.cardId}-${index}`}
+        aria-hidden
+        className="pack-rarity-wash pointer-events-none fixed inset-0"
+      />
+      <div
+        key={`burst-${card.cardId}-${index}`}
+        aria-hidden
+        className="pack-rarity-burst pointer-events-none fixed top-1/2 left-1/2 h-40 w-40 rounded-full mix-blend-screen sm:h-56 sm:w-56"
+      />
 
-        <div className="flex flex-col gap-1">
-          <p className="text-lg font-bold text-gray-950 capitalize">
-            {card.name}
-          </p>
-          <p className="text-xs font-semibold tracking-wide text-gray-700 uppercase">
-            {RARITY_LABEL[card.rarity] ?? card.rarity}
-          </p>
-        </div>
+      <div className="z-10 flex w-full max-w-xl items-center justify-start text-sm font-semibold text-gray-900/80">
+        <span>
+          Card {index + 1} of {total}
+        </span>
       </div>
 
-      <p className="text-sm font-semibold text-gray-900">
-        {isLast ? "Click to finish" : "Click to continue"}
-      </p>
+      <div className="min-h-0 w-full flex-1">
+        {card.imageUrl ? (
+          <InteractiveCardDisplay
+            key={`${card.cardId}-${index}`}
+            imageUrl={card.imageUrl}
+            className="pack-card-reveal mx-auto h-full min-h-[420px] w-full max-w-4xl"
+          />
+        ) : (
+          <CollectionCardDisplay
+            key={`${card.cardId}-${index}`}
+            card={{
+              cardId: card.cardId,
+              displayName: card.name,
+              rarity: card.rarity,
+              imageUrl: card.imageUrl,
+            }}
+            className="pack-card-reveal mx-auto mt-8 w-full max-w-sm"
+          />
+        )}
+      </div>
+
+      <div className="z-10 flex w-full max-w-xl items-center justify-end">
+        <button
+          type="button"
+          onClick={onAdvance}
+          className="shrink-0 rounded-full bg-gray-950 px-5 py-2.5 text-sm font-semibold text-white shadow transition hover:bg-gray-800"
+        >
+          {isLast ? "Finish" : "Next card"}
+        </button>
+      </div>
     </div>
   );
 }
