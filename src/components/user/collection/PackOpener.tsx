@@ -126,7 +126,6 @@ function RevealOverlay({
       >
         <div className="aspect-square w-full overflow-hidden rounded-lg bg-gray-50">
           {card.imageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={card.imageUrl}
               alt={card.name}
