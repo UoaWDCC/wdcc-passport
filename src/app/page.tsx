@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import LandingPage from "@/components/LandingPage";
+import LandingPage from "@/components/SignIn";
 // import { getSignedInDestination } from "@/lib/access";
 
 export default async function Home({
