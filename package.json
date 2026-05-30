@@ -7,13 +7,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-	"db:generate": "drizzle-kit generate",
-	"db:migrate": "drizzle-kit migrate",
-	"db:push": "drizzle-kit push",
-	"db:studio": "drizzle-kit studio"
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
+    "@tanstack/react-query": "^5.100.14",
     "better-auth": "^1.6.12",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
@@ -23,6 +24,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@tanstack/eslint-plugin-query": "^5.100.14",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
