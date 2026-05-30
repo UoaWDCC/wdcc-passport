@@ -1,3 +1,3 @@
-export default function Home() {
+export default function Admin() {
 	return <div>logged in successfully</div>;
 }
