@@ -6,11 +6,11 @@ import checkFile from "eslint-plugin-check-file";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  // Enforce the feature-slice file convention across the backend.
-  // Every file under src/server must be named <feature>.<role>.ts(x), where
-  // <feature> is kebab-case and <role> is one of:
-  //   service | actions | queries | test   (per-operation files)
-  //   keys | types                          (shared modules, e.g. _shared/)
+  // Backend convention: every file under src/server is server-only and named
+  // <feature>.<role>.ts(x), kebab-case, where <role> is one of:
+  //   service | actions | test   (per-operation files)
+  //   types                       (shared modules, e.g. _shared/)
+  // Client query hooks live in src/hooks, not here.
   {
     files: ["src/server/**/*.{ts,tsx}"],
     plugins: { "check-file": checkFile },
@@ -18,13 +18,28 @@ const eslintConfig = defineConfig([
       "check-file/filename-naming-convention": [
         "error",
         {
-          "**/*.{ts,tsx}":
-            "+([a-z0-9-]).+(service|actions|queries|test|keys|types)",
+          "**/*.{ts,tsx}": "+([a-z0-9-]).+(service|actions|test|types)",
         },
         { ignoreMiddleExtensions: false },
       ],
-      // No barrels in server/: an index.ts that re-exports a service alongside
-      // its client query hooks is exactly how server-only code leaks to the client.
+      // No barrels in server/: an index.ts that re-exports across the boundary
+      // is exactly how server-only code leaks into a client bundle.
+      "check-file/no-index": "error",
+    },
+  },
+  // Client hooks convention: every file under src/hooks is a `use-<name>` hook
+  // or a `<name>.keys` query-key module.
+  {
+    files: ["src/hooks/**/*.{ts,tsx}"],
+    plugins: { "check-file": checkFile },
+    rules: {
+      "check-file/filename-naming-convention": [
+        "error",
+        {
+          "**/*.{ts,tsx}": "@(use-+([a-z0-9-])|+([a-z0-9-]).keys)",
+        },
+        { ignoreMiddleExtensions: false },
+      ],
       "check-file/no-index": "error",
     },
   },

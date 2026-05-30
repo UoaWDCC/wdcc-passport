@@ -2,8 +2,9 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { greetingsKeys } from "../_shared/greetings.keys";
-import { createGreetingAction } from "./create-greeting.actions";
+import { createGreetingAction } from "@/server/greetings/create-greeting/create-greeting.actions";
+
+import { greetingsKeys } from "./greetings.keys";
 
 export function useCreateGreeting() {
   const queryClient = useQueryClient();
@@ -11,7 +12,7 @@ export function useCreateGreeting() {
   return useMutation({
     mutationFn: createGreetingAction,
     onSuccess: () => {
-      // Invalidate the shared greetings keys so list-greetings refetches.
+      // Invalidate the shared greetings keys so use-list-greetings refetches.
       queryClient.invalidateQueries({ queryKey: greetingsKeys.all });
     },
   });
