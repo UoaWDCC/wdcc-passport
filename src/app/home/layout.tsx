@@ -1,33 +1,17 @@
-import { redirect } from "next/navigation";
-import { cookies, headers } from "next/headers";
 import type { ReactNode } from "react";
 
-import Navbar from "@/components/Navbar";
-import { auth } from "@/lib/auth";
-
-const ROLE_COOKIE_NAME = "role";
+import { requireUser } from "@/lib/access";
 
 export default async function UserLayout({
   children,
 }: {
   children: ReactNode;
 }) {
-  const role = (await cookies()).get(ROLE_COOKIE_NAME)?.value;
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  await requireUser();
 
-  if (!session?.user || (role !== "admin" && role !== "user")) {
-    redirect("/");
-  }
-
-  if (role === "admin") {
-    redirect("/admin");
-  }
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50 text-gray-950">
-      <Navbar access={{ status: role, email: session.user.email }} />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 md:pt-24">
         {children}
       </main>
