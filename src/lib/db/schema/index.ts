@@ -1,1 +1,1 @@
-// blank for now
+export * from "./greetings";
