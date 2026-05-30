@@ -1,5 +1,4 @@
-// auth
-import { user } from "./user.schema"
-import { account } from "./account.schema"
-import { session } from "./session.schema"
-import { verification } from "./verification.schema"
+export { user } from "./user.schema";
+export { account } from "./account.schema";
+export { session } from "./session.schema";
+export { verification } from "./verification.schema";
