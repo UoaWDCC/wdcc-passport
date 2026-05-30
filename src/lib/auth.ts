@@ -13,6 +13,16 @@ export const auth = betterAuth({
 			verification
 		}
 	}),
+	user: {
+		additionalFields: {
+			role: {
+				type: ["user", "admin"],
+				required: false,
+				defaultValue: "user",
+				input: false,
+			},
+		},
+  	},
 	socialProviders: {
 		google: {
 			clientId: process.env.GOOGLE_CLIENT_ID!,
