@@ -23,10 +23,16 @@ export const auth = betterAuth({
 			},
 		},
   	},
+	session: {
+		cookieCache: {
+			enabled: true,
+			maxAge: 5 * 60,
+		},
+	},
 	socialProviders: {
 		google: {
 			clientId: process.env.GOOGLE_CLIENT_ID!,
-			clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+			clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
 			prompt: "select_account",
 		},
 	},
