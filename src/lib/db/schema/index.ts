@@ -1,4 +1,4 @@
-export { user } from "./user.schema";
-export { account } from "./account.schema";
-export { session } from "./session.schema";
-export { verification } from "./verification.schema";
+export * from "./user.schema";
+export * from "./account.schema";
+export * from "./session.schema";
+export * from "./verification.schema";
