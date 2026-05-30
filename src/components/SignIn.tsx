@@ -3,7 +3,7 @@
 import { authClient } from "@/lib/auth-client";
 import { useState } from "react";
 
-export default function LandingPage({
+export default function SignIn({
   error: initialError,
 }: {
   error: string | null;
