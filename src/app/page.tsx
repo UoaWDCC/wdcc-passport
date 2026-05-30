@@ -1,20 +1,11 @@
-import { redirect } from "next/navigation";
-
-import LandingPage from "@/components/SignIn";
-// import { getSignedInDestination } from "@/lib/access";
+import SignIn from "@/components/SignIn";
 
 export default async function Home({
-  searchParams,
+	searchParams,
 }: {
-  searchParams: Promise<{ error?: string | string[] }>;
+	searchParams: Promise<{ error?: string | string[] }>;
 }) {
-  // const signedInDestination = await getSignedInDestination();
-
-  // if (signedInDestination) {
-  //   redirect(signedInDestination);
-  // }
-
-  const { error } = await searchParams;
-  const errorMessage = typeof error === "string" ? error : null;
-  return <LandingPage error={errorMessage} />;
+	const { error } = await searchParams;
+	const errorMessage = typeof error === "string" ? error : null;
+	return <SignIn error={errorMessage} />;
 }
