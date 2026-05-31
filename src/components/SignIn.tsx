@@ -36,7 +36,7 @@ export default function SignIn({ error: initialError }: { error: string | null }
           </div>
         )}
         <h1 className="mt-5 text-5xl leading-none font-semibold text-white md:text-7xl">
-          WDCC Calendar
+          WDCC Passport
         </h1>
         <p className="mt-4 text-base leading-7 text-white/75">
           Sign in with your Google account to continue to the app.
