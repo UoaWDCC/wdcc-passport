@@ -3,25 +3,25 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 
 export type UserRole = "admin" | "user";
-	
+
 export async function requireUser() {
-	const session = await auth.api.getSession({
-		headers: await headers(),
-	});
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
-	if(!session) {
-		redirect("/");
-	}
+  if (!session) {
+    redirect("/");
+  }
 
-	return session;
+  return session;
 }
 
 export async function requireAdmin() {
-	const session = await requireUser();
+  const session = await requireUser();
 
-	if(session.user.role !== "admin") {
-		redirect("/home");
-	}
+  if (session.user.role !== "admin") {
+    redirect("/home");
+  }
 
-	return session;
+  return session;
 }
