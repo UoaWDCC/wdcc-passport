@@ -45,18 +45,18 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Scripts
 
-| Script | What it does |
-|--------|--------------|
-| `pnpm dev` | Start dev server |
-| `pnpm build` | Production build |
-| `pnpm start` | Run production build |
-| `pnpm lint` | ESLint |
-| `pnpm typecheck` | `tsc --noEmit` |
-| `pnpm format` / `format:check` | Prettier write / check |
-| `pnpm db:generate` | Generate Drizzle migration from schema |
-| `pnpm db:migrate` | Apply migrations |
-| `pnpm db:push` | Push schema directly (dev) |
-| `pnpm db:studio` | Open Drizzle Studio |
+| Script                         | What it does                           |
+| ------------------------------ | -------------------------------------- |
+| `pnpm dev`                     | Start dev server                       |
+| `pnpm build`                   | Production build                       |
+| `pnpm start`                   | Run production build                   |
+| `pnpm lint`                    | ESLint                                 |
+| `pnpm typecheck`               | `tsc --noEmit`                         |
+| `pnpm format` / `format:check` | Prettier write / check                 |
+| `pnpm db:generate`             | Generate Drizzle migration from schema |
+| `pnpm db:migrate`              | Apply migrations                       |
+| `pnpm db:push`                 | Push schema directly (dev)             |
+| `pnpm db:studio`               | Open Drizzle Studio                    |
 
 ## Project layout
 
@@ -79,6 +79,7 @@ Page protection uses the helpers in `src/lib/access.ts` — call `requireUser()`
 ## CI
 
 `.github/workflows/ci.yaml` runs on PRs:
+
 - `pnpm format:check`
 - `pnpm typecheck`
 - `pnpm build`
