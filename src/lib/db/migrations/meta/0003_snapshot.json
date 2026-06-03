@@ -110,12 +110,8 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -184,12 +180,8 @@
           "name": "badge_event_id_event_id_fk",
           "tableFrom": "badge",
           "tableTo": "event",
-          "columnsFrom": [
-            "event_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["event_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -294,9 +286,7 @@
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -379,12 +369,8 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -394,9 +380,7 @@
         "session_token_unique": {
           "name": "session_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -500,12 +484,8 @@
           "name": "user_badge_user_id_user_id_fk",
           "tableFrom": "user_badge",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -513,12 +493,8 @@
           "name": "user_badge_badge_id_badge_id_fk",
           "tableFrom": "user_badge",
           "tableTo": "badge",
-          "columnsFrom": [
-            "badge_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["badge_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -526,10 +502,7 @@
       "compositePrimaryKeys": {
         "user_badge_user_id_badge_id_pk": {
           "name": "user_badge_user_id_badge_id_pk",
-          "columns": [
-            "user_id",
-            "badge_id"
-          ]
+          "columns": ["user_id", "badge_id"]
         }
       },
       "uniqueConstraints": {},
@@ -542,10 +515,7 @@
     "public.badge_type": {
       "name": "badge_type",
       "schema": "public",
-      "values": [
-        "event",
-        "special"
-      ]
+      "values": ["event", "special"]
     }
   },
   "schemas": {},
