@@ -1,14 +1,12 @@
-import { requireUser } from "@/lib/access";
-import { getUserBadges } from "@/server/badges/get-user-badges/get-user-badges.server";
+import { getUserBadgesAction } from "@/server/badges/get-user-badges/get-user-badges.action";
 
 export default async function Home() {
-  const session = await requireUser();
-  const badges = await getUserBadges(session.user.id);
+  const badges = await getUserBadgesAction();
 
   return (
     <main>
       <h1>Test JSON</h1>
-      {JSON.stringify(badges, null, 2)}
+      <pre>{JSON.stringify(badges, null, 2)}</pre>
     </main>
   );
 }

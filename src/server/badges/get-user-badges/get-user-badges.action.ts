@@ -1,11 +1,14 @@
-import { getUserBadges } from "@/server/badges/get-user-badges/get-user-badges.server";
+"use server";
+
+import { getUserBadges } from "@/server/badges/get-user-badges/get-user-badges.service";
 import { requireUser } from "@/lib/access";
 
-export async function GET() {
+
+export async function getUserBadgesAction() {
   const session = await requireUser();
-  const badges = await getUserBadges(session.user.id);
-  return new Response(JSON.stringify(badges), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
-  });
+  return await getUserBadges(session.user.id);
+}
+
+export async function GET() {
+  return getUserBadgesAction();
 }

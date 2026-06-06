@@ -1,5 +1,3 @@
-"use server";
-
 import { db } from "@/lib/db/client";
 import { eq } from "drizzle-orm";
 import { userBadge, badge } from "@/lib/db/schema";
