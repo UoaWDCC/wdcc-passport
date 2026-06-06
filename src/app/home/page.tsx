@@ -8,7 +8,7 @@ export default async function Home() {
   return (
     <main>
       <h1>Test JSON</h1>
-        {JSON.stringify(badges, null, 2)}
+      {JSON.stringify(badges, null, 2)}
     </main>
   );
 }
