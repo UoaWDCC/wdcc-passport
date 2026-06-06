@@ -12,5 +12,6 @@ export async function getUserBadges(userId: string) {
     })
     .from(userBadge)
     .innerJoin(badge, eq(userBadge.badgeId, badge.id))
-    .where(eq(userBadge.userId, userId));
+    .where(eq(userBadge.userId, userId))
+    .orderBy(badge.name);
 }

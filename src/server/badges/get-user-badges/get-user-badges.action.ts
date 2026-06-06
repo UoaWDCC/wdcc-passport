@@ -5,5 +5,5 @@ import { requireUser } from "@/lib/access";
 
 export async function getUserBadgesAction() {
   const session = await requireUser();
-  return await getUserBadges(session.user.id);
+  return getUserBadges(session.user.id);
 }
