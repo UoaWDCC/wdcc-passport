@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { userBadge, badge } from "@/lib/db/schema";
 
 export async function getUserBadges(userId: string) {
-  return await db
+  return db
     .select({
       id: badge.id,
       name: badge.name,
