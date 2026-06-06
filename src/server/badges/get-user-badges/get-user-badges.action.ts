@@ -1,4 +1,4 @@
-import { getUserBadges } from "@/server/badges/getUserBadges";
+import { getUserBadges } from "@/server/badges/get-user-badges/get-user-badges.server";
 import { requireUser } from "@/lib/access";
 
 export async function GET() {
