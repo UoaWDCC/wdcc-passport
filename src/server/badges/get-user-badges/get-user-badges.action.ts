@@ -9,6 +9,3 @@ export async function getUserBadgesAction() {
   return await getUserBadges(session.user.id);
 }
 
-export async function GET() {
-  return getUserBadgesAction();
-}
