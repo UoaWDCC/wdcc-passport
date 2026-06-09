@@ -1,6 +1,7 @@
 "use client";
 
 import { getUserBadgesAction } from "@/server/badges/get-user-badges/get-user-badges.action";
+import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 
 export function BadgesSection() {
@@ -19,7 +20,7 @@ export function BadgesSection() {
   return (
     <ul>
       {badges.map((badge) => (
-        <img key={badge.id} src={badge.path} alt={badge.name} />
+        <Image key={badge.id} src={badge.path} alt={badge.name} width={128} height={128} />
       ))}
     </ul>
   );
