@@ -20,7 +20,9 @@ export function BadgesSection() {
   return (
     <ul>
       {badges.map((badge) => (
-        <Image key={badge.id} src={badge.path} alt={badge.name} width={128} height={128} />
+        <li key={badge.id}>
+          <Image src={badge.path} alt={badge.name} width={128} height={128} />
+        </li>
       ))}
     </ul>
   );
