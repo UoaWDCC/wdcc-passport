@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const badgeImageBaseUrl = new URL(
-  process.env.BADGE_IMAGE_BASE_URL ?? "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev"
+  process.env.R2_PUBLIC_BASE_URL ?? "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev",
 );
 
 const nextConfig: NextConfig = {
