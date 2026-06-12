@@ -21,8 +21,8 @@ export async function getUserBadges(userId: string) {
     .where(eq(userBadge.userId, userId))
     .orderBy(badge.name);
 
-  return rows.map((badge) => ({
-    ...badge,
-    path: `${baseUrl}/${badge.path}`,
+  return rows.map((b) => ({
+    ...b,
+    path: `${baseUrl}/${b.path}`,
   }));
 }
