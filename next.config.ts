@@ -1,15 +1,10 @@
 import type { NextConfig } from "next";
 
-const badgeImageBaseUrl = new URL(
-  process.env.R2_PUBLIC_BASE_URL ?? "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev",
-);
-
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: badgeImageBaseUrl.protocol.replace(":", "") as "https" | "http",
-        hostname: badgeImageBaseUrl.hostname,
+        hostname: process.env.R2_PUBLIC_BASE_URL!.replace(/https?:\/\//, ""),
         pathname: "/badge/**",
       },
     ],
