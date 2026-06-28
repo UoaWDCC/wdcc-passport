@@ -1,6 +1,6 @@
-"use server"
+"use server";
 
-import { createBadge } from "@/server/badges/create-badge/create-badge.service"
+import { createBadge } from "@/server/badges/create-badge/create-badge.service";
 import { requireAdmin } from "@/lib/access";
 
 export async function createBadgeAction() {
@@ -8,7 +8,7 @@ export async function createBadgeAction() {
   const badge = await createBadge({
     name: "Test Badge",
     path: "@/public/test.jpg",
-    type:"special",
+    type: "special",
     eventId: null,
   });
   console.log(badge);

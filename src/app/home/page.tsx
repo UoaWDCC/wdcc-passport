@@ -1,5 +1,5 @@
 import { BadgesSection } from "@/components/home/BadgesSection";
-import { TestBadgeButton } from "@/components/test-badge-button"
+import { TestBadgeButton } from "@/components/test-badge-button";
 export default async function Home() {
   return (
     <main>
