@@ -1,6 +1,6 @@
 "use server"
 
-import { createBadge } from "@/server/badges/create-badge/create-badge.server"
+import { createBadge } from "@/server/badges/create-badge/create-badge.service"
 import { requireAdmin } from "@/lib/access";
 
 export async function createBadgeAction() {
