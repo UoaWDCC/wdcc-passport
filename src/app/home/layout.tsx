@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { requireUser } from "@/lib/access";
 
+
 export default async function UserLayout({ children }: { children: ReactNode }) {
   await requireUser();
 
