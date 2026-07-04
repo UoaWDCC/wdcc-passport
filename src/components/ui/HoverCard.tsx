@@ -31,7 +31,7 @@ export function HoverCard({ content, children }: HoverCardProps) {
       {children}
       <span
         role="tooltip"
-        className={`bg-foreground text-background pointer-events-none absolute top-full left-1/2 z-10 mt-2 w-max max-w-64 -translate-x-1/2 rounded-md px-3 py-2 text-sm shadow-lg transition-opacity duration-150 group-hover:visible group-hover:opacity-100 group-focus-visible:visible group-focus-visible:opacity-100 ${
+        className={`pointer-events-none absolute top-full left-1/2 z-10 mt-2 w-max max-w-64 -translate-x-1/2 rounded-md bg-white px-3 py-2 text-sm text-black shadow-lg transition-opacity duration-150 group-hover:visible group-hover:opacity-100 group-focus-visible:visible group-focus-visible:opacity-100 ${
           open ? "visible opacity-100" : "invisible opacity-0"
         }`}
       >
