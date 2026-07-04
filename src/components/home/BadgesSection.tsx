@@ -1,6 +1,7 @@
 "use client";
 
 import { getUserBadgesAction } from "@/server/badges/get-user-badges/get-user-badges.action";
+import { HoverCard } from "@/components/ui/HoverCard";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 
@@ -21,7 +22,23 @@ export function BadgesSection() {
     <ul>
       {badges.map((badge) => (
         <li key={badge.id}>
-          <Image src={badge.path} alt={badge.name} width={128} height={128} />
+          <HoverCard
+            content={
+              <span className="block text-center">
+                <span className="block font-semibold">{badge.name}</span>
+                <span className="block">
+                  Awarded{" "}
+                  {new Date(badge.awardedAt).toLocaleDateString(undefined, {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </span>
+              </span>
+            }
+          >
+            <Image src={badge.path} alt={badge.name} width={128} height={128} />
+          </HoverCard>
         </li>
       ))}
     </ul>
