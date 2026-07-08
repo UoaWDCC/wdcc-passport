@@ -19,7 +19,7 @@
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
     "@tanstack/react-query": "^5.100.14",
-    "better-auth": "^1.6.12",
+    "better-auth": "^1.6.23",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
     "next": "16.2.6",
@@ -40,10 +40,5 @@
     "prettier-plugin-tailwindcss": "^0.8.0",
     "tailwindcss": "^4",
     "typescript": "^5"
-  },
-  "pnpm": {
-    "overrides": {
-      "kysely": "0.28.17"
-    }
   }
 }
