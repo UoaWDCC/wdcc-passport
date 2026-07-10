@@ -2,6 +2,6 @@
 "use client";
 import { createBadgeAction } from "@/server/badges/create-badge/create-badge.action";
 
-export function TestBadgeButton() {
+export function CreateBadgeButton() {
   return <button onClick={() => createBadgeAction()}>Test Create Badge</button>;
 }
