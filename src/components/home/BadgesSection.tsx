@@ -35,9 +35,6 @@ export function BadgesSection() {
   } else if (badges.length === 0) {
     body = (
       <div className="flex flex-col items-center gap-2 rounded-3xl border-2 border-dashed border-white/15 bg-white/5 px-6 py-10 text-center">
-        <span aria-hidden className="text-4xl">
-          🏅
-        </span>
         <p className="text-sm text-white/60">
           No badges yet — show up to WDCC events to start collecting.
         </p>
@@ -45,7 +42,7 @@ export function BadgesSection() {
     );
   } else {
     body = (
-      <ul className="flex flex-wrap gap-4">
+      <ul className="flex flex-wrap gap-4 pb-5">
         {badges.map((badge) => (
           <li key={badge.id}>
             <HoverCard
@@ -64,7 +61,12 @@ export function BadgesSection() {
               }
             >
               <span className="block rounded-2xl bg-white/10 p-3 transition duration-150 group-hover:-translate-y-1 group-hover:bg-white/15">
-                <Image src={badge.path} alt={badge.name} width={128} height={128} />
+                <Image
+                  src={badge.path}
+                  alt={badge.name}
+                  width={128}
+                  height={128}
+                />
               </span>
             </HoverCard>
           </li>
