@@ -61,12 +61,7 @@ export function BadgesSection() {
               }
             >
               <span className="block rounded-2xl bg-white/10 p-3 transition duration-150 group-hover:-translate-y-1 group-hover:bg-white/15">
-                <Image
-                  src={badge.path}
-                  alt={badge.name}
-                  width={128}
-                  height={128}
-                />
+                <Image src={badge.path} alt={badge.name} width={128} height={128} />
               </span>
             </HoverCard>
           </li>
