@@ -2,13 +2,15 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: process.env.R2_PUBLIC_BASE_URL!.replace(/https?:\/\//, ""),
-        pathname: "/badge/**",
-      },
-    ],
+    remotePatterns: process.env.R2_PUBLIC_BASE_URL
+      ? [
+          {
+            protocol: "https",
+            hostname: new URL(process.env.R2_PUBLIC_BASE_URL).hostname,
+            pathname: "/badge/**",
+          },
+        ]
+      : [],
   },
   serverExternalPackages: ["better-auth", "@better-auth/kysely-adapter", "kysely"],
 };

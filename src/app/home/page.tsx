@@ -1,6 +1,7 @@
 import { BadgesSection } from "@/components/home/BadgesSection";
 import { SectionHeader } from "@/components/home/SectionHeader";
 import { requireUser } from "@/lib/access";
+import { CreateBadgeButton } from "@/components/CreateBadgeButton";
 
 export default async function Home() {
   const { user } = await requireUser();
@@ -19,6 +20,7 @@ export default async function Home() {
       </header>
 
       <BadgesSection />
+      <CreateBadgeButton />
 
       <section>
         <SectionHeader title="Cards" />
@@ -28,5 +30,6 @@ export default async function Home() {
         <SectionHeader title="Packs" />
       </section>
     </div>
+    </main>
   );
 }

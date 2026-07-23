@@ -20,6 +20,7 @@ export async function requireAdmin() {
   const session = await requireUser();
 
   if (session.user.role !== "admin") {
+    console.log("User is not Admin");
     redirect("/home");
   }
 
