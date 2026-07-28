@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 
 interface HoverCardProps {
   content: ReactNode;
@@ -8,32 +8,12 @@ interface HoverCardProps {
 }
 
 export function HoverCard({ content, children }: HoverCardProps) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLSpanElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    function onPointerDown(e: PointerEvent) {
-      if (!ref.current?.contains(e.target as Node)) setOpen(false);
-    }
-    document.addEventListener("pointerdown", onPointerDown);
-    return () => document.removeEventListener("pointerdown", onPointerDown);
-  }, [open]);
-
   return (
-    <span
-      ref={ref}
-      className="group relative inline-block"
-      tabIndex={0}
-      onClick={() => setOpen((o) => !o)}
-      onKeyDown={(e) => e.key === "Escape" && setOpen(false)}
-    >
+    <span className="group relative block leading-none transition duration-150 hover:-translate-y-1">
       {children}
       <span
         role="tooltip"
-        className={`pointer-events-none absolute top-full left-1/2 z-10 mt-2 w-max max-w-64 -translate-x-1/2 rounded-md bg-white px-3 py-2 text-sm text-black shadow-lg transition-opacity duration-150 group-hover:visible group-hover:opacity-100 group-focus-visible:visible group-focus-visible:opacity-100 ${
-          open ? "visible opacity-100" : "invisible opacity-0"
-        }`}
+        className="pointer-events-none invisible absolute inset-0 flex items-center justify-center rounded-2xl bg-black/60 px-3 py-2 text-center text-sm text-white opacity-0 backdrop-blur-sm transition-opacity duration-150 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100"
       >
         {content}
       </span>

@@ -5,7 +5,7 @@ import { CreateBadgeButton } from "@/components/CreateBadgeButton";
 
 export default async function Home() {
   const { user } = await requireUser();
-  const name = user.name.trim() || "there";
+  const name = (user.name ?? "").trim() || "there";
   const firstName = name.split(" ")[0];
 
   return (
