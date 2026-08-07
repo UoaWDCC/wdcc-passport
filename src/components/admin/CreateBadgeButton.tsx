@@ -16,11 +16,11 @@ export function CreateBadgeButton() {
     reset,
   } = useMutation({
     mutationFn: createBadgeAction,
-    onSuccess: () => close(),
+    onSuccess: () => closeDialog(),
     onError: (createError) => console.error(createError),
   });
 
-  function close() {
+  function closeDialog() {
     setIsOpen(false);
     setType("special");
     setEventId(null);
@@ -48,10 +48,13 @@ export function CreateBadgeButton() {
           aria-modal="true"
           aria-label="Create badge"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
-          onClick={close}
+          onClick={closeDialog}
         >
           <form
-            action={createBadge}
+            onSubmit={(submitEvent) => {
+              submitEvent.preventDefault();
+              createBadge(new FormData(submitEvent.currentTarget));
+            }}
             onClick={(clickEvent) => clickEvent.stopPropagation()}
             className="flex w-full max-w-md flex-col gap-4 rounded-2xl bg-neutral-900 p-6"
           >
@@ -82,18 +85,6 @@ export function CreateBadgeButton() {
               </select>
             </label>
 
-            {eventId && (
-              <label className="flex flex-col gap-1 text-sm text-white/75">
-                Event id (generated)
-                <input
-                  name="eventId"
-                  value={eventId}
-                  readOnly
-                  className="rounded-lg bg-white/10 px-3 py-2 font-mono text-xs text-white"
-                />
-              </label>
-            )}
-
             <label className="flex flex-col gap-1 text-sm text-white/75">
               Image
               <input
@@ -116,7 +107,7 @@ export function CreateBadgeButton() {
             <div className="flex justify-end gap-2">
               <button
                 type="button"
-                onClick={close}
+                onClick={closeDialog}
                 disabled={isPending}
                 className="rounded-lg px-4 py-2 text-sm text-white/75 transition hover:text-white disabled:opacity-50"
               >
