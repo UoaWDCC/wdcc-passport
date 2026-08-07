@@ -1,15 +1,6 @@
 import { db } from "@/lib/db/client";
 import { badge } from "@/lib/db/schema";
-import { DeleteObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-
-const S3 = new S3Client({
-  region: "auto",
-  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-  credentials: {
-    accessKeyId: process.env.R2_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
-  },
-});
+import { deleteObject, putObject } from "@/lib/r2/storage";
 
 const IMAGE_EXTENSIONS: Record<string, string> = {
   "image/png": "png",
@@ -18,7 +9,7 @@ const IMAGE_EXTENSIONS: Record<string, string> = {
   "image/gif": "gif",
 };
 
-export const MAX_BADGE_IMAGE_BYTES = 2 * 1024 * 1024;
+export const MAX_BADGE_IMAGE_BYTES = 1 * 1024 * 1024;
 
 async function uploadBadgeImage(badgeId: string, image: File) {
   const extension = IMAGE_EXTENSIONS[image.type];
@@ -32,22 +23,13 @@ async function uploadBadgeImage(badgeId: string, image: File) {
   }
 
   if (image.size > MAX_BADGE_IMAGE_BYTES) {
-    throw new Error("Badge image must be 2MB or smaller");
+    throw new Error("Badge image must be 1MB or smaller");
   }
 
   const key = `badge/${badgeId}.${extension}`;
   const fileContent = Buffer.from(await image.arrayBuffer());
 
-  await S3.send(
-    new PutObjectCommand({
-      Bucket: process.env.R2_BUCKET_NAME,
-      Key: key,
-      Body: fileContent,
-      ContentType: image.type,
-    }),
-  );
-
-  return key;
+  return putObject(key, fileContent, image.type);
 }
 
 export async function createBadge(input: {
@@ -73,8 +55,8 @@ export async function createBadge(input: {
 
     return createdBadge;
   } catch (error) {
-    await S3.send(new DeleteObjectCommand({ Bucket: process.env.R2_BUCKET_NAME, Key: path })).catch(
-      (deleteError) => console.error("Failed to clean up badge image", deleteError),
+    await deleteObject(path).catch((deleteError) =>
+      console.error("Failed to clean up badge image", deleteError),
     );
 
     throw error;
