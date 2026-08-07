@@ -1,7 +1,7 @@
 import { BadgesSection } from "@/components/home/BadgesSection";
 import { SectionHeader } from "@/components/home/SectionHeader";
 import { requireUser } from "@/lib/access";
-import { CreateBadgeButton } from "@/components/CreateBadgeButton";
+import { CreateBadgeButton } from "@/components/admin/CreateBadgeButton";
 
 export default async function Home() {
   const { user } = await requireUser();
