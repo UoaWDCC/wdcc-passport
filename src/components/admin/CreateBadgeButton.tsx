@@ -7,7 +7,6 @@ import { useState } from "react";
 export function CreateBadgeButton() {
   const [isOpen, setIsOpen] = useState(false);
   const [type, setType] = useState<"special" | "event">("special");
-  const [eventId, setEventId] = useState<string | null>(null);
 
   const {
     mutate: createBadge,
@@ -23,13 +22,7 @@ export function CreateBadgeButton() {
   function closeDialog() {
     setIsOpen(false);
     setType("special");
-    setEventId(null);
     reset();
-  }
-
-  function changeType(nextType: "special" | "event") {
-    setType(nextType);
-    setEventId(nextType === "event" ? crypto.randomUUID() : null);
   }
 
   return (
@@ -76,12 +69,11 @@ export function CreateBadgeButton() {
                 name="type"
                 value={type}
                 onChange={(changeEvent) =>
-                  changeType(changeEvent.target.value as "special" | "event")
+                  setType(changeEvent.target.value as "special" | "event")
                 }
                 className="rounded-lg bg-white/10 px-3 py-2 text-white"
               >
                 <option value="special">Special</option>
-                <option value="event">Event</option>
               </select>
             </label>
 
