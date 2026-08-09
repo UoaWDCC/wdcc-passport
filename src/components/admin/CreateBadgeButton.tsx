@@ -68,9 +68,7 @@ export function CreateBadgeButton() {
               <select
                 name="type"
                 value={type}
-                onChange={(changeEvent) =>
-                  setType(changeEvent.target.value as "special" | "event")
-                }
+                onChange={(changeEvent) => setType(changeEvent.target.value as "special" | "event")}
                 className="rounded-lg bg-white/10 px-3 py-2 text-white"
               >
                 <option value="special">Special</option>
