@@ -30,7 +30,7 @@ export function CreateBadgeButton() {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="self-start rounded-lg bg-white/15 px-4 py-2 text-sm font-semibold transition hover:bg-white/25"
+        className="self-start rounded-lg bg-gray-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-800"
       >
         Create badge
       </button>
