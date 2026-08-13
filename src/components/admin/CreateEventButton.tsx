@@ -1,28 +1,26 @@
 "use client";
 
 import { FormModal } from "@/components/ui/FormModal";
-import { createBadgeAction } from "@/server/badges/create-badge/create-badge.action";
+import { createEventAction } from "@/server/events/create-event/create-event.action";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 
-export function CreateBadgeButton() {
+export function CreateEventButton() {
   const [isOpen, setIsOpen] = useState(false);
-  const [type, setType] = useState<"special" | "event">("special");
 
   const {
-    mutate: createBadge,
+    mutate: createEvent,
     error,
     isPending,
     reset,
   } = useMutation({
-    mutationFn: createBadgeAction,
+    mutationFn: createEventAction,
     onSuccess: () => closeDialog(),
     onError: (createError) => console.error(createError),
   });
 
   function closeDialog() {
     setIsOpen(false);
-    setType("special");
     reset();
   }
 
@@ -33,16 +31,16 @@ export function CreateBadgeButton() {
         onClick={() => setIsOpen(true)}
         className="self-start rounded-lg bg-gray-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-800"
       >
-        Create badge
+        Create event
       </button>
 
       <FormModal
-        title="Create badge"
+        title="Create event"
         open={isOpen}
         onClose={closeDialog}
-        onSubmit={createBadge}
+        onSubmit={createEvent}
         isPending={isPending}
-        pendingMessage="Uploading badge…"
+        pendingMessage="Creating event…"
         error={error}
       >
         <label className="flex flex-col gap-1 text-sm text-white/75">
@@ -56,25 +54,22 @@ export function CreateBadgeButton() {
         </label>
 
         <label className="flex flex-col gap-1 text-sm text-white/75">
-          Type
-          <select
-            name="type"
-            value={type}
-            onChange={(changeEvent) => setType(changeEvent.target.value as "special" | "event")}
+          Start time
+          <input
+            type="datetime-local"
+            name="startTimestamp"
+            required
             className="rounded-lg bg-white/10 px-3 py-2 text-white"
-          >
-            <option value="special">Special</option>
-          </select>
+          />
         </label>
 
         <label className="flex flex-col gap-1 text-sm text-white/75">
-          Image
+          End time
           <input
-            type="file"
-            name="image"
-            accept="image/png,image/jpeg,image/webp,image/gif"
+            type="datetime-local"
+            name="endTimestamp"
             required
-            className="text-white"
+            className="rounded-lg bg-white/10 px-3 py-2 text-white"
           />
         </label>
       </FormModal>

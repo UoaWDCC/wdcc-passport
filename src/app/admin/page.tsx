@@ -1,4 +1,5 @@
 import { CreateBadgeButton } from "@/components/admin/CreateBadgeButton";
+import { CreateEventButton } from "@/components/admin/CreateEventButton";
 import { SignOutButton } from "@/components/SignOutButton";
 import { requireAdmin } from "@/lib/access";
 
@@ -15,7 +16,10 @@ export default async function Admin() {
         <SignOutButton />
       </header>
 
-      <CreateBadgeButton />
+      <div className="flex flex-wrap gap-3">
+        <CreateBadgeButton />
+        <CreateEventButton />
+      </div>
     </div>
   );
 }
