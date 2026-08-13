@@ -1,9 +1,14 @@
 import type { ReactNode } from "react";
+import { redirect } from "next/navigation";
 
 import { requireUser } from "@/lib/access";
 
 export default async function UserLayout({ children }: { children: ReactNode }) {
-  await requireUser();
+  const session = await requireUser();
+
+  if (session.user.role === "admin") {
+    redirect("/admin");
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-900 text-white">

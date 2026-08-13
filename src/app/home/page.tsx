@@ -1,7 +1,6 @@
 import { BadgesSection } from "@/components/home/BadgesSection";
 import { SectionHeader } from "@/components/home/SectionHeader";
 import { requireUser } from "@/lib/access";
-import { CreateBadgeButton } from "@/components/admin/CreateBadgeButton";
 import { SignOutButton } from "@/components/SignOutButton";
 
 export default async function Home() {
@@ -22,7 +21,6 @@ export default async function Home() {
       </header>
 
       <BadgesSection />
-      <CreateBadgeButton />
 
       <section>
         <SectionHeader title="Cards" />
