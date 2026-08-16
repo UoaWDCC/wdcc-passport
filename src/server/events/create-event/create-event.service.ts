@@ -14,7 +14,12 @@ export async function createEvent(input: {
       startTimestamp: input.startTimestamp,
       endTimestamp: input.endTimestamp,
     })
-    .returning();
+    .returning({
+      id: event.id,
+      name: event.name,
+      startTimestamp: event.startTimestamp,
+      endTimestamp: event.endTimestamp,
+    });
 
   return createdEvent;
 }

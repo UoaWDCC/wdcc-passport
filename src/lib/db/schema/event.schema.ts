@@ -6,13 +6,10 @@ export const event = pgTable(
   {
     id: text("id").primaryKey(),
     name: text("name").notNull(),
-    startTimestamp: timestamp("start_timestamp").notNull(),
-    endTimestamp: timestamp("end_timestamp").notNull(),
+    startTimestamp: timestamp("start_timestamp", { withTimezone: true }).notNull(),
+    endTimestamp: timestamp("end_timestamp", { withTimezone: true }).notNull(),
   },
   (table) => [
-    check(
-      "event_timestamps_check",
-      sql`${table.endTimestamp} > ${table.startTimestamp}`,
-    ),
+    check("event_timestamps_check", sql`${table.endTimestamp} > ${table.startTimestamp}`),
   ],
 );

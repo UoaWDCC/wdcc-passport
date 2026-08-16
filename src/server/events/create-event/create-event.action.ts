@@ -3,6 +3,8 @@
 import { createEvent } from "@/server/events/create-event/create-event.service";
 import { requireAdmin } from "@/lib/access";
 
+const ISO_WITH_OFFSET = /(?:Z|[+-]\d{2}:?\d{2})$/;
+
 export async function createEventAction(formData: FormData) {
   await requireAdmin();
 
@@ -20,6 +22,14 @@ export async function createEventAction(formData: FormData) {
 
   if (typeof endTimestamp !== "string" || endTimestamp.trim() === "") {
     throw new Error("Event end time is required");
+  }
+
+  if (!ISO_WITH_OFFSET.test(startTimestamp)) {
+    throw new Error("Event start time must include a UTC offset");
+  }
+
+  if (!ISO_WITH_OFFSET.test(endTimestamp)) {
+    throw new Error("Event end time must include a UTC offset");
   }
 
   const start = new Date(startTimestamp);
