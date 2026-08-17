@@ -19,6 +19,27 @@ export function CreateEventButton() {
     onError: (createError) => console.error(createError),
   });
 
+  function handleSubmit(formData: FormData) {
+  const start = formData.get("startTimestamp");
+  const end = formData.get("endTimestamp");
+
+  if (typeof start === "string") {
+    formData.set(
+      "startTimestamp",
+      new Date(start).toISOString()
+    );
+  }
+
+  if (typeof end === "string") {
+    formData.set(
+      "endTimestamp",
+      new Date(end).toISOString()
+    );
+  }
+
+  createEvent(formData);
+}
+
   function closeDialog() {
     setIsOpen(false);
     reset();
@@ -38,7 +59,7 @@ export function CreateEventButton() {
         title="Create event"
         open={isOpen}
         onClose={closeDialog}
-        onSubmit={createEvent}
+        onSubmit={handleSubmit}
         isPending={isPending}
         pendingMessage="Creating event…"
         error={error}
