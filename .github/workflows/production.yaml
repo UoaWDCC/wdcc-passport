@@ -34,5 +34,5 @@ jobs:
       - name: Build
         run: pnpm build
 
-      # - name: Migrate Database
-      #   run: pnpm db:migrate
+      - name: Migrate Database
+        run: pnpm db:migrate
