@@ -20,25 +20,19 @@ export function CreateEventButton() {
   });
 
   function handleSubmit(formData: FormData) {
-  const start = formData.get("startTimestamp");
-  const end = formData.get("endTimestamp");
+    const start = formData.get("startTimestamp");
+    const end = formData.get("endTimestamp");
 
-  if (typeof start === "string") {
-    formData.set(
-      "startTimestamp",
-      new Date(start).toISOString()
-    );
+    if (typeof start === "string") {
+      formData.set("startTimestamp", new Date(start).toISOString());
+    }
+
+    if (typeof end === "string") {
+      formData.set("endTimestamp", new Date(end).toISOString());
+    }
+
+    createEvent(formData);
   }
-
-  if (typeof end === "string") {
-    formData.set(
-      "endTimestamp",
-      new Date(end).toISOString()
-    );
-  }
-
-  createEvent(formData);
-}
 
   function closeDialog() {
     setIsOpen(false);
