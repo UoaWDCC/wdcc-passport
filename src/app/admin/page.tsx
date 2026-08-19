@@ -1,13 +1,16 @@
+"use client";
+
 import { CreateBadgeButton } from "@/components/admin/CreateBadgeButton";
 import { CreateEventButton } from "@/components/admin/CreateEventButton";
 import { SignOutButton } from "@/components/SignOutButton";
-import { requireAdmin } from "@/lib/access";
-import { getEvents } from "@/server/events/get-events/get-events.service";
+import { getEventsAction } from "@/server/events/get-events/get-events.action";
+import { useQuery } from "@tanstack/react-query";
 
-export default async function Admin() {
-  await requireAdmin();
-
-  const events = await getEvents();
+export default function Admin() {
+  const { data: events = [] } = useQuery({
+    queryKey: ["get-events"],
+    queryFn: getEventsAction,
+  });
 
   return (
     <div className="flex flex-col gap-6">
