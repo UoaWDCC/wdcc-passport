@@ -3,10 +3,12 @@
 import { CreateBadgeButton } from "@/components/admin/CreateBadgeButton";
 import { CreateEventButton } from "@/components/admin/CreateEventButton";
 import { SignOutButton } from "@/components/SignOutButton";
+import { requireAdmin } from "@/lib/access";
 import { getEventsAction } from "@/server/events/get-events/get-events.action";
 import { useQuery } from "@tanstack/react-query";
 
-export default function Admin() {
+export default async function Admin() {
+  await requireAdmin();
   const { data: events = [] } = useQuery({
     queryKey: ["get-events"],
     queryFn: getEventsAction,
