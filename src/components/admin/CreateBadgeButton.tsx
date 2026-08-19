@@ -5,7 +5,11 @@ import { createBadgeAction } from "@/server/badges/create-badge/create-badge.act
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 
-export function CreateBadgeButton() {
+interface CreateBadgeButtonProps {
+  events: { id: string; name: string }[];
+}
+
+export function CreateBadgeButton({ events }: CreateBadgeButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [type, setType] = useState<"special" | "event">("special");
 
@@ -64,8 +68,30 @@ export function CreateBadgeButton() {
             className="rounded-lg bg-white/10 px-3 py-2 text-white"
           >
             <option value="special">Special</option>
+            <option value="event">Event</option>
           </select>
         </label>
+
+        {type === "event" && (
+          <label className="flex flex-col gap-1 text-sm text-white/75">
+            Event
+            <select
+              name="eventId"
+              required
+              defaultValue=""
+              className="rounded-lg bg-white/10 px-3 py-2 text-white"
+            >
+              <option value="" disabled>
+                {events.length === 0 ? "No events yet" : "Select an event"}
+              </option>
+              {events.map((event) => (
+                <option key={event.id} value={event.id}>
+                  {event.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
 
         <label className="flex flex-col gap-1 text-sm text-white/75">
           Image

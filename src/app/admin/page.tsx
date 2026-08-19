@@ -2,9 +2,12 @@ import { CreateBadgeButton } from "@/components/admin/CreateBadgeButton";
 import { CreateEventButton } from "@/components/admin/CreateEventButton";
 import { SignOutButton } from "@/components/SignOutButton";
 import { requireAdmin } from "@/lib/access";
+import { getEvents } from "@/server/events/get-events/get-events.service";
 
 export default async function Admin() {
   await requireAdmin();
+
+  const events = await getEvents();
 
   return (
     <div className="flex flex-col gap-6">
@@ -17,7 +20,7 @@ export default async function Admin() {
       </header>
 
       <div className="flex flex-wrap gap-3">
-        <CreateBadgeButton />
+        <CreateBadgeButton events={events} />
         <CreateEventButton />
       </div>
     </div>
