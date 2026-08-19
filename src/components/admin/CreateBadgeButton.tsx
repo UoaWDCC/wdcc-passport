@@ -5,7 +5,13 @@ import { createBadgeAction } from "@/server/badges/create-badge/create-badge.act
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 
-export function CreateBadgeButton() {
+interface CreateBadgeButtonProps {
+  events: { id: string; name: string }[];
+  eventsPending: boolean;
+  eventsError: Error | null;
+}
+
+export function CreateBadgeButton({ events, eventsPending, eventsError }: CreateBadgeButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [type, setType] = useState<"special" | "event">("special");
 
@@ -24,6 +30,13 @@ export function CreateBadgeButton() {
     setIsOpen(false);
     setType("special");
     reset();
+  }
+
+  function eventPlaceholder() {
+    if (eventsPending) return "Loading events...";
+    if (eventsError) return "Could not load events";
+    if (events.length === 0) return "No events yet";
+    return "Select an event";
   }
 
   return (
@@ -64,8 +77,30 @@ export function CreateBadgeButton() {
             className="rounded-lg bg-white/10 px-3 py-2 text-white"
           >
             <option value="special">Special</option>
+            <option value="event">Event</option>
           </select>
         </label>
+
+        {type === "event" && (
+          <label className="flex flex-col gap-1 text-sm text-white/75">
+            Event
+            <select
+              name="eventId"
+              required
+              defaultValue=""
+              className="rounded-lg bg-white/10 px-3 py-2 text-white"
+            >
+              <option value="" disabled>
+                {eventPlaceholder()}
+              </option>
+              {events.map((event) => (
+                <option key={event.id} value={event.id}>
+                  {event.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
 
         <label className="flex flex-col gap-1 text-sm text-white/75">
           Image
