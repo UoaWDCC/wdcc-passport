@@ -7,9 +7,11 @@ import { useState } from "react";
 
 interface CreateBadgeButtonProps {
   events: { id: string; name: string }[];
+  eventsPending: boolean;
+  eventsError: unknown;
 }
 
-export function CreateBadgeButton({ events }: CreateBadgeButtonProps) {
+export function CreateBadgeButton({ events, eventsPending, eventsError }: CreateBadgeButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [type, setType] = useState<"special" | "event">("special");
 
@@ -29,6 +31,13 @@ export function CreateBadgeButton({ events }: CreateBadgeButtonProps) {
     setType("special");
     reset();
   }
+
+  function eventPlaceholder() {
+  if (eventsPending) return "Loading events...";
+  if (eventsError) return "Could not load events";
+  if (events.length === 0) return "No events yet";
+  return "Select an event"
+}
 
   return (
     <>
@@ -83,6 +92,7 @@ export function CreateBadgeButton({ events }: CreateBadgeButtonProps) {
             >
               <option value="" disabled>
                 {events.length === 0 ? "No events yet" : "Select an event"}
+                {eventPlaceholder()}
               </option>
               {events.map((event) => (
                 <option key={event.id} value={event.id}>
