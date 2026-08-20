@@ -6,8 +6,7 @@ import { badge, userBadge } from "@/lib/db/schema";
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export async function scanQr(qrCode: string, userId: string) {
-  const code = qrCode.toLowerCase();
+export async function scanQr(code: string, userId: string) {
   const isUuid = UUID_REGEX.test(code);
 
   if (!isUuid && code.length !== 6) {
@@ -24,11 +23,5 @@ export async function scanQr(qrCode: string, userId: string) {
     throw new Error("Badge not found");
   }
 
-  const [awarded] = await db
-    .insert(userBadge)
-    .values({ userId, badgeId: matchedBadge.id })
-    .onConflictDoNothing()
-    .returning();
-
-  return { badge: matchedBadge, alreadyAwarded: !awarded };
+  return { badge: matchedBadge };
 }
