@@ -11,6 +11,12 @@ const IMAGE_EXTENSIONS: Record<string, string> = {
 
 export const MAX_BADGE_IMAGE_BYTES = 1 * 1024 * 1024;
 
+function generateBadgeCode() {
+  return Math.floor(Math.random() * 1000000)
+    .toString()
+    .padStart(6, "0");
+}
+
 async function uploadBadgeImage(badgeId: string, image: File) {
   const extension = IMAGE_EXTENSIONS[image.type];
 
@@ -46,6 +52,7 @@ export async function createBadge(input: {
       .insert(badge)
       .values({
         id: badgeId,
+        code: generateBadgeCode(),
         name: input.name,
         path,
         type: input.type,
