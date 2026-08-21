@@ -9,6 +9,7 @@ export const badge = pgTable(
   "badge",
   {
     id: text("id").primaryKey(),
+    code: text("code").unique(),
     name: text("name").notNull(),
     path: text("path").notNull(),
     type: badgeType("type").notNull(),
