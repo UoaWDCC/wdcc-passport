@@ -9,13 +9,15 @@ export const badge = pgTable(
   "badge",
   {
     id: text("id").primaryKey(),
-    code: text("code").unique(),
+    code: text("code").unique().notNull(),
     name: text("name").notNull(),
     path: text("path").notNull(),
     type: badgeType("type").notNull(),
-    eventId: text("event_id").references(() => event.id, {
-      onDelete: "cascade",
-    }),
+    eventId: text("event_id")
+      .references(() => event.id, {
+        onDelete: "cascade",
+      })
+      .unique(),
   },
   (table) => [
     index("badge_eventId_idx").on(table.eventId),

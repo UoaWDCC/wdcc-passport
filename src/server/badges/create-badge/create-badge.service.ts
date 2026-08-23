@@ -1,6 +1,8 @@
 import { db } from "@/lib/db/client";
 import { badge } from "@/lib/db/schema";
 import { deleteObject, putObject } from "@/lib/r2/storage";
+import { NeonDbError } from "@neondatabase/serverless";
+import { randomBytes } from "crypto";
 
 const IMAGE_EXTENSIONS: Record<string, string> = {
   "image/png": "png",
@@ -11,10 +13,13 @@ const IMAGE_EXTENSIONS: Record<string, string> = {
 
 export const MAX_BADGE_IMAGE_BYTES = 1 * 1024 * 1024;
 
-function generateBadgeCode() {
-  return Math.floor(Math.random() * 1000000)
-    .toString()
-    .padStart(6, "0");
+function isBadgeCodeCollision(error: unknown) {
+  return (
+    error instanceof Error &&
+    error.cause instanceof NeonDbError &&
+    error.cause.code === "23505" &&
+    error.cause.constraint === "badge_code_unique"
+  );
 }
 
 async function uploadBadgeImage(badgeId: string, image: File) {
@@ -47,25 +52,31 @@ export async function createBadge(input: {
   const badgeId = crypto.randomUUID();
   const path = await uploadBadgeImage(badgeId, input.image);
 
-  try {
-    const [createdBadge] = await db
-      .insert(badge)
-      .values({
-        id: badgeId,
-        code: generateBadgeCode(),
-        name: input.name,
-        path,
-        type: input.type,
-        eventId: input.type === "event" ? (input.eventId ?? null) : null,
-      })
-      .returning();
+  while (true) {
+    try {
+      const [createdBadge] = await db
+        .insert(badge)
+        .values({
+          id: badgeId,
+          code: randomBytes(3).toString("hex"),
+          name: input.name,
+          path,
+          type: input.type,
+          eventId: input.type === "event" ? (input.eventId ?? null) : null,
+        })
+        .returning();
 
-    return createdBadge;
-  } catch (error) {
-    await deleteObject(path).catch((deleteError) =>
-      console.error("Failed to clean up badge image", deleteError),
-    );
+      return createdBadge;
+    } catch (error) {
+      if (isBadgeCodeCollision(error)) {
+        continue;
+      }
 
-    throw error;
+      await deleteObject(path).catch((deleteError) =>
+        console.error("Failed to clean up badge image", deleteError),
+      );
+
+      throw error;
+    }
   }
 }
