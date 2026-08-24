@@ -12,6 +12,7 @@ const IMAGE_EXTENSIONS: Record<string, string> = {
 };
 
 export const MAX_BADGE_IMAGE_BYTES = 1 * 1024 * 1024;
+const RETRY_LIMIT = 6;
 
 function isBadgeCodeCollision(error: unknown) {
   return (
@@ -53,7 +54,7 @@ export async function createBadge(input: {
   const path = await uploadBadgeImage(badgeId, input.image);
   let count = 0;
 
-  while (count < 6) {
+  while (count < RETRY_LIMIT) {
     try {
       count++;
       const [createdBadge] = await db
