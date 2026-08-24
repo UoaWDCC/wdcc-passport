@@ -43,6 +43,20 @@
       "when": 1787109957964,
       "tag": "0005_foamy_sabretooth",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1787200724276,
+      "tag": "0006_crazy_roxanne_simpson",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1787479468962,
+      "tag": "0007_badge_code_not_null_event_unique",
+      "breakpoints": true
     }
   ]
 }
