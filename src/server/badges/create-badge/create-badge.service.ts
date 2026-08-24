@@ -51,9 +51,11 @@ export async function createBadge(input: {
 }) {
   const badgeId = crypto.randomUUID();
   const path = await uploadBadgeImage(badgeId, input.image);
+  let count = 0;
 
-  while (true) {
+  while (count < 6) {
     try {
+      count++;
       const [createdBadge] = await db
         .insert(badge)
         .values({
@@ -79,4 +81,10 @@ export async function createBadge(input: {
       throw error;
     }
   }
+
+  await deleteObject(path).catch((deleteError) =>
+    console.error("Failed to clean up badge image", deleteError),
+  );
+
+  throw new Error("Failed to generate a unique badge code");
 }
