@@ -7,46 +7,9 @@ import { NeonDbError } from "@neondatabase/serverless";
 import { deleteObject, putObject } from "../r2/storage";
 import { randomBytes } from "crypto";
 import { requireAdmin, requireUser } from "@/lib/access";
-
-const IMAGE_EXTENSIONS: Record<string, string> = {
-  "image/png": "png",
-  "image/jpeg": "jpg",
-  "image/webp": "webp",
-  "image/gif": "gif",
-};
+import { createUserBadge } from "./mutations";
 
 const MAX_BADGE_IMAGE_BYTES = 1 * 1024 * 1024;
-const RETRY_LIMIT = 6;
-
-function isBadgeCodeCollision(error: unknown) {
-  return (
-    error instanceof Error &&
-    error.cause instanceof NeonDbError &&
-    error.cause.code === "23505" &&
-    error.cause.constraint === "badge_code_unique"
-  );
-}
-
-async function uploadBadgeImage(badgeId: string, image: File) {
-  const extension = IMAGE_EXTENSIONS[image.type];
-
-  if (!extension) {
-    throw new Error(`Unsupported badge image type: ${image.type || "unknown"}`);
-  }
-
-  if (image.size === 0) {
-    throw new Error("Badge image is empty");
-  }
-
-  if (image.size > MAX_BADGE_IMAGE_BYTES) {
-    throw new Error("Badge image must be 1MB or smaller");
-  }
-
-  const key = `badge/${badgeId}.${extension}`;
-  const fileContent = Buffer.from(await image.arrayBuffer());
-
-  return putObject(key, fileContent, image.type);
-}
 
 export async function createBadgeAction(formData: FormData) {
   await requireAdmin();
@@ -72,45 +35,10 @@ export async function createBadgeAction(formData: FormData) {
     throw new Error("Event badges need an event");
   }
 
-  const badgeId = crypto.randomUUID();
-  const path = await uploadBadgeImage(badgeId, image);
-  let count = 0;
 
-  while (count < RETRY_LIMIT) {
-    try {
-      count++;
-      const [createdBadge] = await db
-        .insert(badge)
-        .values({
-          id: badgeId,
-          code: randomBytes(3).toString("hex"),
-          name: name,
-          path,
-          type: type,
-          eventId: type === "event" ? (eventId ?? null) : null,
-        })
-        .returning();
-
-      return createdBadge;
-    } catch (error) {
-      if (isBadgeCodeCollision(error)) {
-        continue;
-      }
-
-      await deleteObject(path).catch((deleteError) =>
-        console.error("Failed to clean up badge image", deleteError),
-      );
-
-      throw error;
-    }
+  await createUserBadge(name, type, image, eventId);
   }
 
-  await deleteObject(path).catch((deleteError) =>
-    console.error("Failed to clean up badge image", deleteError),
-  );
-
-  throw new Error("Failed to generate a unique badge code");
-}
 export async function getUserBadgesAction() {
   const session = await requireUser();
   const baseUrl = process.env.R2_PUBLIC_BASE_URL;
