@@ -1,5 +1,5 @@
-import { db } from "@/lib/db/client";
-import { event } from "@/lib/db/schema";
+import { db } from "@/server/db/client";
+import { event } from "@/server/db/schema";
 
 export async function createEvent(input: {
   name: string;

@@ -1,6 +1,6 @@
-import { db } from "@/lib/db/client";
+import { db } from "@/server/db/client";
 import { desc } from "drizzle-orm";
-import { event } from "@/lib/db/schema";
+import { event } from "@/server/db/schema";
 
 export async function getEvents() {
   return db

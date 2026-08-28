@@ -1,6 +1,6 @@
-import { db } from "@/lib/db/client";
+import { db } from "@/server/db/client";
 import { eq } from "drizzle-orm";
-import { userBadge, badge } from "@/lib/db/schema";
+import { userBadge, badge } from "@/server/db/schema";
 
 export async function getUserBadges(userId: string) {
   const baseUrl = process.env.R2_PUBLIC_BASE_URL;

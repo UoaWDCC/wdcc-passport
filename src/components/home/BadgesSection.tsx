@@ -1,6 +1,6 @@
 "use client";
 
-import { getUserBadgesAction } from "@/server/badges/get-user-badges/get-user-badges.action";
+import { getUserBadgesQuery } from "@/hooks/badges/query-options";
 import { HoverCard } from "@/components/ui/HoverCard";
 import { SectionHeader } from "@/components/home/SectionHeader";
 import Image from "next/image";
@@ -8,14 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 
 export function BadgesSection() {
-  const {
-    data: badges = [],
-    error,
-    isPending,
-  } = useQuery({
-    queryKey: ["get-user-badges"],
-    queryFn: getUserBadgesAction,
-  });
+  const { data: badges = [], error, isPending } = useQuery(getUserBadgesQuery());
 
   let body: ReactNode;
   if (isPending) {

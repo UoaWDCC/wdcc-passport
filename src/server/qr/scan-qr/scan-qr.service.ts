@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 
-import { db } from "@/lib/db/client";
-import { badge } from "@/lib/db/schema";
+import { db } from "@/server/db/client";
+import { badge } from "@/server/db/schema";
 
 export async function getMatchingBadge(code: string) {
   const [matchedBadge] = await db

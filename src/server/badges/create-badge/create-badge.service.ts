@@ -1,6 +1,6 @@
-import { db } from "@/lib/db/client";
-import { badge } from "@/lib/db/schema";
-import { deleteObject, putObject } from "@/lib/r2/storage";
+import { db } from "@/server/db/client";
+import { badge } from "@/server/db/schema";
+import { deleteObject, putObject } from "@/server/r2/storage";
 import { NeonDbError } from "@neondatabase/serverless";
 import { randomBytes } from "crypto";
 

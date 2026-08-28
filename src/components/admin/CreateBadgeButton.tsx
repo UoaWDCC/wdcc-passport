@@ -1,7 +1,7 @@
 "use client";
 
 import { FormModal } from "@/components/ui/FormModal";
-import { createBadgeAction } from "@/server/badges/create-badge/create-badge.action";
+import { createBadgeMutation } from "@/hooks/badges/query-options";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -20,11 +20,7 @@ export function CreateBadgeButton({ events, eventsPending, eventsError }: Create
     error,
     isPending,
     reset,
-  } = useMutation({
-    mutationFn: createBadgeAction,
-    onSuccess: () => closeDialog(),
-    onError: (createError) => console.error(createError),
-  });
+  } = useMutation(createBadgeMutation({ onSuccess: closeDialog }));
 
   function closeDialog() {
     setIsOpen(false);
