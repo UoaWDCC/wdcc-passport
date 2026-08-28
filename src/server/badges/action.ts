@@ -8,6 +8,7 @@ import { deleteObject, putObject } from "../r2/storage";
 import { randomBytes } from "crypto";
 import { requireAdmin, requireUser } from "@/lib/access";
 import { createUserBadge } from "./mutations";
+import { getUserBadges } from "./queries";
 
 const MAX_BADGE_IMAGE_BYTES = 1 * 1024 * 1024;
 
@@ -47,31 +48,11 @@ export async function getUserBadgesAction() {
     throw new Error("R2_PUBLIC_BASE_URL is not set");
   }
 
-  const rows = await db
-    .select({
-      id: badge.id,
-      name: badge.name,
-      path: badge.path,
-      awardedAt: userBadge.awardedAt,
-    })
-    .from(userBadge)
-    .innerJoin(badge, eq(userBadge.badgeId, badge.id))
-    .where(eq(userBadge.userId, session.user.id))
-    .orderBy(badge.name);
-
-  return rows.map((b) => ({
-    ...b,
-    path: `${baseUrl}/${b.path}`,
-  }));
+  await getUserBadges(baseUrl, session.user.id);
 }
 
 export async function addUserBadge(userId: string, badgeId: string) {
   await requireAdmin();
-  const [awarded] = await db
-    .insert(userBadge)
-    .values({ userId, badgeId })
-    .onConflictDoNothing()
-    .returning();
-
-  return { badgeId, alreadyAwarded: !awarded };
+  
+  return await addUserBadge(userId, badgeId);
 }
