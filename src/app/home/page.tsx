@@ -2,6 +2,7 @@ import { BadgesSection } from "@/components/home/BadgesSection";
 import { SectionHeader } from "@/components/home/SectionHeader";
 import { requireUser } from "@/lib/access";
 import { SignOutButton } from "@/components/SignOutButton";
+import Link from "next/link";
 
 export default async function Home() {
   const { user } = await requireUser();
@@ -17,6 +18,12 @@ export default async function Home() {
             Show up to events to collect badges, cards and packs.
           </p>
         </div>
+        <Link
+          href="/home/scan"
+          className="self-start rounded-full bg-white px-5 py-2 text-sm font-semibold text-black transition hover:bg-white/90"
+        >
+          Scan QR
+        </Link>
         <SignOutButton />
       </header>
 
