@@ -1,6 +1,6 @@
-import { db } from "@/lib/db/client";
+import { db } from "../db/client";
+import { badge, userBadge } from "../db/schema";
 import { eq } from "drizzle-orm";
-import { userBadge, badge } from "@/lib/db/schema";
 
 export async function getUserBadges(userId: string) {
   const baseUrl = process.env.R2_PUBLIC_BASE_URL;
@@ -25,4 +25,23 @@ export async function getUserBadges(userId: string) {
     ...b,
     path: `${baseUrl}/${b.path}`,
   }));
+}
+
+export async function getMatchingBadge(code: string) {
+  if (!code || typeof code !== "string") {
+    throw new Error("Invalid QR code");
+  }
+  code = code.trim().toLowerCase();
+
+  const [matchedBadge] = await db
+    .select({ id: badge.id })
+    .from(badge)
+    .where(eq(badge.code, code))
+    .limit(1);
+
+  if (!matchedBadge) {
+    throw new Error("Badge not found");
+  }
+
+  return matchedBadge.id;
 }

@@ -1,8 +1,8 @@
-import { db } from "@/lib/db/client";
-import { badge } from "@/lib/db/schema";
-import { deleteObject, putObject } from "@/lib/r2/storage";
-import { NeonDbError } from "@neondatabase/serverless";
 import { randomBytes } from "crypto";
+import { db } from "../db/client";
+import { badge, userBadge } from "../db/schema";
+import { deleteObject, putObject } from "../r2/storage";
+import { NeonDbError } from "@neondatabase/serverless";
 
 const IMAGE_EXTENSIONS: Record<string, string> = {
   "image/png": "png",
@@ -11,10 +11,10 @@ const IMAGE_EXTENSIONS: Record<string, string> = {
   "image/gif": "gif",
 };
 
-export const MAX_BADGE_IMAGE_BYTES = 1 * 1024 * 1024;
+const MAX_BADGE_IMAGE_BYTES = 1 * 1024 * 1024;
 const RETRY_LIMIT = 6;
 
-function isBadgeCodeCollision(error: unknown) {
+export function isBadgeCodeCollision(error: unknown) {
   return (
     error instanceof Error &&
     error.cause instanceof NeonDbError &&
@@ -23,7 +23,7 @@ function isBadgeCodeCollision(error: unknown) {
   );
 }
 
-async function uploadBadgeImage(badgeId: string, image: File) {
+export async function uploadBadgeImage(badgeId: string, image: File) {
   const extension = IMAGE_EXTENSIONS[image.type];
 
   if (!extension) {
@@ -44,15 +44,31 @@ async function uploadBadgeImage(badgeId: string, image: File) {
   return putObject(key, fileContent, image.type);
 }
 
-export async function createBadge(input: {
-  name: string;
-  image: File;
-  type: "event" | "special";
-  eventId?: string | null;
-}) {
+export async function createUserBadge(formData: FormData) {
+  const name = formData.get("name")?.toString().trim();
+  const type = formData.get("type");
+  const eventId = formData.get("eventId")?.toString().trim();
+  const image = formData.get("image");
+
+  if (typeof name !== "string" || name.trim() === "") {
+    throw new Error("Badge name is required");
+  }
+
+  if (type !== "event" && type !== "special") {
+    throw new Error("Badge type must be 'event' or 'special'");
+  }
+
+  if (!(image instanceof File)) {
+    throw new Error("Badge image is required");
+  }
+
+  if (type === "event" && (typeof eventId !== "string" || eventId.trim() === "")) {
+    throw new Error("Event badges need an event");
+  }
+
   const badgeId = crypto.randomUUID();
-  const path = await uploadBadgeImage(badgeId, input.image);
   let count = 0;
+  const path = await uploadBadgeImage(badgeId, image);
 
   while (count < RETRY_LIMIT) {
     try {
@@ -62,10 +78,10 @@ export async function createBadge(input: {
         .values({
           id: badgeId,
           code: randomBytes(3).toString("hex"),
-          name: input.name,
+          name: name,
           path,
-          type: input.type,
-          eventId: input.type === "event" ? (input.eventId ?? null) : null,
+          type: type,
+          eventId: type === "event" ? (eventId ?? null) : null,
         })
         .returning();
 
@@ -82,10 +98,19 @@ export async function createBadge(input: {
       throw error;
     }
   }
-
   await deleteObject(path).catch((deleteError) =>
     console.error("Failed to clean up badge image", deleteError),
   );
 
   throw new Error("Failed to generate a unique badge code");
+}
+
+export async function addUserBadge(userId: string, badgeId: string) {
+  const [awarded] = await db
+    .insert(userBadge)
+    .values({ userId, badgeId })
+    .onConflictDoNothing()
+    .returning();
+
+  return { badgeId, alreadyAwarded: !awarded };
 }

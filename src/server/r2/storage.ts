@@ -1,5 +1,5 @@
 import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
-import { r2, R2_BUCKET_NAME } from "@/lib/r2/client";
+import { r2, R2_BUCKET_NAME } from "@/server/r2/client";
 
 export async function putObject(key: string, body: Buffer, contentType: string) {
   await r2.send(

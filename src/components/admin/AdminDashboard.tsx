@@ -3,18 +3,11 @@
 import { CreateBadgeButton } from "@/components/admin/CreateBadgeButton";
 import { CreateEventButton } from "@/components/admin/CreateEventButton";
 import { SignOutButton } from "@/components/SignOutButton";
-import { getEventsAction } from "@/server/events/get-events/get-events.action";
+import { getEventsQuery } from "@/hooks/events/query-options";
 import { useQuery } from "@tanstack/react-query";
 
 export function AdminDashboard() {
-  const {
-    data: events = [],
-    error,
-    isPending,
-  } = useQuery({
-    queryKey: ["get-events"],
-    queryFn: getEventsAction,
-  });
+  const { data: events = [], error, isPending } = useQuery(getEventsQuery());
 
   return (
     <div className="flex flex-col gap-6">
