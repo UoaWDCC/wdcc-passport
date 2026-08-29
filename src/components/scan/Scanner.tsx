@@ -16,9 +16,9 @@ export function ScannerComponent() {
     isPending,
   } = useMutation(addUserBadgeMutation({ onSuccess: () => router.push("/home") }));
 
-  function handleScan(scannedCode: string) {
-    setCode(scannedCode);
-    addUserBadge(scannedCode);
+  function handleScan(code: string) {
+    setCode(code);
+    addUserBadge(code);
   }
 
   return (
