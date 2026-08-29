@@ -26,3 +26,22 @@ export async function getUserBadges(userId: string) {
     path: `${baseUrl}/${b.path}`,
   }));
 }
+
+export async function getMatchingBadge(code: string) {
+  if (!code || typeof code !== "string") {
+    throw new Error("Invalid QR code");
+  }
+  code = code.trim().toLowerCase();
+
+  const [matchedBadge] = await db
+    .select({ id: badge.id })
+    .from(badge)
+    .where(eq(badge.code, code))
+    .limit(1);
+
+  if (!matchedBadge) {
+    throw new Error("Badge not found");
+  }
+
+  return matchedBadge.id;
+}

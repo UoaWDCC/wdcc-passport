@@ -1,9 +1,8 @@
-import { createEventAction } from "@/server/events/create-event/create-event.action";
-import { getEventsAction } from "@/server/events/get-events/get-events.action";
+import { createEventAction, getAllEventsAction } from "@/server/events/action";
 
 export const getEventsQuery = () => ({
   queryKey: ["get-events"],
-  queryFn: getEventsAction,
+  queryFn: getAllEventsAction,
 });
 
 export const createEventMutation = (options?: { onSuccess?: () => void }) => ({
