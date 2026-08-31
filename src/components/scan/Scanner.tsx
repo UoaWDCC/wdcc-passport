@@ -16,19 +16,22 @@ export function ScannerComponent() {
     isPending,
   } = useMutation(addUserBadgeMutation({ onSuccess: () => router.push("/home") }));
 
-  function handleScan(code: string) {
-    setCode(code);
-    addUserBadge(code);
+  function handleScan(scannedCode: string) {
+    scannedCode = scannedCode.trim().slice(scannedCode.length-6, scannedCode.length);
+    setCode(scannedCode);
+    addUserBadge(scannedCode);
   }
 
   return (
     <div className="flex flex-col items-center justify-center gap-4">
       <Scanner
+       paused={isPending}
         onScan={(codes) => {
           if (codes[0]) {
             handleScan(codes[0].rawValue);
           }
         }}
+
         classNames={{
           container: "w-full max-w-sm overflow-hidden rounded-3xl",
         }}
@@ -57,7 +60,7 @@ export function ScannerComponent() {
 
       {error && (
         <p className="rounded-lg bg-red-100 px-4 py-3 text-sm font-semibold text-red-700">
-          Could not add badge.
+          {error.message || "Could not add badge."}
         </p>
       )}
     </div>
