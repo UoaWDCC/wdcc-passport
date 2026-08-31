@@ -9,29 +9,40 @@ import { useState } from "react";
 export function ScannerComponent() {
   const router = useRouter();
   const [code, setCode] = useState("");
+  const [cameraError, setCameraError] = useState<string | null>(null);
 
-  const {
-    mutate: addUserBadge,
-    error,
-    isPending,
-  } = useMutation(addUserBadgeMutation({ onSuccess: () => router.push("/home") }));
+  const { mutate: addUserBadge, data, error, isPending } = useMutation(addUserBadgeMutation());
+
+  function submitCode(value: string) {
+    addUserBadge(value, {
+      onSuccess: ({ alreadyAwarded }) => {
+        if (!alreadyAwarded) router.push("/home");
+      },
+    });
+  }
 
   function handleScan(scannedCode: string) {
-    scannedCode = scannedCode.trim().slice(scannedCode.length-6, scannedCode.length);
+    scannedCode = scannedCode.trim().slice(scannedCode.length - 6, scannedCode.length);
     setCode(scannedCode);
-    addUserBadge(scannedCode);
+    submitCode(scannedCode);
   }
 
   return (
     <div className="flex flex-col items-center justify-center gap-4">
       <Scanner
-       paused={isPending}
+        paused={isPending}
         onScan={(codes) => {
           if (codes[0]) {
             handleScan(codes[0].rawValue);
           }
         }}
-
+        onError={(scannerError) =>
+          setCameraError(
+            scannerError.kind === "permission-denied"
+              ? "Camera access was denied — allow it in your browser, or type the code below."
+              : "Camera unavailable — type the code below instead.",
+          )
+        }
         classNames={{
           container: "w-full max-w-sm overflow-hidden rounded-3xl",
         }}
@@ -51,12 +62,24 @@ export function ScannerComponent() {
 
       <button
         type="button"
-        onClick={() => addUserBadge(code)}
+        onClick={() => submitCode(code)}
         disabled={isPending || code.trim() === ""}
         className="rounded-lg bg-gray-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:opacity-50"
       >
         {isPending ? "Adding badge…" : "Add badge"}
       </button>
+
+      {cameraError && (
+        <p className="rounded-lg bg-red-100 px-4 py-3 text-sm font-semibold text-red-700">
+          {cameraError}
+        </p>
+      )}
+
+      {data?.alreadyAwarded && !isPending && (
+        <p className="rounded-lg bg-amber-100 px-4 py-3 text-sm font-semibold text-amber-700">
+          You already have this badge.
+        </p>
+      )}
 
       {error && (
         <p className="rounded-lg bg-red-100 px-4 py-3 text-sm font-semibold text-red-700">
