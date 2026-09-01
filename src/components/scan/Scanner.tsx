@@ -12,7 +12,13 @@ export function ScannerComponent() {
   const [code, setCode] = useState("");
   const [cameraError, setCameraError] = useState<string | null>(null);
 
-  const { mutate: addUserBadge, data, error, isPending, reset } = useMutation(addUserBadgeMutation());
+  const {
+    mutate: addUserBadge,
+    data,
+    error,
+    isPending,
+    reset,
+  } = useMutation(addUserBadgeMutation());
 
   function submitCode(value: string) {
     addUserBadge(value, {
@@ -24,7 +30,7 @@ export function ScannerComponent() {
 
   function handleScan(scannedCode: string) {
     const parsed = scannedCode.trim().slice(-6);
-     if (parsed === lastSubmitted.current) return;
+    if (parsed === lastSubmitted.current) return;
     reset();
     lastSubmitted.current = parsed;
     setCode(parsed);
