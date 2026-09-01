@@ -64,6 +64,7 @@ export function ScannerComponent() {
       <input
         id="code-input"
         type="text"
+        maxLength={6}
         value={code}
         onChange={(e) => setCode(e.target.value)}
         placeholder="Or type the code here"
@@ -73,7 +74,7 @@ export function ScannerComponent() {
       <button
         type="button"
         onClick={() => submitCode(code)}
-        disabled={isPending || code.trim() === ""}
+        disabled={code.length < 6 || isPending || code.trim() === ""}
         className="rounded-lg bg-gray-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:opacity-50"
       >
         {isPending ? "Adding badge…" : "Add badge"}
