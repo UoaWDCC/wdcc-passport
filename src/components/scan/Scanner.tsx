@@ -4,14 +4,15 @@ import { addUserBadgeMutation } from "@/hooks/badges/query-options";
 import { useMutation } from "@tanstack/react-query";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 export function ScannerComponent() {
   const router = useRouter();
+  const lastSubmitted = useRef("");
   const [code, setCode] = useState("");
   const [cameraError, setCameraError] = useState<string | null>(null);
 
-  const { mutate: addUserBadge, data, error, isPending } = useMutation(addUserBadgeMutation());
+  const { mutate: addUserBadge, data, error, isPending, reset } = useMutation(addUserBadgeMutation());
 
   function submitCode(value: string) {
     addUserBadge(value, {
@@ -22,9 +23,12 @@ export function ScannerComponent() {
   }
 
   function handleScan(scannedCode: string) {
-    scannedCode = scannedCode.trim().slice(scannedCode.length - 6, scannedCode.length);
-    setCode(scannedCode);
-    submitCode(scannedCode);
+    const parsed = scannedCode.trim().slice(-6);
+     if (parsed === lastSubmitted.current) return;
+    reset();
+    lastSubmitted.current = parsed;
+    setCode(parsed);
+    submitCode(parsed);
   }
 
   return (
