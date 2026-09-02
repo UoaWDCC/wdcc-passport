@@ -7,4 +7,4 @@ export * from "./badge.schema";
 export * from "./userBadge.schema";
 export * from "./card.schema";
 export * from "./userCard.schema";
-export * from "./pack.schema";
+export * from "./userPack.schema";
