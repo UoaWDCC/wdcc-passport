@@ -57,6 +57,13 @@
       "when": 1787479468962,
       "tag": "0007_badge_code_not_null_event_unique",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1788424477564,
+      "tag": "0008_polite_brood",
+      "breakpoints": true
     }
   ]
 }
