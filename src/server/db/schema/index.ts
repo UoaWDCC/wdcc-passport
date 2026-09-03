@@ -5,3 +5,6 @@ export * from "./verification.schema";
 export * from "./event.schema";
 export * from "./badge.schema";
 export * from "./userBadge.schema";
+export * from "./card.schema";
+export * from "./userCard.schema";
+export * from "./userPack.schema";
