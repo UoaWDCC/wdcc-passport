@@ -3,6 +3,7 @@
 import { requireAdmin, requireUser } from "@/lib/access";
 import { addUserBadge, createUserBadge } from "./mutations";
 import { getMatchingBadge, getUserBadges } from "./queries";
+import { addUserPack } from "../packs/mutation";
 
 export async function createBadgeAction(formData: FormData) {
   await requireAdmin();
@@ -19,6 +20,11 @@ export async function getUserBadgesAction() {
 export async function addUserBadgeAction(code: string) {
   const session = await requireUser();
   const badgeId = await getMatchingBadge(code);
+  const result = await addUserBadge(session.user.id, badgeId);
 
-  return await addUserBadge(session.user.id, badgeId);
+  if (!result.alreadyAwarded) {
+    await addUserPack(session.user.id);
+  }
+
+  return result;
 }
