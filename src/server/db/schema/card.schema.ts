@@ -1,6 +1,7 @@
 import { pgEnum, pgTable, text } from "drizzle-orm/pg-core";
 
 export const rarityEnum = pgEnum("rarity", ["common", "rare", "epic", "legendary"]);
+export type Card = typeof card.$inferSelect;
 
 export const card = pgTable("card", {
   id: text("id").primaryKey(),
