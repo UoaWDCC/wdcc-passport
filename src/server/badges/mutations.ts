@@ -3,7 +3,7 @@ import { db } from "../db/client";
 import { badge, userBadge, userPack } from "../db/schema";
 import { deleteObject, putObject } from "../r2/storage";
 import { NeonDbError } from "@neondatabase/serverless";
-import { sql } from "drizzle-orm/sql/sql";
+import { sql } from "drizzle-orm";
 
 const IMAGE_EXTENSIONS: Record<string, string> = {
   "image/png": "png",
