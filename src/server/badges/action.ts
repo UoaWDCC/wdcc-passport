@@ -19,6 +19,7 @@ export async function getUserBadgesAction() {
 export async function addUserBadgeAction(code: string) {
   const session = await requireUser();
   const badgeId = await getMatchingBadge(code);
+  const result = await addUserBadge(session.user.id, badgeId);
 
-  return await addUserBadge(session.user.id, badgeId);
+  return result;
 }

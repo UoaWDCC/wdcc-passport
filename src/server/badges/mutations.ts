@@ -1,8 +1,9 @@
 import { randomBytes } from "crypto";
 import { db } from "../db/client";
-import { badge, userBadge } from "../db/schema";
+import { badge, userBadge, userPack } from "../db/schema";
 import { deleteObject, putObject } from "../r2/storage";
 import { NeonDbError } from "@neondatabase/serverless";
+import { sql } from "drizzle-orm";
 
 const IMAGE_EXTENSIONS: Record<string, string> = {
   "image/png": "png",
@@ -106,11 +107,32 @@ export async function createUserBadge(formData: FormData) {
 }
 
 export async function addUserBadge(userId: string, badgeId: string) {
-  const [awarded] = await db
-    .insert(userBadge)
-    .values({ userId, badgeId })
-    .onConflictDoNothing()
-    .returning();
+  const awarded = db
+    .$with("awarded")
+    .as(
+      db
+        .insert(userBadge)
+        .values({ userId, badgeId })
+        .onConflictDoNothing()
+        .returning({ userId: userBadge.userId }),
+    );
 
-  return { badgeId, alreadyAwarded: !awarded };
+  const [pack] = await db
+    .with(awarded)
+    .insert(userPack)
+    .select((qb) =>
+      qb
+        .select({
+          userId: awarded.userId,
+          packQuantity: sql<number>`1`.as("pack_quantity"),
+        })
+        .from(awarded),
+    )
+    .onConflictDoUpdate({
+      target: userPack.userId,
+      set: { packQuantity: sql`${userPack.packQuantity} + 1` },
+    })
+    .returning({ userId: userPack.userId });
+
+  return { badgeId, alreadyAwarded: !pack };
 }
