@@ -3,7 +3,6 @@
 import { requireAdmin, requireUser } from "@/lib/access";
 import { addUserBadge, createUserBadge } from "./mutations";
 import { getMatchingBadge, getUserBadges } from "./queries";
-import { addUserPack } from "../packs/mutation";
 
 export async function createBadgeAction(formData: FormData) {
   await requireAdmin();

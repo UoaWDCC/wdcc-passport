@@ -107,7 +107,9 @@ export async function createUserBadge(formData: FormData) {
 }
 
 export async function addUserBadge(userId: string, badgeId: string) {
-  const awarded = db.$with("awarded").as(
+  const awarded = db
+    .$with("awarded")
+    .as(
       db
         .insert(userBadge)
         .values({ userId, badgeId })
@@ -115,22 +117,22 @@ export async function addUserBadge(userId: string, badgeId: string) {
         .returning({ userId: userBadge.userId }),
     );
 
-    const [pack] = await db
-      .with(awarded)
-      .insert(userPack)
-      .select((qb) =>
-        qb
-          .select({
-            userId: awarded.userId,
-            packQuantity: sql<number>`1`.as("pack_quantity"),
-          })
-          .from(awarded),
-      )
-      .onConflictDoUpdate({
-        target: userPack.userId,
-        set: { packQuantity: sql`${userPack.packQuantity} + 1` },
-      })
-      .returning({ userId: userPack.userId });
+  const [pack] = await db
+    .with(awarded)
+    .insert(userPack)
+    .select((qb) =>
+      qb
+        .select({
+          userId: awarded.userId,
+          packQuantity: sql<number>`1`.as("pack_quantity"),
+        })
+        .from(awarded),
+    )
+    .onConflictDoUpdate({
+      target: userPack.userId,
+      set: { packQuantity: sql`${userPack.packQuantity} + 1` },
+    })
+    .returning({ userId: userPack.userId });
 
-    return { badgeId, alreadyAwarded: !pack };
+  return { badgeId, alreadyAwarded: !pack };
 }
