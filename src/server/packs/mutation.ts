@@ -9,5 +9,5 @@ export async function openPack(userId: string) {
     .where(and(eq(userPack.userId, userId), gt(userPack.packQuantity, 0)))
     .returning({ packQuantity: userPack.packQuantity });
 
-    return result;
+  return result;
 }

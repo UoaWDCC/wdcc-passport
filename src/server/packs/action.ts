@@ -9,10 +9,10 @@ export async function openPackAction() {
   const session = await requireUser();
   const result = await openPack(session.user.id);
 
-  if(!result){
+  if (!result) {
     throw new Error("No packs available to open.");
   }
-  
+
   const cards = await generateCards();
   await addUserCards(session.user.id, cards);
   return cards;
