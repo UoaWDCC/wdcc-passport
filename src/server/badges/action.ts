@@ -22,9 +22,5 @@ export async function addUserBadgeAction(code: string) {
   const badgeId = await getMatchingBadge(code);
   const result = await addUserBadge(session.user.id, badgeId);
 
-  if (!result.alreadyAwarded) {
-    await addUserPack(session.user.id);
-  }
-
   return result;
 }
