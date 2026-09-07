@@ -1,0 +1,114 @@
+[
+  {
+    "id": "pikachoo",
+    "name": "Pikachoo",
+    "image": "pikachoo.webp",
+    "back": "backside.webp",
+    "rarity": "legendary"
+  },
+  {
+    "id": "warizard",
+    "name": "Warizard",
+    "image": "warizard.webp",
+    "back": "backside.webp",
+    "rarity": "legendary"
+  },
+  {
+    "id": "wewtwo",
+    "name": "Wewtwo",
+    "image": "wewtwo.webp",
+    "back": "backside.webp",
+    "rarity": "legendary"
+  },
+  {
+    "id": "wengar",
+    "name": "Wengar",
+    "image": "wengar.webp",
+    "back": "backside.webp",
+    "rarity": "epic"
+  },
+  {
+    "id": "snorelax",
+    "name": "Snorelax",
+    "image": "snorelax.webp",
+    "back": "backside.webp",
+    "rarity": "epic"
+  },
+  {
+    "id": "bulbasour",
+    "name": "Bulbasour",
+    "image": "bulbasour.webp",
+    "back": "backside.webp",
+    "rarity": "rare"
+  },
+  {
+    "id": "jigglybuff",
+    "name": "Jigglybuff",
+    "image": "jigglybuff.webp",
+    "back": "backside.webp",
+    "rarity": "rare"
+  },
+  {
+    "id": "pokewebster",
+    "name": "Pokewebster",
+    "image": "pokewebster.webp",
+    "back": "backside.webp",
+    "rarity": "epic"
+  },
+  {
+    "id": "psyweb",
+    "name": "Psyweb",
+    "image": "psyweb.webp",
+    "back": "backside.webp",
+    "rarity": "common"
+  },
+  {
+    "id": "warill",
+    "name": "Warill",
+    "image": "warill.webp",
+    "back": "backside.webp",
+    "rarity": "common"
+  },
+  {
+    "id": "webbykarp",
+    "name": "Webbykarp",
+    "image": "webbykarp.webp",
+    "back": "backside.webp",
+    "rarity": "common"
+  },
+  {
+    "id": "weowth",
+    "name": "Weowth",
+    "image": "weowth.webp",
+    "back": "backside.webp",
+    "rarity": "common"
+  },
+  {
+    "id": "wiglet",
+    "name": "Wiglet",
+    "image": "wiglet.webp",
+    "back": "backside.webp",
+    "rarity": "common"
+  },
+  {
+    "id": "witto",
+    "name": "Witto",
+    "image": "witto.webp",
+    "back": "backside.webp",
+    "rarity": "rare"
+  },
+  {
+    "id": "wogepi",
+    "name": "Wogepi",
+    "image": "wogepi.webp",
+    "back": "backside.webp",
+    "rarity": "rare"
+  },
+  {
+    "id": "worterra",
+    "name": "Worterra",
+    "image": "worterra.webp",
+    "back": "backside.webp",
+    "rarity": "rare"
+  }
+]
