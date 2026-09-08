@@ -1,13 +1,19 @@
 "use server";
 
 import { requireAdmin, requireUser } from "@/lib/access";
-import { addUserBadge, createUserBadge } from "./mutations";
+import { addUserBadge, createUserBadge, deleteBadge } from "./mutations";
 import { getMatchingBadge, getUserBadges } from "./queries";
 
 export async function createBadgeAction(formData: FormData) {
   await requireAdmin();
 
   await createUserBadge(formData);
+}
+
+export async function deleteBadgeAction(badgeId: string) {
+  await requireAdmin();
+
+  return await deleteBadge(badgeId);
 }
 
 export async function getUserBadgesAction() {
