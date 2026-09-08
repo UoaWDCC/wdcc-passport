@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm/sql/expressions/conditions";
 import { db } from "../db/client";
-import {badge, event } from "../db/schema";
+import { badge, event } from "../db/schema";
 
 const ISO_WITH_OFFSET = /(?:Z|[+-]\d{2}:?\d{2})$/;
 
@@ -92,7 +92,7 @@ export async function updateEvent(formData: FormData) {
       endTimestamp: event.endTimestamp,
     });
 
-    if (!updatedEvent) throw new Error("Event not found");
+  if (!updatedEvent) throw new Error("Event not found");
 
   return updatedEvent;
 }
