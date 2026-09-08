@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
             hostname: new URL(process.env.R2_PUBLIC_BASE_URL).hostname,
             pathname: "/badge/**",
           },
+          {
+            protocol: "https",
+            hostname: new URL(process.env.R2_PUBLIC_BASE_URL).hostname,
+            pathname: "/card/**",
+          },
         ]
       : [],
   },

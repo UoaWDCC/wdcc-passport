@@ -3,36 +3,47 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { CardScene } from "@/cards/CardScene";
-import type { CardImages } from "@/cards/types";
+import { CardScene, type CardStatus } from "@/cards/CardScene";
+import { loadManifest } from "@/cards/manifest";
+import type { CardEntry } from "@/cards/types";
 
-/** Development-only demo card. Replaced by manifest data in a later PR. */
-const DEMO_CARD: CardImages & { name: string; width: number; height: number } = {
-  name: "Pikachoo",
-  front: "/cards/pikachoo.webp",
-  back: "/cards/backside.webp",
-  width: 496,
-  height: 700,
-};
-
-//replace with tanstack later
-type Status = { kind: "loading" } | { kind: "ready" } | { kind: "error"; message: string };
+// for now until we actually create server action
+const MANIFEST_URL = "/cards/manifest.json";
 
 export default function CardViewerScene() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [status, setStatus] = useState<Status>({ kind: "loading" });
+  const sceneRef = useRef<CardScene | null>(null);
+  const [cards, setCards] = useState<CardEntry[] | null>(null);
+  const [index, setIndex] = useState(0);
+  const [status, setStatus] = useState<CardStatus>({ kind: "loading" });
+
+  useEffect(() => {
+    let cancelled = false;
+    loadManifest(MANIFEST_URL)
+      .then((loaded) => {
+        if (!cancelled) setCards(loaded);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setStatus({ kind: "error", message: err instanceof Error ? err.message : String(err) });
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    if (!container || !cards || cards.length === 0) return;
 
     let scene: CardScene | null = null;
     try {
-      //change CardScene later to allow for a list of cards to be passed in
-      scene = new CardScene(container, DEMO_CARD, {
-        onReady: () => setStatus({ kind: "ready" }),
-        onError: (message) => setStatus({ kind: "error", message }),
+      scene = new CardScene(container, {
+        onStatus: setStatus,
+        onStep: (delta) => setIndex((i) => (i + delta + cards.length) % cards.length),
       });
+      sceneRef.current = scene;
     } catch {
       // Reported on the next tick, like the scene's own async callbacks.
       queueMicrotask(() =>
@@ -45,8 +56,22 @@ export default function CardViewerScene() {
 
     return () => {
       scene?.dispose();
+      sceneRef.current = null;
     };
-  }, []);
+  }, [cards]);
+
+  const current = cards?.[index];
+
+  useEffect(() => {
+    const scene = sceneRef.current;
+    if (!scene || !cards || cards.length === 0) return;
+    void scene.show(cards[index]);
+    // Keep the neighbours' textures loaded so the next swipe is instant.
+    scene.preload([
+      cards[(index - 1 + cards.length) % cards.length],
+      cards[(index + 1) % cards.length],
+    ]);
+  }, [cards, index]);
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-gray-900 text-white">
@@ -65,18 +90,49 @@ export default function CardViewerScene() {
         aria-live="polite"
         className="pointer-events-none absolute inset-x-0 bottom-4 flex flex-col items-center gap-1 px-4 text-center text-xs text-white/80"
       >
-        <div className="text-sm font-semibold text-white">{DEMO_CARD.name}</div>
+        <div className="text-sm font-semibold text-white">
+          {current && cards ? `${current.name} · ${index + 1} / ${cards.length}` : ""}
+        </div>
+        {cards && cards.length > 1 && (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIndex((i) => (i - 1 + cards.length) % cards.length)}
+              className="pointer-events-auto rounded-full bg-black/50 px-3 py-1 text-xs font-semibold text-white/80 backdrop-blur transition hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+            >
+              ‹ Prev
+            </button>
+            <button
+              type="button"
+              onClick={() => setIndex((i) => (i + 1) % cards.length)}
+              className="pointer-events-auto rounded-full bg-black/50 px-3 py-1 text-xs font-semibold text-white/80 backdrop-blur transition hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+            >
+              Next ›
+            </button>
+          </div>
+        )}
         {status.kind === "ready" && (
-          <div>move the pointer to tilt · click or press Enter to flip</div>
+          <div>
+            move the pointer to tilt · click or press Enter to flip · swipe or ← → to browse
+          </div>
         )}
       </div>
 
-      {status.kind === "loading" && (
+      {status.kind === "loading" && cards?.length !== 0 && (
         <div
           role="status"
           className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-white/60"
         >
           Loading card…
+        </div>
+      )}
+
+      {cards?.length === 0 && (
+        <div
+          role="status"
+          className="absolute inset-0 flex items-center justify-center text-sm text-white/60"
+        >
+          No cards to show yet.
         </div>
       )}
 
@@ -86,13 +142,15 @@ export default function CardViewerScene() {
           className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 text-center"
         >
           <p className="text-sm text-red-300">Could not show the 3D card: {status.message}</p>
-          <Image
-            src={DEMO_CARD.front}
-            alt={DEMO_CARD.name}
-            width={DEMO_CARD.width}
-            height={DEMO_CARD.height}
-            className="h-auto w-full max-w-xs rounded-xl"
-          />
+          {current && (
+            <Image
+              src={current.front}
+              alt={current.name}
+              width={496}
+              height={700}
+              className="h-auto w-full max-w-xs rounded-xl"
+            />
+          )}
         </div>
       )}
     </div>

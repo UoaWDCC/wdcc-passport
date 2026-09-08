@@ -1,5 +1,6 @@
-/** Image URLs for one card. */
-export interface CardImages {
+export interface CardEntry {
+  id: string;
+  name: string;
   front: string;
   back: string;
 }
