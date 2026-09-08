@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm/sql/expressions/conditions";
 import { db } from "../db/client";
 import {badge, event } from "../db/schema";
 
@@ -65,4 +66,33 @@ export async function createEvent(formData: FormData) {
     });
 
   return createdEvent;
+}
+
+export async function updateEvent(formData: FormData) {
+  const id = formData.get("id")?.toString().trim();
+
+  if (typeof id !== "string" || id.trim() === "") {
+    throw new Error("Event ID is required");
+  }
+
+  const { name, start, end } = parseEventFormData(formData);
+
+  const [updatedEvent] = await db
+    .update(event)
+    .set({
+      name: name,
+      startTimestamp: start,
+      endTimestamp: end,
+    })
+    .where(eq(event.id, id))
+    .returning({
+      id: event.id,
+      name: event.name,
+      startTimestamp: event.startTimestamp,
+      endTimestamp: event.endTimestamp,
+    });
+
+    if (!updatedEvent) throw new Error("Event not found");
+
+  return updatedEvent;
 }
