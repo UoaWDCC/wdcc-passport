@@ -96,3 +96,26 @@ export async function updateEvent(formData: FormData) {
 
   return updatedEvent;
 }
+
+export async function deleteEvent(eventId: string) {
+  if (typeof eventId !== "string" || eventId.trim() === "") {
+    throw new Error("Event id is required");
+  }
+
+  const [linkedBadge] = await db
+    .select({ id: badge.id })
+    .from(badge)
+    .where(eq(badge.eventId, eventId))
+    .limit(1);
+
+  if (linkedBadge) throw new Error("Delete the event's badge before deleting the event");
+
+  const [deletedEvent] = await db
+    .delete(event)
+    .where(eq(event.id, eventId))
+    .returning({ id: event.id });
+
+  if (!deletedEvent) throw new Error("Event not found");
+
+  return deletedEvent;
+}
