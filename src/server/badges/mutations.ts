@@ -3,7 +3,7 @@ import { db } from "../db/client";
 import { badge, userBadge, userPack } from "../db/schema";
 import { deleteObject, putObject } from "../r2/storage";
 import { NeonDbError } from "@neondatabase/serverless";
-import { sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 const IMAGE_EXTENSIONS: Record<string, string> = {
   "image/png": "png",
@@ -104,6 +104,28 @@ export async function createUserBadge(formData: FormData) {
   );
 
   throw new Error("Failed to generate a unique badge code");
+}
+
+export async function deleteBadge(badgeId: string) {
+  if (typeof badgeId !== "string" || badgeId.trim() === "") {
+    throw new Error("Badge id is required");
+  }
+
+  const [deletedBadge] = await db
+    .delete(badge)
+    .where(eq(badge.id, badgeId))
+    .returning({ id: badge.id, path: badge.path });
+
+  if (!deletedBadge) {
+    throw new Error("Badge not found");
+  }
+
+  // user_badge rows are removed by the FK cascade; pack quantities are left as-is.
+  await deleteObject(deletedBadge.path).catch((deleteError) =>
+    console.error("Failed to clean up badge image", deleteError),
+  );
+
+  return deletedBadge;
 }
 
 export async function addUserBadge(userId: string, badgeId: string) {
