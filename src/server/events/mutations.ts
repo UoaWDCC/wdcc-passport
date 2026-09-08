@@ -1,9 +1,9 @@
 import { db } from "../db/client";
-import { event } from "../db/schema";
+import {badge, event } from "../db/schema";
 
 const ISO_WITH_OFFSET = /(?:Z|[+-]\d{2}:?\d{2})$/;
 
-export async function createEvent(formData: FormData) {
+function parseEventFormData(formData: FormData) {
   const name = formData.get("name")?.toString().trim();
   const startTimestamp = formData.get("startTimestamp");
   const endTimestamp = formData.get("endTimestamp");
@@ -42,6 +42,12 @@ export async function createEvent(formData: FormData) {
   if (end <= start) {
     throw new Error("Event end time must be after the start time");
   }
+
+  return { name, start, end };
+}
+
+export async function createEvent(formData: FormData) {
+  const { name, start, end } = parseEventFormData(formData);
 
   const [createdEvent] = await db
     .insert(event)
