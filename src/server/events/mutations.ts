@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm/sql/expressions/conditions";
+import { and, eq, notExists } from "drizzle-orm";
 import { db } from "../db/client";
 import { badge, event } from "../db/schema";
 
@@ -102,20 +102,17 @@ export async function deleteEvent(eventId: string) {
     throw new Error("Event id is required");
   }
 
-  const [linkedBadge] = await db
-    .select({ id: badge.id })
-    .from(badge)
-    .where(eq(badge.eventId, eventId))
-    .limit(1);
-
-  if (linkedBadge) throw new Error("Delete the event's badge before deleting the event");
-
   const [deletedEvent] = await db
-    .delete(event)
-    .where(eq(event.id, eventId))
-    .returning({ id: event.id });
+  .delete(event)
+  .where(
+    and(
+      eq(event.id, eventId),
+      notExists(db.select().from(badge).where(eq(badge.eventId, event.id))),
+    ),
+  )
+  .returning({ id: event.id });
 
-  if (!deletedEvent) throw new Error("Event not found");
+  if (!deletedEvent) throw new Error("Event not found, or its badge must be deleted first");
 
   return deletedEvent;
 }
