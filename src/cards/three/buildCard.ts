@@ -31,6 +31,12 @@ export function buildCardObject(textures: CardTextures, height: number): CardObj
   return { group, front, back };
 }
 
+/** Draw order (used to keep a moving card on top of its neighbours). */
+export function setCardRenderOrder(card: CardObject, order: number): void {
+  card.front.renderOrder = order;
+  card.back.renderOrder = order;
+}
+
 /** Disposes geometry and materials. Textures are owned by the caller. */
 export function disposeCardObject(card: CardObject): void {
   card.group.removeFromParent();
