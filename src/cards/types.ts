@@ -4,3 +4,11 @@ export interface CardEntry {
   front: string;
   back: string;
 }
+
+/** World dimensions in centimetres (the screen is a window at z = 0, the box extends to z = -boxD). */
+export interface SceneDims {
+  screenW: number;
+  screenH: number;
+  boxD: number;
+  eyeZ: number;
+}

@@ -65,9 +65,8 @@ export default function CardViewerScene() {
   useEffect(() => {
     const scene = sceneRef.current;
     if (!scene || !cards || cards.length === 0) return;
-    void scene.show(cards[index]);
     // Keep the neighbours' textures loaded so the next swipe is instant.
-    scene.preload([
+    scene.showSingle(cards[index], [
       cards[(index - 1 + cards.length) % cards.length],
       cards[(index + 1) % cards.length],
     ]);
