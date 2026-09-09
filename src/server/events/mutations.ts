@@ -1,9 +1,10 @@
+import { and, eq, notExists } from "drizzle-orm";
 import { db } from "../db/client";
-import { event } from "../db/schema";
+import { badge, event } from "../db/schema";
 
 const ISO_WITH_OFFSET = /(?:Z|[+-]\d{2}:?\d{2})$/;
 
-export async function createEvent(formData: FormData) {
+function parseEventFormData(formData: FormData) {
   const name = formData.get("name")?.toString().trim();
   const startTimestamp = formData.get("startTimestamp");
   const endTimestamp = formData.get("endTimestamp");
@@ -43,6 +44,12 @@ export async function createEvent(formData: FormData) {
     throw new Error("Event end time must be after the start time");
   }
 
+  return { name, start, end };
+}
+
+export async function createEvent(formData: FormData) {
+  const { name, start, end } = parseEventFormData(formData);
+
   const [createdEvent] = await db
     .insert(event)
     .values({
@@ -59,4 +66,53 @@ export async function createEvent(formData: FormData) {
     });
 
   return createdEvent;
+}
+
+export async function updateEvent(formData: FormData) {
+  const id = formData.get("id")?.toString().trim();
+
+  if (typeof id !== "string" || id.trim() === "") {
+    throw new Error("Event ID is required");
+  }
+
+  const { name, start, end } = parseEventFormData(formData);
+
+  const [updatedEvent] = await db
+    .update(event)
+    .set({
+      name: name,
+      startTimestamp: start,
+      endTimestamp: end,
+    })
+    .where(eq(event.id, id))
+    .returning({
+      id: event.id,
+      name: event.name,
+      startTimestamp: event.startTimestamp,
+      endTimestamp: event.endTimestamp,
+    });
+
+  if (!updatedEvent) throw new Error("Event not found");
+
+  return updatedEvent;
+}
+
+export async function deleteEvent(eventId: string) {
+  if (typeof eventId !== "string" || eventId.trim() === "") {
+    throw new Error("Event id is required");
+  }
+
+  const [deletedEvent] = await db
+    .delete(event)
+    .where(
+      and(
+        eq(event.id, eventId),
+        notExists(db.select().from(badge).where(eq(badge.eventId, event.id))),
+      ),
+    )
+    .returning({ id: event.id });
+
+  if (!deletedEvent) throw new Error("Event not found, or its badge must be deleted first");
+
+  return deletedEvent;
 }
