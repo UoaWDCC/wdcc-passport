@@ -74,7 +74,7 @@ export default function CardViewerScene() {
       {status.kind === "loading" && (
         <div
           role="status"
-          className="absolute inset-0 flex items-center justify-center text-sm text-white/60"
+          className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-white/60"
         >
           Loading card…
         </div>
@@ -83,7 +83,7 @@ export default function CardViewerScene() {
       {status.kind === "error" && (
         <div
           role="alert"
-          className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 text-center"
+          className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 text-center"
         >
           <p className="text-sm text-red-300">Could not show the 3D card: {status.message}</p>
           <Image
