@@ -103,14 +103,14 @@ export async function deleteEvent(eventId: string) {
   }
 
   const [deletedEvent] = await db
-  .delete(event)
-  .where(
-    and(
-      eq(event.id, eventId),
-      notExists(db.select().from(badge).where(eq(badge.eventId, event.id))),
-    ),
-  )
-  .returning({ id: event.id });
+    .delete(event)
+    .where(
+      and(
+        eq(event.id, eventId),
+        notExists(db.select().from(badge).where(eq(badge.eventId, event.id))),
+      ),
+    )
+    .returning({ id: event.id });
 
   if (!deletedEvent) throw new Error("Event not found, or its badge must be deleted first");
 
