@@ -5,17 +5,33 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { CardScene, type CardStatus } from "@/cards/CardScene";
 import { loadManifest } from "@/cards/manifest";
+import { detectMobile } from "@/cards/three/layout";
 import type { CardEntry, ViewMode } from "@/cards/types";
 
 // for now until we actually create server action
 const MANIFEST_URL = "/cards/manifest.json";
+
+const MODES: Array<{ id: ViewMode; label: string }> = [
+  { id: "fan", label: "Fan" },
+  { id: "stack", label: "Stack" },
+  { id: "single", label: "Single" },
+];
+
+const HINTS: Record<ViewMode, string> = {
+  fan: "drag, scroll or ← → to browse · click a card or press Enter to inspect",
+  stack: "swipe, scroll or ↑ ↓ to cycle the pile · tap the top card or press Enter to flip",
+  single: "move the pointer to tilt · click or press Enter to flip · swipe or ← → to browse",
+};
+const INSPECT_HINT =
+  "move the pointer to tilt · click or press Enter to flip · Esc or click outside to return";
 
 export default function CardViewerScene() {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<CardScene | null>(null);
   const [cards, setCards] = useState<CardEntry[] | null>(null);
   const [index, setIndex] = useState(0);
-  const [mode, setMode] = useState<ViewMode>("single");
+  // pokebox: default is stack on mobile, fan on desktop
+  const [mode, setMode] = useState<ViewMode>(() => (detectMobile() ? "stack" : "fan"));
   const [inspecting, setInspecting] = useState(false);
   const [status, setStatus] = useState<CardStatus>({ kind: "loading" });
 
@@ -73,6 +89,10 @@ export default function CardViewerScene() {
       scene.showFan(cards, index);
       return;
     }
+    if (mode === "stack") {
+      scene.showStack(cards, index);
+      return;
+    }
     // Keep the neighbours' textures loaded so the next swipe is instant.
     scene.showSingle(cards[index], [
       cards[(index - 1 + cards.length) % cards.length],
@@ -98,19 +118,19 @@ export default function CardViewerScene() {
         </Link>
         {cards &&
           cards.length > 0 &&
-          (["single", "fan"] as const).map((m) => (
+          MODES.map((m) => (
             <button
-              key={m}
+              key={m.id}
               type="button"
-              aria-pressed={mode === m}
-              onClick={() => switchMode(m)}
+              aria-pressed={mode === m.id}
+              onClick={() => switchMode(m.id)}
               className={`pointer-events-auto rounded-full px-3 py-1 text-xs font-semibold backdrop-blur transition focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none ${
-                mode === m
+                mode === m.id
                   ? "bg-white text-black"
                   : "bg-black/50 text-white/80 hover:bg-white/10 hover:text-white"
               }`}
             >
-              {m === "single" ? "Single" : "Fan"}
+              {m.label}
             </button>
           ))}
       </div>
@@ -142,15 +162,7 @@ export default function CardViewerScene() {
             </button>
           </div>
         )}
-        {status.kind === "ready" && (
-          <div>
-            {mode === "fan"
-              ? inspecting
-                ? "move the pointer to tilt · click or press Enter to flip · Esc or click outside to return"
-                : "drag, scroll or ← → to browse · click a card or press Enter to inspect"
-              : "move the pointer to tilt · click or press Enter to flip · swipe or ← → to browse"}
-          </div>
-        )}
+        {status.kind === "ready" && <div>{inspecting ? INSPECT_HINT : HINTS[mode]}</div>}
       </div>
 
       {status.kind === "loading" && mode === "single" && cards?.length !== 0 && (

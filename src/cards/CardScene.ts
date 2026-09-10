@@ -3,6 +3,7 @@ import { PointerTilt } from "./input/PointerTilt";
 import { FanMode } from "./modes/FanMode";
 import type { Mode, ModeEnv, PointerInfo } from "./modes/Mode";
 import { SingleMode, type CardStatus } from "./modes/SingleMode";
+import { StackMode } from "./modes/StackMode";
 import { CARD_ASPECT } from "./three/buildCard";
 import { SCREEN_H_CM, VIEW_DISTANCE_CM, computeDims } from "./three/dims";
 import { TextureCache } from "./three/textures";
@@ -15,7 +16,7 @@ export interface CardSceneCallbacks {
   onStatus(status: CardStatus): void;
   /** The user swiped or pressed an arrow key: +1 = next card, -1 = previous. */
   onStep(delta: number): void;
-  /** Fan mode settled on this card. */
+  /** Fan mode settled on this card, or it reached the top of the stack. */
   onFocus(index: number): void;
   /** Fan mode zoomed a card in (true) or returned it to the hand (false). */
   onInspect(inspecting: boolean): void;
@@ -67,7 +68,7 @@ export class CardScene {
     this.canvas.tabIndex = 0;
     this.canvas.setAttribute(
       "aria-label",
-      "3D cards. Left and right arrows change card; Enter flips or inspects; Escape returns.",
+      "3D cards. Arrow keys change card; Enter flips or inspects; Escape returns.",
     );
     container.appendChild(this.canvas);
 
@@ -149,6 +150,18 @@ export class CardScene {
     this.callbacks.onStatus({ kind: "ready" });
   }
 
+  /** Stack mode with a card on top. Repeated calls with a new index bring that card to the top. */
+  showStack(entries: readonly CardEntry[], index: number): void {
+    if (this.mode instanceof StackMode) {
+      this.mode.focus(index);
+      return;
+    }
+    this.setMode(
+      new StackMode(this.env, entries, index, { onFocus: (i) => this.callbacks.onFocus(i) }),
+    );
+    this.callbacks.onStatus({ kind: "ready" });
+  }
+
   private setMode(mode: Mode | null): void {
     this.mode?.dispose();
     this.mode = mode;
@@ -201,6 +214,8 @@ export class CardScene {
     this.lastTime = now;
 
     this.pointerTilt.update(dt);
+    // The flip belongs to the focused card; once it moves on (stack swipe, fan return) unflip.
+    if (this.flipped && !this.mode?.canFlip()) this.flipped = false;
     const target = this.flipped ? Math.PI : 0;
     this.flipAngle = this.env.reducedMotion
       ? target

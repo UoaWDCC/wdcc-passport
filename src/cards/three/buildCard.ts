@@ -31,6 +31,16 @@ export function buildCardObject(textures: CardTextures, height: number): CardObj
   return { group, front, back };
 }
 
+/** Re-points an existing card at other images (the caller manages texture ownership). */
+export function setCardTextures(card: CardObject, textures: CardTextures): void {
+  const front = card.front.material as MeshBasicMaterial;
+  const back = card.back.material as MeshBasicMaterial;
+  front.map = textures.front;
+  back.map = textures.back;
+  front.needsUpdate = true;
+  back.needsUpdate = true;
+}
+
 /** Draw order (used to keep a moving card on top of its neighbours). */
 export function setCardRenderOrder(card: CardObject, order: number): void {
   card.front.renderOrder = order;
