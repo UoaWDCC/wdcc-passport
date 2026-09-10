@@ -1,0 +1,18 @@
+[
+  { "id": "pikachoo", "name": "Pikachoo", "front": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/pikachoo.webp", "back": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/backside.webp" },
+  { "id": "warizard", "name": "Warizard", "front": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/warizard.webp", "back": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/backside.webp" },
+  { "id": "wewtwo", "name": "Wewtwo", "front": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/wewtwo.webp", "back": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/backside.webp" },
+  { "id": "wengar", "name": "Wengar", "front": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/wengar.webp", "back": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/backside.webp" },
+  { "id": "snorelax", "name": "Snorelax", "front": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/snorelax.webp", "back": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/backside.webp" },
+  { "id": "bulbasour", "name": "Bulbasour", "front": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/bulbasour.webp", "back": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/backside.webp" },
+  { "id": "jigglybuff", "name": "Jigglybuff", "front": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/jigglybuff.webp", "back": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/backside.webp" },
+  { "id": "pokewebster", "name": "Pokewebster", "front": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/pokewebster.webp", "back": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/backside.webp" },
+  { "id": "psyweb", "name": "Psyweb", "front": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/psyweb.webp", "back": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/backside.webp" },
+  { "id": "warill", "name": "Warill", "front": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/warill.webp", "back": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/backside.webp" },
+  { "id": "webbykarp", "name": "Webbykarp", "front": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/webbykarp.webp", "back": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/backside.webp" },
+  { "id": "weowth", "name": "Weowth", "front": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/weowth.webp", "back": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/backside.webp" },
+  { "id": "wiglet", "name": "Wiglet", "front": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/wiglet.webp", "back": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/backside.webp" },
+  { "id": "witto", "name": "Witto", "front": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/witto.webp", "back": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/backside.webp" },
+  { "id": "wogepi", "name": "Wogepi", "front": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/wogepi.webp", "back": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/backside.webp" },
+  { "id": "worterra", "name": "Worterra", "front": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/worterra.webp", "back": "https://pub-0b110f6b1f0b4c0baa8f61bdb498f606.r2.dev/card/backside.webp" }
+]
