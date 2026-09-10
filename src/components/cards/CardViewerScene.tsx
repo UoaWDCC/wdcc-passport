@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { CardScene, type CardStatus } from "@/cards/CardScene";
 import { loadManifest } from "@/cards/manifest";
-import type { CardEntry } from "@/cards/types";
+import type { CardEntry, ViewMode } from "@/cards/types";
 
 // for now until we actually create server action
 const MANIFEST_URL = "/cards/manifest.json";
@@ -15,6 +15,8 @@ export default function CardViewerScene() {
   const sceneRef = useRef<CardScene | null>(null);
   const [cards, setCards] = useState<CardEntry[] | null>(null);
   const [index, setIndex] = useState(0);
+  const [mode, setMode] = useState<ViewMode>("single");
+  const [inspecting, setInspecting] = useState(false);
   const [status, setStatus] = useState<CardStatus>({ kind: "loading" });
 
   useEffect(() => {
@@ -42,6 +44,8 @@ export default function CardViewerScene() {
       scene = new CardScene(container, {
         onStatus: setStatus,
         onStep: (delta) => setIndex((i) => (i + delta + cards.length) % cards.length),
+        onFocus: setIndex,
+        onInspect: setInspecting,
       });
       sceneRef.current = scene;
     } catch {
@@ -65,24 +69,50 @@ export default function CardViewerScene() {
   useEffect(() => {
     const scene = sceneRef.current;
     if (!scene || !cards || cards.length === 0) return;
+    if (mode === "fan") {
+      scene.showFan(cards, index);
+      return;
+    }
     // Keep the neighbours' textures loaded so the next swipe is instant.
     scene.showSingle(cards[index], [
       cards[(index - 1 + cards.length) % cards.length],
       cards[(index + 1) % cards.length],
     ]);
-  }, [cards, index]);
+  }, [cards, index, mode]);
+
+  const switchMode = (next: ViewMode) => {
+    setMode(next);
+    setInspecting(false);
+  };
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-gray-900 text-white">
       <div ref={containerRef} className="absolute inset-0" />
 
-      <div className="pointer-events-none absolute inset-x-0 top-0 flex items-center p-3">
+      <div className="pointer-events-none absolute inset-x-0 top-0 flex items-center gap-2 p-3">
         <Link
           href="/home"
           className="pointer-events-auto rounded-full bg-black/50 px-3 py-1 text-xs font-semibold text-white/80 backdrop-blur transition hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
         >
           ← Home
         </Link>
+        {cards &&
+          cards.length > 0 &&
+          (["single", "fan"] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              aria-pressed={mode === m}
+              onClick={() => switchMode(m)}
+              className={`pointer-events-auto rounded-full px-3 py-1 text-xs font-semibold backdrop-blur transition focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none ${
+                mode === m
+                  ? "bg-white text-black"
+                  : "bg-black/50 text-white/80 hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              {m === "single" ? "Single" : "Fan"}
+            </button>
+          ))}
       </div>
 
       <div
@@ -97,14 +127,16 @@ export default function CardViewerScene() {
             <button
               type="button"
               onClick={() => setIndex((i) => (i - 1 + cards.length) % cards.length)}
-              className="pointer-events-auto rounded-full bg-black/50 px-3 py-1 text-xs font-semibold text-white/80 backdrop-blur transition hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+              disabled={inspecting}
+              className="pointer-events-auto rounded-full bg-black/50 px-3 py-1 text-xs font-semibold text-white/80 backdrop-blur transition hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none disabled:opacity-40"
             >
               ‹ Prev
             </button>
             <button
               type="button"
               onClick={() => setIndex((i) => (i + 1) % cards.length)}
-              className="pointer-events-auto rounded-full bg-black/50 px-3 py-1 text-xs font-semibold text-white/80 backdrop-blur transition hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+              disabled={inspecting}
+              className="pointer-events-auto rounded-full bg-black/50 px-3 py-1 text-xs font-semibold text-white/80 backdrop-blur transition hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none disabled:opacity-40"
             >
               Next ›
             </button>
@@ -112,12 +144,16 @@ export default function CardViewerScene() {
         )}
         {status.kind === "ready" && (
           <div>
-            move the pointer to tilt · click or press Enter to flip · swipe or ← → to browse
+            {mode === "fan"
+              ? inspecting
+                ? "move the pointer to tilt · click or press Enter to flip · Esc or click outside to return"
+                : "drag, scroll or ← → to browse · click a card or press Enter to inspect"
+              : "move the pointer to tilt · click or press Enter to flip · swipe or ← → to browse"}
           </div>
         )}
       </div>
 
-      {status.kind === "loading" && cards?.length !== 0 && (
+      {status.kind === "loading" && mode === "single" && cards?.length !== 0 && (
         <div
           role="status"
           className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-white/60"

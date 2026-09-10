@@ -1,5 +1,6 @@
 import { Color, PerspectiveCamera, Raycaster, Scene, Vector2, WebGLRenderer } from "three";
 import { PointerTilt } from "./input/PointerTilt";
+import { FanMode } from "./modes/FanMode";
 import type { Mode, ModeEnv, PointerInfo } from "./modes/Mode";
 import { SingleMode, type CardStatus } from "./modes/SingleMode";
 import { CARD_ASPECT } from "./three/buildCard";
@@ -14,6 +15,10 @@ export interface CardSceneCallbacks {
   onStatus(status: CardStatus): void;
   /** The user swiped or pressed an arrow key: +1 = next card, -1 = previous. */
   onStep(delta: number): void;
+  /** Fan mode settled on this card. */
+  onFocus(index: number): void;
+  /** Fan mode zoomed a card in (true) or returned it to the hand (false). */
+  onInspect(inspecting: boolean): void;
 }
 
 const BACKGROUND = 0x111827;
@@ -62,7 +67,7 @@ export class CardScene {
     this.canvas.tabIndex = 0;
     this.canvas.setAttribute(
       "aria-label",
-      "3D card. Press Enter or Space to flip, left and right arrows to change card.",
+      "3D cards. Left and right arrows change card; Enter flips or inspects; Escape returns.",
     );
     container.appendChild(this.canvas);
 
@@ -125,6 +130,23 @@ export class CardScene {
     this.flipped = false;
     void single.show(entry);
     single.preload(neighbours);
+  }
+
+  /** Fan mode centred on a card. Repeated calls with a new index re-centre the hand. */
+  showFan(entries: readonly CardEntry[], index: number): void {
+    if (this.mode instanceof FanMode) {
+      this.mode.focus(index);
+      return;
+    }
+    const fan = new FanMode(this.env, entries, index, {
+      onFocus: (i) => this.callbacks.onFocus(i),
+      onInspect: (v) => {
+        this.flipped = false;
+        this.callbacks.onInspect(v);
+      },
+    });
+    this.setMode(fan);
+    this.callbacks.onStatus({ kind: "ready" });
   }
 
   private setMode(mode: Mode | null): void {

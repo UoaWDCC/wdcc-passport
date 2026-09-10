@@ -5,6 +5,8 @@ export interface CardEntry {
   back: string;
 }
 
+export type ViewMode = "single" | "fan";
+
 /** World dimensions in centimetres (the screen is a window at z = 0, the box extends to z = -boxD). */
 export interface SceneDims {
   screenW: number;
