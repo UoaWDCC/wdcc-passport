@@ -6,17 +6,17 @@ checkout on 2026-09-11.
 
 ## Copied verbatim
 
-| Here                                    | pokebox                                        | Purpose                                     |
-| --------------------------------------- | ---------------------------------------------- | ------------------------------------------- |
-| `shaders/holo.vert`                     | `src/shaders/holo.vert`                        | Shared vertex shader                        |
-| `shaders/flatsilver-reverse.frag`       | `src/shaders/flatsilver-reverse.frag`          | common cards (reverse holo)                 |
-| `shaders/ultra-rare.frag`               | `src/shaders/ultra-rare.frag`                  | rare cards (ultra rare, e.g. Zapdos ex 192) |
-| `shaders/illustration-rare.frag`        | `src/shaders/illustration-rare.frag`           | epic cards (e.g. Poliwhirl 176)             |
-| `shaders/double-rare.frag`              | `src/shaders/double-rare.frag`                 | legendary cards (e.g. Ninetales ex 038)     |
-| `shaders/common/{blend,filters,rainbow}.glsl` | `src/shaders/common/…`                   | Shared GLSL chunks (`#include`)             |
-| `public/cards/fx/grain.webp`            | `public/img/grain.webp`                        | flatsilver-reverse grain (500×500, 58 KB)   |
-| `public/cards/fx/glitter.png`           | `public/img/glitter.png`                       | illustration-rare glitter (630×540, 111 KB) |
-| `public/cards/fx/iri-7.webp`            | `public/img/151/iri-7.webp`                    | ultra-rare iridescence (300×300, 36 KB)     |
+| Here                                                 | pokebox                                   | Purpose                                      |
+| ---------------------------------------------------- | ----------------------------------------- | -------------------------------------------- |
+| `shaders/holo.vert`                                  | `src/shaders/holo.vert`                   | Shared vertex shader                         |
+| `shaders/flatsilver-reverse.frag`                    | `src/shaders/flatsilver-reverse.frag`     | common cards (reverse holo)                  |
+| `shaders/ultra-rare.frag`                            | `src/shaders/ultra-rare.frag`             | rare cards (ultra rare, e.g. Zapdos ex 192)  |
+| `shaders/illustration-rare.frag`                     | `src/shaders/illustration-rare.frag`      | epic cards (e.g. Poliwhirl 176)              |
+| `shaders/double-rare.frag`                           | `src/shaders/double-rare.frag`            | legendary cards (e.g. Ninetales ex 038)      |
+| `shaders/common/{blend,filters,rainbow}.glsl`        | `src/shaders/common/…`                    | Shared GLSL chunks (`#include`)              |
+| `public/cards/fx/grain.webp`                         | `public/img/grain.webp`                   | flatsilver-reverse grain (500×500, 58 KB)    |
+| `public/cards/fx/glitter.png`                        | `public/img/glitter.png`                  | illustration-rare glitter (630×540, 111 KB)  |
+| `public/cards/fx/iri-7.webp`                         | `public/img/151/iri-7.webp`               | ultra-rare iridescence (300×300, 36 KB)      |
 | `public/cards/fx/birthday-holo-dank.webp`, `-2.webp` | `public/img/151/birthday-holo-dank*.webp` | double-rare sparkle (1140×2026, 162 KB each) |
 
 ## Adapted
