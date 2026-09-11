@@ -1,4 +1,6 @@
 import type { Raycaster, Scene } from "three";
+import type { CardObject } from "../three/buildCard";
+import type { FxTextures } from "../three/fxTextures";
 import type { TextureCache } from "../three/textures";
 import type { SceneDims } from "../types";
 
@@ -6,6 +8,8 @@ import type { SceneDims } from "../types";
 export interface ModeEnv {
   scene: Scene;
   textures: TextureCache;
+  /** Shared holo helper textures, loaded once (never rejects). */
+  fx: Promise<FxTextures>;
   reducedMotion: boolean;
 }
 
@@ -41,6 +45,8 @@ export interface PointerInfo {
  */
 export interface Mode {
   tick(ctx: TickContext): void;
+  /** Every card currently built (the scene pushes the holo uniforms to them). */
+  cards(): Iterable<CardObject>;
   /** A settled card is in focus and may be flipped. */
   canFlip(): boolean;
   pointerDown(p: PointerInfo): void;

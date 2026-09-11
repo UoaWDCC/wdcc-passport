@@ -1,5 +1,7 @@
 import type { Mesh, Raycaster } from "three";
+import { RARITY_SHADER } from "../shaders";
 import { buildCardObject, disposeCardObject, type CardObject } from "../three/buildCard";
+import { acquireCardTextures, releaseCardTextures } from "../three/cardTextures";
 import { FanAnimator, type FanCardEntry } from "../three/FanAnimator";
 import { FAN_INTRO_DELAY, FAN_VISIBLE_RADIUS, fanCardHeight } from "../three/FanLayoutBuilder";
 import { zoomedTransform } from "../three/layout";
@@ -70,6 +72,10 @@ export class FanMode implements Mode {
 
   canFlip(): boolean {
     return this.fanAnimator.zoomedIndex !== null && !this.fanAnimator.isZooming;
+  }
+
+  *cards(): Iterable<CardObject> {
+    for (const e of this.fanCards.values()) yield e.card;
   }
 
   /** Centre the hand on a card (buttons). Ignored mid-drag or while inspecting. */
@@ -270,17 +276,20 @@ export class FanMode implements Mode {
       this.pendingFan.add(idx);
       const entry = this.entries[idx];
       const introDelay = (idx - lo) * FAN_INTRO_DELAY;
-      const { textures } = this.env;
-      Promise.all([textures.acquire(entry.front), textures.acquire(entry.back)]).then(
-        ([front, back]) => {
+      acquireCardTextures(this.env, entry).then(
+        ({ textures, fx }) => {
           this.pendingFan.delete(idx);
           if (this.disposed || this.fanCards.has(idx)) {
             this.releaseTextures(idx);
             return;
           }
-          const card = buildCardObject({ front, back }, fanCardHeight(this.dims));
-          card.front.userData.index = idx;
-          card.back.userData.index = idx;
+          const card = buildCardObject(
+            textures,
+            fanCardHeight(this.dims),
+            RARITY_SHADER[entry.rarity],
+            fx,
+          );
+          card.mesh.userData.index = idx;
           card.group.visible = false;
           this.env.scene.add(card.group);
           const t = performance.now() / 1000;
@@ -297,8 +306,7 @@ export class FanMode implements Mode {
   }
 
   private releaseTextures(idx: number): void {
-    this.env.textures.release(this.entries[idx].front);
-    this.env.textures.release(this.entries[idx].back);
+    releaseCardTextures(this.env, this.entries[idx]);
   }
 
   private clearFan(): void {
@@ -316,9 +324,8 @@ export class FanMode implements Mode {
     const byMesh = new Map<Mesh, CardObject>();
     for (const c of cards) {
       if (!c.group.visible) continue;
-      meshes.push(c.front, c.back);
-      byMesh.set(c.front, c);
-      byMesh.set(c.back, c);
+      meshes.push(c.mesh);
+      byMesh.set(c.mesh, c);
     }
     const hit = ray.intersectObjects(meshes, false)[0];
     return hit ? (byMesh.get(hit.object as Mesh) ?? null) : null;
@@ -329,6 +336,6 @@ export class FanMode implements Mode {
       ray,
       Array.from(this.fanCards.values(), (e) => e.card),
     );
-    return card ? (card.front.userData.index as number) : null;
+    return card ? (card.mesh.userData.index as number) : null;
   }
 }
