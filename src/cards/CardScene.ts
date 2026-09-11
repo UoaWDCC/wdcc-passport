@@ -1,10 +1,19 @@
-import { Color, PerspectiveCamera, Raycaster, Scene, Vector2, WebGLRenderer } from "three";
+import {
+  Color,
+  PerspectiveCamera,
+  Raycaster,
+  Scene,
+  Vector2,
+  WebGLRenderer,
+  type Group,
+} from "three";
 import { PointerTilt } from "./input/PointerTilt";
 import { FanMode } from "./modes/FanMode";
 import type { Mode, ModeEnv, PointerInfo } from "./modes/Mode";
 import { SingleMode, type CardStatus } from "./modes/SingleMode";
 import { StackMode } from "./modes/StackMode";
 import { CARD_ASPECT } from "./three/buildCard";
+import { ROOM_BACKGROUND, buildRoom, disposeRoom } from "./three/buildRoom";
 import { SCREEN_H_CM, VIEW_DISTANCE_CM, computeDims } from "./three/dims";
 import { TextureCache } from "./three/textures";
 import type { CardEntry, SceneDims } from "./types";
@@ -22,7 +31,6 @@ export interface CardSceneCallbacks {
   onInspect(inspecting: boolean): void;
 }
 
-const BACKGROUND = 0x111827;
 /** World units are pokebox's centimetres: the eye sits 60 cm from a 24.81 cm-tall screen at z = 0. */
 const CAMERA_DISTANCE = VIEW_DISTANCE_CM;
 const CAMERA_FOV = (2 * Math.atan(SCREEN_H_CM / 2 / CAMERA_DISTANCE) * 180) / Math.PI;
@@ -48,6 +56,7 @@ export class CardScene {
   private readonly env: ModeEnv;
 
   private mode: Mode | null = null;
+  private room: Group | null = null;
   private dims: SceneDims = computeDims(1, 1);
   private flipped = false;
   private flipAngle = 0;
@@ -72,7 +81,7 @@ export class CardScene {
     );
     container.appendChild(this.canvas);
 
-    this.scene.background = new Color(BACKGROUND);
+    this.scene.background = new Color(ROOM_BACKGROUND);
     this.camera = new PerspectiveCamera(CAMERA_FOV, 1, 1, 1000);
     this.camera.position.z = CAMERA_DISTANCE;
     this.textures = new TextureCache(this.renderer);
@@ -112,6 +121,7 @@ export class CardScene {
     document.removeEventListener("visibilitychange", this.onVisibilityChange);
 
     this.setMode(null);
+    if (this.room) disposeRoom(this.room);
     this.textures.dispose();
     this.renderer.dispose();
     this.renderer.forceContextLoss();
@@ -192,6 +202,10 @@ export class CardScene {
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
     this.dims = computeDims(w, h);
+    // The room is sized to the view, so it is rebuilt with it (pokebox rebuilds the box too).
+    if (this.room) disposeRoom(this.room);
+    this.room = buildRoom(this.dims);
+    this.scene.add(this.room);
     if (!this.raf) this.renderer.render(this.scene, this.camera);
   }
 
