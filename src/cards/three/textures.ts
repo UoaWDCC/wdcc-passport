@@ -1,4 +1,4 @@
-import { SRGBColorSpace, TextureLoader, type Texture, type WebGLRenderer } from "three";
+import { NoColorSpace, TextureLoader, type Texture, type WebGLRenderer } from "three";
 
 interface CacheEntry {
   refs: number;
@@ -28,7 +28,9 @@ export class TextureCache {
     }
     const promise: Promise<Texture> = this.loader.loadAsync(url).then(
       (texture) => {
-        texture.colorSpace = SRGBColorSpace;
+        // The pokebox shaders composite in gamma space and write gl_FragColor directly
+        // (three never gamma-encodes a ShaderMaterial), so images are sampled as-is.
+        texture.colorSpace = NoColorSpace;
         texture.anisotropy = this.maxAnisotropy;
         const current = this.entries.get(url);
         if (current?.promise !== promise) {

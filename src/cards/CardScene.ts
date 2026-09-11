@@ -12,9 +12,11 @@ import { FanMode } from "./modes/FanMode";
 import type { Mode, ModeEnv, PointerInfo } from "./modes/Mode";
 import { SingleMode, type CardStatus } from "./modes/SingleMode";
 import { StackMode } from "./modes/StackMode";
-import { CARD_ASPECT } from "./three/buildCard";
+import { CARD_ASPECT, disableShaders, applyFallbackMaterial } from "./three/buildCard";
 import { ROOM_BACKGROUND, buildRoom, disposeRoom } from "./three/buildRoom";
 import { SCREEN_H_CM, VIEW_DISTANCE_CM, computeDims } from "./three/dims";
+import { disposeFxTextures, loadFxTextures } from "./three/fxTextures";
+import { updateCardUniforms } from "./three/shaderUniforms";
 import { TextureCache } from "./three/textures";
 import type { CardEntry, SceneDims } from "./types";
 
@@ -29,6 +31,8 @@ export interface CardSceneCallbacks {
   onFocus(index: number): void;
   /** Fan mode zoomed a card in (true) or returned it to the hand (false). */
   onInspect(inspecting: boolean): void;
+  /** A holo shader failed to compile; cards are shown as plain images from now on. */
+  onEffectsUnavailable(): void;
 }
 
 /** World units are pokebox's centimetres: the eye sits 60 cm from a 24.81 cm-tall screen at z = 0. */
@@ -57,6 +61,7 @@ export class CardScene {
 
   private mode: Mode | null = null;
   private room: Group | null = null;
+  private effectsBroken = false;
   private dims: SceneDims = computeDims(1, 1);
   private flipped = false;
   private flipAngle = 0;
@@ -71,6 +76,10 @@ export class CardScene {
     // Throws if a WebGL context cannot be created
     this.renderer = new WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, MAX_PIXEL_RATIO));
+    // Output stays sRGB (three's default): that only gamma-encodes built-in materials
+    // (the room), never a ShaderMaterial, so the card shaders' gamma-space output
+    // reaches the screen untouched.
+    this.renderer.debug.onShaderError = this.onShaderError;
     this.canvas = this.renderer.domElement;
     this.canvas.style.cssText =
       "display:block;width:100%;height:100%;touch-action:none;outline:none";
@@ -88,6 +97,7 @@ export class CardScene {
     this.env = {
       scene: this.scene,
       textures: this.textures,
+      fx: loadFxTextures(this.renderer),
       reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
     };
 
@@ -122,6 +132,7 @@ export class CardScene {
 
     this.setMode(null);
     if (this.room) disposeRoom(this.room);
+    void this.env.fx.then(disposeFxTextures);
     this.textures.dispose();
     this.renderer.dispose();
     this.renderer.forceContextLoss();
@@ -244,7 +255,32 @@ export class CardScene {
       tilt: { rotateX: this.pointerTilt.rotateX, rotateY: this.pointerTilt.rotateY },
       flipAngle: this.flipAngle,
     });
+    if (this.mode) updateCardUniforms(this.mode.cards(), now, this.dims.eyeZ);
     this.renderer.render(this.scene, this.camera);
+  };
+
+  /** three.js reports a shader that failed to compile: drop to plain cards, once. */
+  private readonly onShaderError = (
+    gl: WebGLRenderingContext,
+    program: WebGLProgram,
+    vertexShader: WebGLShader,
+    fragmentShader: WebGLShader,
+  ): void => {
+    console.error(
+      "[cards] holo shader failed to compile:",
+      gl.getProgramInfoLog(program),
+      gl.getShaderInfoLog(vertexShader),
+      gl.getShaderInfoLog(fragmentShader),
+    );
+    if (this.effectsBroken) return;
+    this.effectsBroken = true;
+    disableShaders();
+    // Called mid-render; swap materials after the frame finishes.
+    queueMicrotask(() => {
+      if (this.disposed) return;
+      for (const card of this.mode?.cards() ?? []) applyFallbackMaterial(card);
+      this.callbacks.onEffectsUnavailable();
+    });
   };
 
   private readonly onVisibilityChange = (): void => {

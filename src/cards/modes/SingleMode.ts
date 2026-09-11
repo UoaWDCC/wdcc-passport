@@ -1,4 +1,6 @@
+import { RARITY_SHADER } from "../shaders";
 import { buildCardObject, disposeCardObject, type CardObject } from "../three/buildCard";
+import { acquireCardTextures, cardTextureUrls, releaseCardTextures } from "../three/cardTextures";
 import type { CardEntry } from "../types";
 import type { Mode, ModeEnv, PointerInfo, TickContext } from "./Mode";
 
@@ -29,7 +31,7 @@ export class SingleMode implements Mode {
   /** Bumped on every `show` so a load that finishes late is discarded. */
   private generation = 0;
   private card: CardObject | null = null;
-  private cardUrls: { front: string; back: string } | null = null;
+  private cardEntry: CardEntry | null = null;
   /** Texture URLs kept loaded by `preload`. */
   private warm = new Set<string>();
   private pointerDownAt: { x: number; y: number; t: number } | null = null;
@@ -52,16 +54,11 @@ export class SingleMode implements Mode {
     this.clearCard();
     this.callbacks.onStatus({ kind: "loading" });
 
-    const urls = { front: entry.front, back: entry.back };
-    let front, back;
+    let loaded;
     try {
-      [front, back] = await Promise.all([
-        this.env.textures.acquire(urls.front),
-        this.env.textures.acquire(urls.back),
-      ]);
+      loaded = await acquireCardTextures(this.env, entry);
     } catch (err) {
-      this.env.textures.release(urls.front);
-      this.env.textures.release(urls.back);
+      releaseCardTextures(this.env, entry);
       if (gen === this.generation) {
         const message = err instanceof Error ? err.message : String(err);
         this.callbacks.onStatus({ kind: "error", message });
@@ -70,12 +67,11 @@ export class SingleMode implements Mode {
     }
     if (gen !== this.generation) {
       // Another card was requested (or the mode was disposed) while loading.
-      this.env.textures.release(urls.front);
-      this.env.textures.release(urls.back);
+      releaseCardTextures(this.env, entry);
       return;
     }
-    this.cardUrls = urls;
-    this.card = buildCardObject({ front, back }, 1);
+    this.cardEntry = entry;
+    this.card = buildCardObject(loaded.textures, 1, RARITY_SHADER[entry.rarity], loaded.fx);
     this.env.scene.add(this.card.group);
     this.callbacks.onStatus({ kind: "ready" });
   }
@@ -85,7 +81,7 @@ export class SingleMode implements Mode {
    * instant. Cards dropped from the list since the previous call are released.
    */
   preload(entries: readonly CardEntry[]): void {
-    const wanted = new Set(entries.flatMap((e) => [e.front, e.back]));
+    const wanted = new Set(entries.flatMap(cardTextureUrls));
     for (const url of this.warm) if (!wanted.has(url)) this.env.textures.release(url);
     for (const url of wanted) {
       // Failures surface when the card is actually shown.
@@ -96,6 +92,10 @@ export class SingleMode implements Mode {
 
   canFlip(): boolean {
     return this.card !== null;
+  }
+
+  cards(): CardObject[] {
+    return this.card ? [this.card] : [];
   }
 
   tick(ctx: TickContext): void {
@@ -134,7 +134,7 @@ export class SingleMode implements Mode {
       return null;
     }
     if (Math.hypot(dx, dy) <= CLICK_MAX_PX && ms <= CLICK_MAX_MS && this.card) {
-      const hit = p.ray.intersectObjects([this.card.front, this.card.back], false).length > 0;
+      const hit = p.ray.intersectObject(this.card.mesh, false).length > 0;
       if (hit) return "flip";
     }
     return null;
@@ -161,10 +161,7 @@ export class SingleMode implements Mode {
   private clearCard(): void {
     if (this.card) disposeCardObject(this.card);
     this.card = null;
-    if (this.cardUrls) {
-      this.env.textures.release(this.cardUrls.front);
-      this.env.textures.release(this.cardUrls.back);
-    }
-    this.cardUrls = null;
+    if (this.cardEntry) releaseCardTextures(this.env, this.cardEntry);
+    this.cardEntry = null;
   }
 }

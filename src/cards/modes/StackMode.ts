@@ -1,11 +1,12 @@
 import type { Raycaster } from "three";
+import { RARITY_SHADER } from "../shaders";
 import {
   buildCardObject,
   disposeCardObject,
   setCardTextures,
   type CardObject,
-  type CardTextures,
 } from "../three/buildCard";
+import { acquireCardTextures, releaseCardTextures, type LoadedCard } from "../three/cardTextures";
 import { StackAnimator, type StackCardEntry } from "../three/StackAnimator";
 import {
   STACK_COUNT,
@@ -40,7 +41,7 @@ const STEP_WHEEL_PX = 80;
  */
 export class StackMode implements Mode {
   private readonly animator = new StackAnimator();
-  private cards: StackCardEntry[] = [];
+  private pile: StackCardEntry[] = [];
   /** Manifest index that the next card to reach the bottom of the pile will show. */
   private next = 0;
   /** Bumped on every rebuild so textures that finish late are discarded. */
@@ -72,7 +73,7 @@ export class StackMode implements Mode {
   /** Bring a card to the top (buttons): the next card swipes in, anything else rebuilds the pile. */
   focus(index: number): void {
     if (this.animator.isSwiping || this.topIndex() === index) return;
-    if (this.cards.find((e) => e.slot === 1)?.index === index) this.swipe(1);
+    if (this.pile.find((e) => e.slot === 1)?.index === index) this.swipe(1);
     else void this.build(index);
   }
 
@@ -80,9 +81,13 @@ export class StackMode implements Mode {
     return this.top() !== undefined && !this.animator.isSwiping;
   }
 
+  cards(): CardObject[] {
+    return this.pile.map((e) => e.card);
+  }
+
   tick(ctx: TickContext): void {
     this.dims = ctx.dims;
-    const departed = this.animator.tick(this.cards, ctx.now, ctx.dt, {
+    const departed = this.animator.tick(this.pile, ctx.now, ctx.dt, {
       cardH: stackCardHeight(ctx.dims),
       dims: ctx.dims,
       tilt: ctx.tilt,
@@ -169,12 +174,12 @@ export class StackMode implements Mode {
   }
 
   private top(): StackCardEntry | undefined {
-    return this.cards.find((e) => e.slot === 0);
+    return this.pile.find((e) => e.slot === 0);
   }
 
   /** pokebox swipe: the top card flies off (up or down) and goes to the bottom of the pile. */
   private swipe(direction: 1 | -1): void {
-    this.animator.swipe(this.cards, direction, performance.now() / 1000);
+    this.animator.swipe(this.pile, direction, performance.now() / 1000);
   }
 
   /** Replaces the pile with one whose top card is `index`. A build still loading is discarded. */
@@ -187,11 +192,11 @@ export class StackMode implements Mode {
     const indices = Array.from({ length: m }, (_, slot) => (index + slot) % n);
 
     const results = await Promise.allSettled(indices.map((i) => this.acquire(i)));
-    const ready: Array<{ index: number; textures: CardTextures }> = [];
+    const ready: Array<{ index: number; loaded: LoadedCard }> = [];
     results.forEach((result, k) => {
       const i = indices[k];
       if (result.status === "fulfilled" && gen === this.generation) {
-        ready.push({ index: i, textures: result.value });
+        ready.push({ index: i, loaded: result.value });
         return;
       }
       this.releaseTextures(i);
@@ -203,8 +208,13 @@ export class StackMode implements Mode {
 
     const now = performance.now() / 1000;
     const cardH = stackCardHeight(this.dims);
-    ready.forEach(({ index: i, textures }, slot) => {
-      const card = buildCardObject(textures, cardH);
+    ready.forEach(({ index: i, loaded }, slot) => {
+      const card = buildCardObject(
+        loaded.textures,
+        cardH,
+        RARITY_SHADER[this.entries[i].rarity],
+        loaded.fx,
+      );
       const rest = stackRest(slot, cardH, this.dims);
       card.group.position.set(rest.x, rest.y, rest.z);
       card.group.visible = false;
@@ -213,7 +223,7 @@ export class StackMode implements Mode {
       const intro = this.env.reducedMotion
         ? null
         : { startTime: now, delay: (ready.length - 1 - slot) * STACK_INTRO_DELAY };
-      this.cards.push({ slot, index: i, card, intro });
+      this.pile.push({ slot, index: i, card, intro });
     });
     const top = this.topIndex();
     if (top !== null) this.callbacks.onFocus(top);
@@ -223,23 +233,28 @@ export class StackMode implements Mode {
   private async reassign(entry: StackCardEntry, index: number): Promise<void> {
     if (entry.index === index) return;
     const gen = this.generation;
-    let textures: CardTextures;
+    let loaded: LoadedCard;
     try {
-      textures = await this.acquire(index);
+      loaded = await this.acquire(index);
     } catch (err) {
       this.releaseTextures(index);
-      if (gen === this.generation && this.cards.includes(entry)) {
+      if (gen === this.generation && this.pile.includes(entry)) {
         // Rather than keep showing a card the user has already passed, drop it from the pile.
         console.warn(`[cards] stack card ${this.entries[index].id} skipped:`, err);
         this.remove(entry);
       }
       return;
     }
-    if (gen !== this.generation || !this.cards.includes(entry)) {
+    if (gen !== this.generation || !this.pile.includes(entry)) {
       this.releaseTextures(index);
       return;
     }
-    setCardTextures(entry.card, textures);
+    setCardTextures(
+      entry.card,
+      loaded.textures,
+      RARITY_SHADER[this.entries[index].rarity],
+      loaded.fx,
+    );
     this.releaseTextures(entry.index);
     entry.index = index;
   }
@@ -247,34 +262,29 @@ export class StackMode implements Mode {
   private remove(entry: StackCardEntry): void {
     disposeCardObject(entry.card);
     this.releaseTextures(entry.index);
-    this.cards = this.cards.filter((e) => e !== entry);
-    for (const e of this.cards) if (e.slot > entry.slot) e.slot--;
+    this.pile = this.pile.filter((e) => e !== entry);
+    for (const e of this.pile) if (e.slot > entry.slot) e.slot--;
   }
 
-  private acquire(index: number): Promise<CardTextures> {
-    const { textures } = this.env;
-    const entry = this.entries[index];
-    return Promise.all([textures.acquire(entry.front), textures.acquire(entry.back)]).then(
-      ([front, back]) => ({ front, back }),
-    );
+  private acquire(index: number): Promise<LoadedCard> {
+    return acquireCardTextures(this.env, this.entries[index]);
   }
 
   private releaseTextures(index: number): void {
-    this.env.textures.release(this.entries[index].front);
-    this.env.textures.release(this.entries[index].back);
+    releaseCardTextures(this.env, this.entries[index]);
   }
 
   private clear(): void {
-    for (const e of this.cards) {
+    for (const e of this.pile) {
       disposeCardObject(e.card);
       this.releaseTextures(e.index);
     }
-    this.cards = [];
+    this.pile = [];
     this.wheelAcc = 0;
     this.animator.reset();
   }
 
   private hit(ray: Raycaster, card: CardObject): boolean {
-    return card.group.visible && ray.intersectObjects([card.front, card.back], false).length > 0;
+    return card.group.visible && ray.intersectObject(card.mesh, false).length > 0;
   }
 }

@@ -34,6 +34,7 @@ export default function CardViewerScene() {
   const [mode, setMode] = useState<ViewMode>(() => (detectMobile() ? "stack" : "fan"));
   const [inspecting, setInspecting] = useState(false);
   const [status, setStatus] = useState<CardStatus>({ kind: "loading" });
+  const [effectsUnavailable, setEffectsUnavailable] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -62,6 +63,7 @@ export default function CardViewerScene() {
         onStep: (delta) => setIndex((i) => (i + delta + cards.length) % cards.length),
         onFocus: setIndex,
         onInspect: setInspecting,
+        onEffectsUnavailable: () => setEffectsUnavailable(true),
       });
       sceneRef.current = scene;
     } catch {
@@ -140,7 +142,9 @@ export default function CardViewerScene() {
         className="pointer-events-none absolute inset-x-0 bottom-4 flex flex-col items-center gap-1 px-4 text-center text-xs text-white/80"
       >
         <div className="text-sm font-semibold text-white">
-          {current && cards ? `${current.name} · ${index + 1} / ${cards.length}` : ""}
+          {current && cards
+            ? `${current.name} · ${current.rarity} · ${index + 1} / ${cards.length}`
+            : ""}
         </div>
         {cards && cards.length > 1 && (
           <div className="flex items-center gap-2">
@@ -163,6 +167,11 @@ export default function CardViewerScene() {
           </div>
         )}
         {status.kind === "ready" && <div>{inspecting ? INSPECT_HINT : HINTS[mode]}</div>}
+        {effectsUnavailable && (
+          <div className="text-amber-200">
+            Holographic effects are not available on this device, so cards are shown plain.
+          </div>
+        )}
       </div>
 
       {status.kind === "loading" && mode === "single" && cards?.length !== 0 && (
