@@ -25,7 +25,7 @@ export async function openPack(userId: string, cards: Card[]) {
           userId: opened.userId,
           cardId: sql<string>`drawn.card_id`.as("card_id"),
           //apparnetly drizzle doesn't support default values on insert
-          acquiredAt: sql<Date>`now()`.as("acquired_at"), 
+          acquiredAt: sql<Date>`now()`.as("acquired_at"),
         })
         .from(opened)
         .crossJoin(drawn),
