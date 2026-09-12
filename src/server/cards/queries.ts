@@ -1,7 +1,9 @@
 import { db } from "../db/client";
-import { card, Card } from "../db/schema";
+import { card, Card, userCard } from "../db/schema";
+import { eq } from "drizzle-orm";
 
 const CARDS_PER_PACK = 5;
+const CARD_BACK_PATH = "card/backside.webp";
 
 const RARITY_WEIGHTS: Record<Card["rarity"], number> = {
   common: 50,
@@ -36,4 +38,30 @@ export async function generateCards(): Promise<Card[]> {
     selectedCards.push(currentSelection[Math.floor(Math.random() * currentSelection.length)]);
   }
   return selectedCards;
+}
+
+export async function getUserCards(userId: string) {
+  const baseUrl = process.env.R2_PUBLIC_BASE_URL;
+
+  if (!baseUrl) {
+    throw new Error("R2_PUBLIC_BASE_URL is not set");
+  }
+
+  const rows = await db
+    .select({
+      id: card.id,
+      name: card.name,
+      rarity: card.rarity,
+      imagePath: card.imagePath,
+    })
+    .from(userCard)
+    .innerJoin(card, eq(userCard.cardId, card.id))
+    .where(eq(userCard.userId, userId))
+    .orderBy(card.rarity);
+
+  return rows.map(({ imagePath, ...c }) => ({
+    ...c,
+    front: `${baseUrl}/${imagePath}`,
+    back: `${baseUrl}/${CARD_BACK_PATH}`,
+  }));
 }

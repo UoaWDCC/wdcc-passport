@@ -7,6 +7,8 @@ import { CardScene, type CardStatus } from "@/cards/CardScene";
 import { loadManifest } from "@/cards/manifest";
 import { detectMobile } from "@/cards/three/layout";
 import type { CardEntry, ViewMode } from "@/cards/types";
+import { getUserCardsQuery } from "@/hooks/cards/query-options";
+import { useQuery } from "@tanstack/react-query";
 
 // for now until we actually create server action
 const MANIFEST_URL = "/cards/manifest.json";
@@ -28,13 +30,14 @@ const INSPECT_HINT =
 export default function CardViewerScene() {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<CardScene | null>(null);
-  const [cards, setCards] = useState<CardEntry[] | null>(null);
   const [index, setIndex] = useState(0);
   // pokebox: default is stack on mobile, fan on desktop
   const [mode, setMode] = useState<ViewMode>(() => (detectMobile() ? "stack" : "fan"));
   const [inspecting, setInspecting] = useState(false);
   const [status, setStatus] = useState<CardStatus>({ kind: "loading" });
   const [effectsUnavailable, setEffectsUnavailable] = useState(false);
+
+   const { data: cards = [], error, isPending } = useQuery(getUserCardsQuery());
 
   useEffect(() => {
     let cancelled = false;
