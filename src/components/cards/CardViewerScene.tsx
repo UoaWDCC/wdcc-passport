@@ -4,14 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { CardScene, type CardStatus } from "@/cards/CardScene";
-import { loadManifest } from "@/cards/manifest";
 import { detectMobile } from "@/cards/three/layout";
-import type { CardEntry, ViewMode } from "@/cards/types";
+import type { ViewMode } from "@/cards/types";
 import { getUserCardsQuery } from "@/hooks/cards/query-options";
 import { useQuery } from "@tanstack/react-query";
-
-// for now until we actually create server action
-const MANIFEST_URL = "/cards/manifest.json";
 
 const MODES: Array<{ id: ViewMode; label: string }> = [
   { id: "fan", label: "Fan" },
@@ -37,23 +33,7 @@ export default function CardViewerScene() {
   const [status, setStatus] = useState<CardStatus>({ kind: "loading" });
   const [effectsUnavailable, setEffectsUnavailable] = useState(false);
 
-   const { data: cards = [], error, isPending } = useQuery(getUserCardsQuery());
-
-  useEffect(() => {
-    let cancelled = false;
-    loadManifest(MANIFEST_URL)
-      .then((loaded) => {
-        if (!cancelled) setCards(loaded);
-      })
-      .catch((err: unknown) => {
-        if (!cancelled) {
-          setStatus({ kind: "error", message: err instanceof Error ? err.message : String(err) });
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const { data: cards, error, isPending } = useQuery(getUserCardsQuery());
 
   useEffect(() => {
     const container = containerRef.current;
@@ -177,7 +157,25 @@ export default function CardViewerScene() {
         )}
       </div>
 
-      {status.kind === "loading" && mode === "single" && cards?.length !== 0 && (
+      {isPending && (
+        <div
+          role="status"
+          className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-white/60"
+        >
+          Loading cards…
+        </div>
+      )}
+
+      {error && (
+        <div
+          role="alert"
+          className="pointer-events-none absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-red-300"
+        >
+          Could not load your cards.
+        </div>
+      )}
+
+      {status.kind === "loading" && mode === "single" && cards && cards.length > 0 && (
         <div
           role="status"
           className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-white/60"

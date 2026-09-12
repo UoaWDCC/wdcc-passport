@@ -7,6 +7,5 @@ export const card = pgTable("card", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   rarity: rarityEnum("rarity").notNull(),
-  description: text("description").notNull(),
   imagePath: text("image_path").notNull(),
 });
