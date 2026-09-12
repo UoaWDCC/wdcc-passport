@@ -3,7 +3,10 @@ import type { ShaderStyle } from "./index";
 /**
  * Per-style uniform values, copied from pokebox's `DEFAULT_CONFIG.shaders`
  * (src/data/defaults.ts) via its uniform registry (src/data/shaderRegistry.ts).
- * Keys are the GLSL uniform names. Not tuned: these are the values pokebox ships.
+ * Keys are the GLSL uniform names. `uCardOpacity` overrides HOLO_INTENSITY for that style.
+ *
+ * ultra-rare (rare) and illustration-rare (epic) are toned down from pokebox: fewer,
+ * wider, dimmer bars and a lower overall holo intensity so the stripes stop dominating.
  */
 export const SHADER_PRESETS: Record<ShaderStyle, Record<string, number>> = {
   "flatsilver-reverse": {
@@ -20,7 +23,8 @@ export const SHADER_PRESETS: Record<ShaderStyle, Record<string, number>> = {
     uBaseSaturation: 3.0,
   },
   "ultra-rare": {
-    uBaseBrightness: 1.6,
+    uCardOpacity: 0.6,
+    uBaseBrightness: 1.5,
     uShineBrightness: 0.22,
     uShineContrast: 1.0,
     uShineSaturation: 20.0,
@@ -28,8 +32,8 @@ export const SHADER_PRESETS: Record<ShaderStyle, Record<string, number>> = {
     uShineAfterContrast: 0.15,
     uShineAfterSaturation: 1.0,
     uShineBaseBrightness: 1.2,
-    uShineBaseContrast: 1.65,
-    uShineBaseSaturation: 3.3,
+    uShineBaseContrast: 1.3,
+    uShineBaseSaturation: 2.2,
     uGlareContrast: 0.8,
     uGlare2Contrast: 0.45,
     uRotateDelta: 99.0,
@@ -40,27 +44,28 @@ export const SHADER_PRESETS: Record<ShaderStyle, Record<string, number>> = {
     uBarAngle: 128.5,
     uBarOffsetBgXMult: 0.9,
     uBarOffsetBgYMult: 1.1,
-    uBarFrequency: 2.5,
-    uBarIntensityStart1: 0.18,
-    uBarIntensityEnd1: 0.51,
-    uBarIntensityStart2: 0.18,
-    uBarIntensityEnd2: 0.8,
-    uSparkleIntensity: 0.35,
+    uBarFrequency: 1.2,
+    uBarIntensityStart1: 0.0,
+    uBarIntensityEnd1: 0.5,
+    uBarIntensityStart2: 0.3,
+    uBarIntensityEnd2: 1.0,
+    uSparkleIntensity: 0.2,
     uSparkleRadius: 1.0,
     uSparkleContrast: 2.4,
     uSparkleColorShift: 5.0,
   },
   "illustration-rare": {
+    uCardOpacity: 0.6,
     uRainbowScale: 0.5,
     uBarAngle: 132.0,
-    uBarDensity: 2.6,
-    uBarDensity2: 1.8,
+    uBarDensity: 1.6,
+    uBarDensity2: 1.2,
     uBarOffsetBgYMult: -0.7,
     uBar2OffsetBgYMult: 0.85,
-    uBarWidth: 5.4,
-    uBarWidth2: 3.95,
-    uBarIntensity: 20.0,
-    uBarIntensity2: 10.35,
+    uBarWidth: 8.0,
+    uBarWidth2: 6.0,
+    uBarIntensity: 3.0,
+    uBarIntensity2: 2.0,
     uBarHue: 231.0,
     uBarMediumSaturation: 0.33,
     uBarMediumLightness: 0.6,
@@ -74,7 +79,7 @@ export const SHADER_PRESETS: Record<ShaderStyle, Record<string, number>> = {
     uShine1Contrast: 1.5,
     uShine1Saturation: 0.8,
     uShine2Opacity: 0.85,
-    uGlareOpacity: 0.9,
+    uGlareOpacity: 0.7,
   },
   // double-rare has no configurable uniforms in pokebox.
   "double-rare": {},

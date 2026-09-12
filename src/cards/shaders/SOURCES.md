@@ -28,6 +28,7 @@ checkout on 2026-09-11.
   un-mirrored and clipped to the front's alpha; `double-rare` shows the plain front
   (not the back image) where the mask is black; and `main()` is wrapped so the output is
   faded out beyond a rounded rectangle (pokebox's scans carry their corners in alpha).
+  The wrapper also adds our own tilt-following sheen band to the rare and epic styles.
 - `three/buildCard.ts` — `buildCardMesh` from `src/three/buildCard.ts` (uniform set,
   double-sided `ShaderMaterial`); no shadow casting.
 - `three/shaderUniforms.ts` — `src/three/ShaderUniformUpdater.ts` with a fixed eye.
