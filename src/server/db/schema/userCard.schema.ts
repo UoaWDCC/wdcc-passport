@@ -1,4 +1,4 @@
-import { integer, pgTable, primaryKey, text } from "drizzle-orm/pg-core";
+import { pgTable, primaryKey, text, timestamp } from "drizzle-orm/pg-core";
 import { user } from "./user.schema";
 import { card } from "./card.schema";
 
@@ -15,7 +15,7 @@ export const userCard = pgTable(
       .references(() => card.id, {
         onDelete: "cascade",
       }),
-    quantity: integer("quantity").notNull(),
+    acquiredAt: timestamp("acquired_at").notNull().defaultNow(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.cardId] })],
 );
