@@ -126,7 +126,7 @@ export default function CardViewerScene() {
       >
         <div className="text-sm font-semibold text-white">
           {current && cards
-            ? `${current.name} · ${current.rarity} · ${index + 1} / ${cards.length}`
+            ? `${current.name} · ${current.rarity} · ×${current.quantity} · ${index + 1} / ${cards.length}`
             : ""}
         </div>
         {cards && cards.length > 1 && (

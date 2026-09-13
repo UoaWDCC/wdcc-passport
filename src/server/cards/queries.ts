@@ -53,6 +53,7 @@ export async function getUserCards(userId: string) {
       name: card.name,
       rarity: card.rarity,
       imagePath: card.imagePath,
+      quantity: userCard.quantity,
     })
     .from(userCard)
     .innerJoin(card, eq(userCard.cardId, card.id))
