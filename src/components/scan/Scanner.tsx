@@ -4,12 +4,12 @@ import { addUserBadgeMutation } from "@/hooks/badges/query-options";
 import { useMutation } from "@tanstack/react-query";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-export function ScannerComponent() {
+export function ScannerComponent({ initialCode }: { initialCode?: string }) {
   const router = useRouter();
   const lastSubmitted = useRef("");
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState(initialCode ?? "");
   const [cameraError, setCameraError] = useState<string | null>(null);
 
   const {
@@ -36,6 +36,10 @@ export function ScannerComponent() {
     setCode(parsed);
     submitCode(parsed);
   }
+  
+  useEffect(() => {
+    if (initialCode) handleScan(initialCode);
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center gap-4">
