@@ -1,5 +1,5 @@
 import { db } from "../db/client";
-import { badge, userBadge } from "../db/schema";
+import { badge, event, userBadge } from "../db/schema";
 import { eq } from "drizzle-orm";
 
 export async function getUserBadges(userId: string) {
@@ -19,6 +19,33 @@ export async function getUserBadges(userId: string) {
     .from(userBadge)
     .innerJoin(badge, eq(userBadge.badgeId, badge.id))
     .where(eq(userBadge.userId, userId))
+    .orderBy(badge.name);
+
+  return rows.map((b) => ({
+    ...b,
+    path: `${baseUrl}/${b.path}`,
+  }));
+}
+
+export async function getAllBadges() {
+  const baseUrl = process.env.R2_PUBLIC_BASE_URL;
+
+  if (!baseUrl) {
+    throw new Error("R2_PUBLIC_BASE_URL is not set");
+  }
+
+  const rows = await db
+    .select({
+      id: badge.id,
+      code: badge.code,
+      name: badge.name,
+      path: badge.path,
+      type: badge.type,
+      eventId: badge.eventId,
+      eventName: event.name,
+    })
+    .from(badge)
+    .leftJoin(event, eq(badge.eventId, event.id))
     .orderBy(badge.name);
 
   return rows.map((b) => ({

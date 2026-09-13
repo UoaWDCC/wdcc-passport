@@ -7,6 +7,8 @@ export async function getAllEvents() {
     .select({
       id: event.id,
       name: event.name,
+      startTimestamp: event.startTimestamp,
+      endTimestamp: event.endTimestamp,
     })
     .from(event)
     .orderBy(desc(event.createdAt));
