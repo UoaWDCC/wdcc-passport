@@ -2,6 +2,7 @@ import {
   addUserBadgeAction,
   createBadgeAction,
   deleteBadgeAction,
+  getAllBadgesAction,
   getUserBadgesAction,
 } from "@/server/badges/action";
 
@@ -26,4 +27,9 @@ export const deleteBadgeMutation = (options?: { onSuccess?: () => void }) => ({
   mutationFn: deleteBadgeAction,
   onSuccess: options?.onSuccess,
   onError: (deleteError: Error) => console.error(deleteError),
+});
+
+export const getAllBadgesQuery = () => ({
+  queryKey: ["get-all-badges"],
+  queryFn: getAllBadgesAction,
 });
