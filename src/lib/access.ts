@@ -15,7 +15,9 @@ export async function requireUser() {
 
   if (!session) {
     const redirectPath = safeRedirectPath(requestHeaders.get("x-pathname") ?? undefined);
-    redirect(redirectPath && redirectPath !== "/" ? `/?next=${encodeURIComponent(redirectPath)}` : "/");
+    redirect(
+      redirectPath && redirectPath !== "/" ? `/?next=${encodeURIComponent(redirectPath)}` : "/",
+    );
   }
 
   return session;
