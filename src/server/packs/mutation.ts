@@ -3,7 +3,6 @@ import { db } from "../db/client";
 import { Card, userCard, userPack } from "../db/schema";
 
 export async function openPack(userId: string, cards: Card[]) {
-
   const counts = new Map<string, number>();
   for (const c of cards) counts.set(c.id, (counts.get(c.id) ?? 0) + 1);
 
@@ -16,9 +15,9 @@ export async function openPack(userId: string, cards: Card[]) {
   );
 
   const drawn = sql`(values ${sql.join(
-    [...counts].map(([cardId, quantity]) => sql`(${cardId}, ${quantity}::int)`), 
+    [...counts].map(([cardId, quantity]) => sql`(${cardId}, ${quantity}::int)`),
     sql`, `,
- )}) as drawn(card_id, quantity)`;
+  )}) as drawn(card_id, quantity)`;
 
   const inserted = await db
     .with(opened)
