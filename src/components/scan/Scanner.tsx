@@ -4,7 +4,7 @@ import { addUserBadgeMutation } from "@/hooks/badges/query-options";
 import { useMutation } from "@tanstack/react-query";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 export function ScannerComponent({ initialCode }: { initialCode?: string }) {
   const router = useRouter();
@@ -36,10 +36,6 @@ export function ScannerComponent({ initialCode }: { initialCode?: string }) {
     setCode(parsed);
     submitCode(parsed);
   }
-  
-  useEffect(() => {
-    if (initialCode) handleScan(initialCode);
-  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center gap-4">
