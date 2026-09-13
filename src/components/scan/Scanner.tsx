@@ -3,6 +3,7 @@
 import { addUserBadgeMutation } from "@/hooks/badges/query-options";
 import { useMutation } from "@tanstack/react-query";
 import { Scanner } from "@yudiel/react-qr-scanner";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
@@ -21,11 +22,7 @@ export function ScannerComponent() {
   } = useMutation(addUserBadgeMutation());
 
   function submitCode(value: string) {
-    addUserBadge(value, {
-      onSuccess: ({ alreadyAwarded }) => {
-        if (!alreadyAwarded) router.push("/home");
-      },
-    });
+    addUserBadge(value);
   }
 
   function handleScan(scannedCode: string) {
@@ -85,17 +82,26 @@ export function ScannerComponent() {
         </p>
       )}
 
-      {data?.alreadyAwarded && !isPending && (
-        <p className="rounded-lg bg-amber-100 px-4 py-3 text-sm font-semibold text-amber-700">
-          You already have this badge.
-        </p>
-      )}
-
       {error && (
         <p className="rounded-lg bg-red-100 px-4 py-3 text-sm font-semibold text-red-700">
           {error.message || "Could not add badge."}
         </p>
       )}
+
+      <ConfirmDialog
+        open={data !== undefined}
+        message={
+          data?.alreadyAwarded ? "You have already scanned this badge." : "Badge and pack added!"
+        }
+        confirmLabel="Go home"
+        cancelLabel="Scan another"
+        onConfirm={() => router.push("/home")}
+        onCancel={() => {
+          reset();
+          setCode("");
+          lastSubmitted.current = "";
+        }}
+      />
     </div>
   );
 }

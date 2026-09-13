@@ -7,9 +7,18 @@ interface ConfirmDialogProps {
   message: string;
   onConfirm: () => void;
   onCancel: () => void;
+  confirmLabel?: string;
+  cancelLabel?: string;
 }
 
-export function ConfirmDialog({ open, message, onConfirm, onCancel }: ConfirmDialogProps) {
+export function ConfirmDialog({
+  open,
+  message,
+  onConfirm,
+  onCancel,
+  confirmLabel = "Yes",
+  cancelLabel = "No",
+}: ConfirmDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
 
@@ -49,14 +58,14 @@ export function ConfirmDialog({ open, message, onConfirm, onCancel }: ConfirmDia
             onClick={onCancel}
             className="rounded-full border border-gray-300 px-4 py-2 text-sm font-semibold transition hover:bg-gray-100"
           >
-            No
+            {cancelLabel}
           </button>
           <button
             type="button"
             onClick={onConfirm}
             className="rounded-full bg-gray-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-800"
           >
-            Yes
+            {confirmLabel}
           </button>
         </div>
       </div>
