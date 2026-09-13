@@ -3,7 +3,13 @@
 import { authClient } from "@/lib/auth-client";
 import { useState } from "react";
 
-export default function SignIn({ error: initialError }: { error: string | null }) {
+export default function SignIn({
+  error: initialError,
+  next,
+}: {
+  error: string | null;
+  next: string | null;
+}) {
   const [localError, setLocalError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const error = localError ?? initialError;
@@ -13,8 +19,8 @@ export default function SignIn({ error: initialError }: { error: string | null }
     try {
       const { error } = await authClient.signIn.social({
         provider: "google",
-        callbackURL: "/home",
-        errorCallbackURL: "/?error=oauth",
+        callbackURL: next ?? "/home",
+        errorCallbackURL: next ? `/?error=oauth&next=${encodeURIComponent(next)}` : "/?error=oauth",
       });
 
       if (error) {

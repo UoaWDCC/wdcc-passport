@@ -4,13 +4,20 @@ import { auth } from "@/lib/auth";
 
 export type UserRole = "admin" | "user";
 
+/** Only allow same-site paths (blocks `//evil.com` and absolute URLs). */
+export function safeRedirectPath(value: string | undefined) {
+  return value && value.startsWith("/") && !value.startsWith("//") ? value : null;
+}
+
 export async function requireUser() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const requestHeaders = await headers();
+  const session = await auth.api.getSession({ headers: requestHeaders });
 
   if (!session) {
-    redirect("/");
+    const redirectPath = safeRedirectPath(requestHeaders.get("x-pathname") ?? undefined);
+    redirect(
+      redirectPath && redirectPath !== "/" ? `/?next=${encodeURIComponent(redirectPath)}` : "/",
+    );
   }
 
   return session;

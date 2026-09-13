@@ -6,10 +6,10 @@ import { Scanner } from "@yudiel/react-qr-scanner";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
-export function ScannerComponent() {
+export function ScannerComponent({ initialCode }: { initialCode?: string }) {
   const router = useRouter();
   const lastSubmitted = useRef("");
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState(initialCode ?? "");
   const [cameraError, setCameraError] = useState<string | null>(null);
 
   const {

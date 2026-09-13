@@ -187,7 +187,7 @@ export default function CardViewerScene() {
       {cards?.length === 0 && (
         <div
           role="status"
-          className="absolute inset-0 flex items-center justify-center text-sm text-white/60"
+          className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-white/60"
         >
           No cards to show yet.
         </div>
