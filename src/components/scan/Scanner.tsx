@@ -37,7 +37,7 @@ export function ScannerComponent() {
   return (
     <div className="flex flex-col items-center justify-center gap-4">
       <Scanner
-        paused={isPending}
+        paused={isPending || data !== undefined}
         onScan={(codes) => {
           if (codes[0]) {
             handleScan(codes[0].rawValue);
