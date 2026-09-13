@@ -2,10 +2,11 @@
 
 import { FormModal } from "@/components/ui/FormModal";
 import { createEventMutation } from "@/hooks/events/query-options";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 export function CreateEventButton() {
+  const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
 
   const {
@@ -31,6 +32,7 @@ export function CreateEventButton() {
   }
 
   function closeDialog() {
+    queryClient.invalidateQueries({ queryKey: ["get-events"] });
     setIsOpen(false);
     reset();
   }
