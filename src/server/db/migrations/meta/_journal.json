@@ -64,6 +64,20 @@
       "when": 1788424477564,
       "tag": "0008_polite_brood",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1789179808620,
+      "tag": "0009_nice_reaper",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1789265815168,
+      "tag": "0010_huge_pestilence",
+      "breakpoints": true
     }
   ]
 }

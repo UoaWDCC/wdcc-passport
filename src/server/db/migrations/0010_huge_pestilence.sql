@@ -1,0 +1,1 @@
+ALTER TABLE "user_card" ADD COLUMN "quantity" integer NOT NULL;

@@ -28,6 +28,7 @@ export async function openPack(userId: string, cards: Card[]) {
           userId: opened.userId,
           cardId: sql<string>`drawn.card_id`.as("card_id"),
           quantity: sql<number>`drawn.quantity`.as("quantity"),
+          acquiredAt: sql<Date>`now()`.as("acquired_at"),
         })
         .from(opened)
         .crossJoin(drawn),
