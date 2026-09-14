@@ -2,7 +2,7 @@
 
 import { FormModal } from "@/components/ui/FormModal";
 import { createBadgeMutation } from "@/hooks/badges/query-options";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 interface CreateBadgeButtonProps {
@@ -12,6 +12,7 @@ interface CreateBadgeButtonProps {
 }
 
 export function CreateBadgeButton({ events, eventsPending, eventsError }: CreateBadgeButtonProps) {
+  const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [type, setType] = useState<"special" | "event">("special");
 
@@ -20,7 +21,14 @@ export function CreateBadgeButton({ events, eventsPending, eventsError }: Create
     error,
     isPending,
     reset,
-  } = useMutation(createBadgeMutation({ onSuccess: closeDialog }));
+  } = useMutation(
+    createBadgeMutation({
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["get-all-badges"] });
+        closeDialog();
+      },
+    }),
+  );
 
   function closeDialog() {
     setIsOpen(false);

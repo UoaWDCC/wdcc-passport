@@ -10,6 +10,8 @@ interface FormModalProps {
   isPending: boolean;
   pendingMessage: string;
   error: Error | null;
+  submitLabel?: string;
+  pendingLabel?: string;
   children: ReactNode;
 }
 
@@ -21,6 +23,8 @@ export function FormModal({
   isPending,
   pendingMessage,
   error,
+  submitLabel = "Create",
+  pendingLabel = "Creating…",
   children,
 }: FormModalProps) {
   if (!open) return null;
@@ -67,7 +71,7 @@ export function FormModal({
             disabled={isPending}
             className="rounded-lg bg-white/15 px-4 py-2 text-sm font-semibold transition hover:bg-white/25 disabled:opacity-50"
           >
-            {isPending ? "Creating…" : "Create"}
+            {isPending ? pendingLabel : submitLabel}
           </button>
         </div>
       </form>
