@@ -25,6 +25,8 @@ export function CreateBadgeButton({ events, eventsPending, eventsError }: Create
     createBadgeMutation({
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["get-all-badges"] });
+        //refetch bc of badge and event join on get all events query
+        queryClient.invalidateQueries({ queryKey: ["get-events"] });
         closeDialog();
       },
     }),

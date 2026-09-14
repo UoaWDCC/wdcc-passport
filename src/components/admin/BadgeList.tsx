@@ -19,6 +19,7 @@ export function BadgeList() {
       onSuccess: () => {
         setDeleting(null);
         queryClient.invalidateQueries({ queryKey: ["get-all-badges"] });
+        queryClient.invalidateQueries({ queryKey: ["get-events"] });
       },
     }),
   );
