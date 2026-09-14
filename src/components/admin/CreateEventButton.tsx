@@ -14,7 +14,14 @@ export function CreateEventButton() {
     error,
     isPending,
     reset,
-  } = useMutation(createEventMutation({ onSuccess: closeDialog }));
+  } = useMutation(
+    createEventMutation({
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["get-events"] });
+        closeDialog();
+      },
+    }),
+  );
 
   function handleSubmit(formData: FormData) {
     const start = formData.get("startTimestamp");
@@ -32,7 +39,6 @@ export function CreateEventButton() {
   }
 
   function closeDialog() {
-    queryClient.invalidateQueries({ queryKey: ["get-events"] });
     setIsOpen(false);
     reset();
   }

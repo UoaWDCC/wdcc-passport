@@ -21,10 +21,16 @@ export function CreateBadgeButton({ events, eventsPending, eventsError }: Create
     error,
     isPending,
     reset,
-  } = useMutation(createBadgeMutation({ onSuccess: closeDialog }));
+  } = useMutation(
+    createBadgeMutation({
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["get-all-badges"] });
+        closeDialog();
+      },
+    }),
+  );
 
   function closeDialog() {
-    queryClient.invalidateQueries({ queryKey: ["get-all-badges"] });
     setIsOpen(false);
     setType("special");
     reset();
