@@ -49,7 +49,9 @@ export function BadgeList() {
             <div className="min-w-0 flex-1">
               <p className="font-semibold">{badge.name}</p>
               <p className="text-sm text-gray-600">
-                {badge.type === "event" ? ("Event name: " + (badge.eventName ?? "Unknown")) : "Special"}
+                {badge.type === "event"
+                  ? "Event name: " + (badge.eventName ?? "Unknown")
+                  : "Special"}
               </p>
             </div>
             <button
