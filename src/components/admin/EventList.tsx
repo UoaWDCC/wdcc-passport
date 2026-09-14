@@ -90,8 +90,8 @@ export function EventList({ events, isPending, error }: EventListProps) {
             <div className="min-w-0 flex-1">
               <p className="font-semibold">{event.name}</p>
               <p className="text-sm text-gray-600">
-                Start: {new Date(event.startTimestamp).toLocaleString(undefined, dateFormat)}
-                , End: {new Date(event.endTimestamp).toLocaleString(undefined, dateFormat)}
+                Start: {new Date(event.startTimestamp).toLocaleString(undefined, dateFormat)}, End:{" "}
+                {new Date(event.endTimestamp).toLocaleString(undefined, dateFormat)}
               </p>
             </div>
             <button
