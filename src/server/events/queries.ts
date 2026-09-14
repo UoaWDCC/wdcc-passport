@@ -1,6 +1,6 @@
 import { db } from "../db/client";
-import { desc } from "drizzle-orm";
-import { event } from "../db/schema";
+import { desc, eq } from "drizzle-orm";
+import { badge, event } from "../db/schema";
 
 export async function getAllEvents() {
   return db
@@ -9,7 +9,9 @@ export async function getAllEvents() {
       name: event.name,
       startTimestamp: event.startTimestamp,
       endTimestamp: event.endTimestamp,
+      badgeCode: badge.code,
     })
     .from(event)
+    .leftJoin(badge, eq(badge.eventId, event.id))
     .orderBy(desc(event.createdAt));
 }
