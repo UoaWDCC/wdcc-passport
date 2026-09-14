@@ -28,7 +28,7 @@ export function QrCodeDisplay({ eventName, code, onClose }: QrCodeDisplayProps) 
             <p className="text-sm text-white/75">Scan this QR code:</p>
             <div className="rounded-lg bg-white p-4">
               <QRCodeSVG
-                value={`https://passport.wdcc.co.nz/home/scan?code=${code}`}
+                value={`${window.location.origin}/home/scan?code=${code}`}
                 size={256}
                 bgColor="#ffffff"
                 fgColor="#000000"
