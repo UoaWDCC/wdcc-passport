@@ -1,5 +1,6 @@
 "use client";
 
+import { QrCodeDisplay } from "@/components/admin/QrCode";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { FormModal } from "@/components/ui/FormModal";
 import { deleteEventMutation, updateEventMutation } from "@/hooks/events/query-options";
@@ -11,6 +12,7 @@ export interface AdminEvent {
   name: string;
   startTimestamp: Date | string;
   endTimestamp: Date | string;
+  badgeCode: string | null;
 }
 
 interface EventListProps {
@@ -37,6 +39,7 @@ export function EventList({ events, isPending, error }: EventListProps) {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState<AdminEvent | null>(null);
   const [deleting, setDeleting] = useState<AdminEvent | null>(null);
+  const [qrCodeOpen, setQrCodeOpen] = useState<AdminEvent | null>(null);
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ["get-events"] });
 
@@ -96,6 +99,13 @@ export function EventList({ events, isPending, error }: EventListProps) {
             </div>
             <button
               type="button"
+              onClick={() => setQrCodeOpen(event)}
+              className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-semibold transition hover:bg-gray-100"
+            >
+              QR Code
+            </button>
+            <button
+              type="button"
               onClick={() => setEditing(event)}
               className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-semibold transition hover:bg-gray-100"
             >
@@ -123,6 +133,13 @@ export function EventList({ events, isPending, error }: EventListProps) {
         <p className="rounded-lg bg-red-100 px-4 py-3 text-sm font-semibold text-red-700">
           {remove.error.message || "Could not delete event."}
         </p>
+      )}
+      {qrCodeOpen && (
+        <QrCodeDisplay
+          eventName={qrCodeOpen.name}
+          code={qrCodeOpen.badgeCode}
+          onClose={() => setQrCodeOpen(null)}
+        />
       )}
 
       {editing && (
