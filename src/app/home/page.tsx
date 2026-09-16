@@ -1,4 +1,5 @@
 import { BadgesSection } from "@/components/home/BadgesSection";
+import { PacksSection } from "@/components/home/PacksSection";
 import { SectionHeader } from "@/components/home/SectionHeader";
 import { requireUser } from "@/lib/access";
 import { SignOutButton } from "@/components/SignOutButton";
@@ -33,9 +34,7 @@ export default async function Home() {
         <SectionHeader title="Cards" />
       </section>
 
-      <section>
-        <SectionHeader title="Packs" />
-      </section>
+      <PacksSection />
     </div>
   );
 }
