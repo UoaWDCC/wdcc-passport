@@ -11,7 +11,7 @@ import { PointerTilt } from "./input/PointerTilt";
 import { FanMode } from "./modes/FanMode";
 import type { Mode, ModeEnv, PointerInfo } from "./modes/Mode";
 import { SingleMode, type CardStatus } from "./modes/SingleMode";
-import { StackMode } from "./modes/StackMode";
+import { StackMode, type StackOptions } from "./modes/StackMode";
 import { CARD_ASPECT, disableShaders, applyFallbackMaterial } from "./three/buildCard";
 import { ROOM_BACKGROUND, buildRoom, disposeRoom } from "./three/buildRoom";
 import { SCREEN_H_CM, VIEW_DISTANCE_CM, computeDims } from "./three/dims";
@@ -33,6 +33,8 @@ export interface CardSceneCallbacks {
   onInspect(inspecting: boolean): void;
   /** A holo shader failed to compile; cards are shown as plain images from now on. */
   onEffectsUnavailable(): void;
+  /** Stack mode with `once`: the last card has been swiped away. */
+  onEmpty?(): void;
 }
 
 /** World units are pokebox's centimetres: the eye sits 60 cm from a 24.81 cm-tall screen at z = 0. */
@@ -72,9 +74,15 @@ export class CardScene {
   constructor(
     private readonly container: HTMLElement,
     private readonly callbacks: CardSceneCallbacks,
+    /** `room: false` draws the cards alone on a transparent canvas, so the page shows through. */
+    private readonly options: { room?: boolean } = {},
   ) {
     // Throws if a WebGL context cannot be created
-    this.renderer = new WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+    this.renderer = new WebGLRenderer({
+      antialias: true,
+      powerPreference: "high-performance",
+      alpha: options.room === false,
+    });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, MAX_PIXEL_RATIO));
     // Output stays sRGB (three's default): that only gamma-encodes built-in materials
     // (the room), never a ShaderMaterial, so the card shaders' gamma-space output
@@ -90,7 +98,7 @@ export class CardScene {
     );
     container.appendChild(this.canvas);
 
-    this.scene.background = new Color(ROOM_BACKGROUND);
+    if (options.room !== false) this.scene.background = new Color(ROOM_BACKGROUND);
     this.camera = new PerspectiveCamera(CAMERA_FOV, 1, 1, 1000);
     this.camera.position.z = CAMERA_DISTANCE;
     this.textures = new TextureCache(this.renderer);
@@ -172,13 +180,22 @@ export class CardScene {
   }
 
   /** Stack mode with a card on top. Repeated calls with a new index bring that card to the top. */
-  showStack(entries: readonly CardEntry[], index: number): void {
+  showStack(entries: readonly CardEntry[], index: number, options?: StackOptions): void {
     if (this.mode instanceof StackMode) {
       this.mode.focus(index);
       return;
     }
     this.setMode(
-      new StackMode(this.env, entries, index, { onFocus: (i) => this.callbacks.onFocus(i) }),
+      new StackMode(
+        this.env,
+        entries,
+        index,
+        {
+          onFocus: (i) => this.callbacks.onFocus(i),
+          onEmpty: () => this.callbacks.onEmpty?.(),
+        },
+        options,
+      ),
     );
     this.callbacks.onStatus({ kind: "ready" });
   }
@@ -215,8 +232,10 @@ export class CardScene {
     this.dims = computeDims(w, h);
     // The room is sized to the view, so it is rebuilt with it (pokebox rebuilds the box too).
     if (this.room) disposeRoom(this.room);
-    this.room = buildRoom(this.dims);
-    this.scene.add(this.room);
+    if (this.options.room !== false) {
+      this.room = buildRoom(this.dims);
+      this.scene.add(this.room);
+    }
     if (!this.raf) this.renderer.render(this.scene, this.camera);
   }
 
