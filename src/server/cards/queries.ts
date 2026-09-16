@@ -5,6 +5,13 @@ import { eq } from "drizzle-orm";
 const CARDS_PER_PACK = 5;
 const CARD_BACK_PATH = "card/backside.webp";
 
+const RARITY_ORDER: Record<Card["rarity"], number> = {
+  common: 0,
+  rare: 1,
+  epic: 2,
+  legendary: 3,
+};
+
 const RARITY_WEIGHTS: Record<Card["rarity"], number> = {
   common: 50,
   rare: 30,
@@ -37,7 +44,8 @@ export async function generateCards(): Promise<Card[]> {
     const currentSelection = cardsOfRarity.length > 0 ? cardsOfRarity : cardPool;
     selectedCards.push(currentSelection[Math.floor(Math.random() * currentSelection.length)]);
   }
-  return selectedCards;
+
+  return selectedCards.sort((a, b) => RARITY_ORDER[a.rarity] - RARITY_ORDER[b.rarity]);
 }
 
 export async function getUserCards(userId: string) {
