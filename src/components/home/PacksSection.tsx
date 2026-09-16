@@ -32,7 +32,7 @@ export function PacksSection() {
         <button
           type="button"
           onClick={() => setShowPacks(true)}
-          disabled={packCount === 0}
+          disabled={packCount === 0 || isPending}
           className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-black transition hover:bg-white/90 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
         >
           Packs

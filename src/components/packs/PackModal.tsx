@@ -15,7 +15,6 @@ export function PackModal({
   onOpen: () => void;
   onClose: () => void;
 }) {
-
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
