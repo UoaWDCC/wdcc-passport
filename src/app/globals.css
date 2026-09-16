@@ -24,3 +24,33 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Pack opening (Pokémon TCG Pocket style): once the slit crosses the pack the top strip
+   slides off sideways in the swipe direction (--tear-dir), then the body drops away. */
+@theme {
+  --animate-pack-lid: pack-lid 0.45s 0.15s ease-in forwards;
+  --animate-pack-body: pack-body 0.5s 0.45s ease-in forwards;
+
+  @keyframes pack-lid {
+    0% {
+      transform: none;
+      opacity: 1;
+    }
+    100% {
+      transform: translate(calc(var(--tear-dir, 1) * 110%), -30%)
+        rotate(calc(var(--tear-dir, 1) * 12deg));
+      opacity: 0;
+    }
+  }
+
+  @keyframes pack-body {
+    0% {
+      transform: none;
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(45%) scale(0.92);
+      opacity: 0;
+    }
+  }
+}
