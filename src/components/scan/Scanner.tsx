@@ -64,6 +64,7 @@ export function ScannerComponent({ initialCode }: { initialCode?: string }) {
         type="text"
         value={code}
         onChange={(e) => setCode(e.target.value)}
+        maxLength={6}
         placeholder="Or type the code here"
         className="rounded-lg bg-white/10 px-3 py-2 text-white"
       />
