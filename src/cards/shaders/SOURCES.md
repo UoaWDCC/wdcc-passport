@@ -32,8 +32,6 @@ checkout on 2026-09-11.
 - `three/buildCard.ts` — `buildCardMesh` from `src/three/buildCard.ts` (uniform set,
   double-sided `ShaderMaterial`); no shadow casting.
 - `three/shaderUniforms.ts` — `src/three/ShaderUniformUpdater.ts` with a fixed eye.
-- `three/buildRoom.ts` — the solid-mode box, walls and lights from `src/three/buildBox.ts`
-  with pokebox's lighting-panel values; spotlight shadow, candles and dim mode left out.
 
 ## Generated here
 

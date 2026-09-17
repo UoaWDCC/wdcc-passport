@@ -6,10 +6,7 @@ import dynamic from "next/dynamic";
 const CardViewerScene = dynamic(() => import("./CardViewerScene"), {
   ssr: false,
   loading: () => (
-    <div
-      role="status"
-      className="fixed inset-0 flex items-center justify-center bg-gray-900 text-sm text-white/60"
-    >
+    <div role="status" className="flex h-full items-center justify-center text-sm text-white/60">
       Loading viewer…
     </div>
   ),
