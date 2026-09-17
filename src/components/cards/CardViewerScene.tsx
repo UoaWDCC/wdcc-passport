@@ -15,12 +15,11 @@ const MODES: Array<{ id: ViewMode; label: string }> = [
 ];
 
 const HINTS: Record<ViewMode, string> = {
-  fan: "drag, scroll or ← → to browse · click a card or press Enter to inspect",
-  stack: "swipe, scroll or ↑ ↓ to cycle the pile · tap the top card or press Enter to flip",
-  single: "move the pointer to tilt · click or press Enter to flip · swipe or ← → to browse",
+  fan: "Drag to browse · tap a card to inspect",
+  stack: "Swipe to cycle · tap the top card to flip",
+  single: "Swipe to browse · tap to flip",
 };
-const INSPECT_HINT =
-  "move the pointer to tilt · click or press Enter to flip · Esc or click outside to return";
+const INSPECT_HINT = "Tap to flip · tap outside to return";
 
 export default function CardViewerScene() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -89,120 +88,111 @@ export default function CardViewerScene() {
     setInspecting(false);
   };
 
-  return (
-    <div className="relative h-full w-full overflow-hidden text-white">
-      <div ref={containerRef} className="absolute inset-0" />
+  const overlay =
+    "pointer-events-none absolute inset-0 flex items-center justify-center p-6 text-center";
+  const pill =
+    "pointer-events-auto rounded-full bg-black/50 px-3 py-2 text-[10px] text-white/80 backdrop-blur transition hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none disabled:opacity-40";
 
-      <div className="pointer-events-none absolute inset-x-0 top-0 flex items-center gap-2 p-3">
-        {cards &&
-          cards.length > 0 &&
-          MODES.map((m) => (
-            <button
-              key={m.id}
-              type="button"
-              aria-pressed={mode === m.id}
-              onClick={() => switchMode(m.id)}
-              className={`pointer-events-auto rounded-full px-3 py-1 text-xs font-semibold backdrop-blur transition focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none ${
-                mode === m.id
-                  ? "bg-white text-black"
-                  : "bg-black/50 text-white/80 hover:bg-white/10 hover:text-white"
-              }`}
-            >
-              {m.label}
-            </button>
-          ))}
+  return (
+    <div className="flex h-full w-full flex-col gap-3 py-3 text-white [text-shadow:2px_2px_0_#000]">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          {cards &&
+            cards.length > 0 &&
+            MODES.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                aria-pressed={mode === m.id}
+                onClick={() => switchMode(m.id)}
+                className={`${pill} ${mode === m.id ? "bg-white/30 text-white ring-2 ring-white/80" : ""}`}
+              >
+                {m.label}
+              </button>
+            ))}
+        </div>
+        {cards && cards.length > 0 && (
+          <span className="text-xs tabular-nums" aria-live="polite">
+            {index + 1} / {cards.length}
+          </span>
+        )}
       </div>
 
-      <div
-        aria-live="polite"
-        className="pointer-events-none absolute inset-x-0 bottom-4 flex flex-col items-center gap-1 px-4 text-center text-xs text-white/80"
-      >
-        <div className="text-sm font-semibold text-white">
-          {current && cards
-            ? `${current.name} · ${current.rarity} · ×${current.quantity} · ${index + 1} / ${cards.length}`
-            : ""}
-        </div>
-        {cards && cards.length > 1 && (
-          <div className="flex items-center gap-2">
+      <div className="relative min-h-0 flex-1">
+        <div ref={containerRef} className="absolute inset-0" />
+
+        {isPending && (
+          <div role="status" className={`${overlay} text-xs`}>
+            Loading cards…
+          </div>
+        )}
+        {error && (
+          <div role="alert" className={`${overlay} text-xs text-red-300`}>
+            Could not load your cards.
+          </div>
+        )}
+        {status.kind === "loading" && mode === "single" && cards && cards.length > 0 && (
+          <div role="status" className={`${overlay} text-xs`}>
+            Loading card…
+          </div>
+        )}
+        {cards?.length === 0 && (
+          <div role="status" className={`${overlay} text-xs`}>
+            No cards to show yet.
+          </div>
+        )}
+        {status.kind === "error" && (
+          <div role="alert" className={`${overlay} flex-col gap-4`}>
+            <p className="text-xs text-red-300">Could not show the 3D card: {status.message}</p>
+            {current && (
+              <Image
+                src={current.front}
+                alt={current.name}
+                width={496}
+                height={700}
+                className="h-auto w-full max-w-xs rounded-xl"
+              />
+            )}
+          </div>
+        )}
+      </div>
+
+      <div aria-live="polite" className="flex flex-col items-center gap-2 text-center">
+        <div className="flex items-center justify-center gap-3">
+          {cards && cards.length > 1 && (
             <button
               type="button"
               onClick={() => setIndex((i) => (i - 1 + cards.length) % cards.length)}
               disabled={inspecting}
-              className="pointer-events-auto rounded-full bg-black/50 px-3 py-1 text-xs font-semibold text-white/80 backdrop-blur transition hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none disabled:opacity-40"
+              aria-label="Previous card"
+              className={`${pill} px-3`}
             >
-              ‹ Prev
+              ‹
             </button>
+          )}
+          <div className="text-xs">{current ? current.name : ""}</div>
+          {cards && cards.length > 1 && (
             <button
               type="button"
               onClick={() => setIndex((i) => (i + 1) % cards.length)}
               disabled={inspecting}
-              className="pointer-events-auto rounded-full bg-black/50 px-3 py-1 text-xs font-semibold text-white/80 backdrop-blur transition hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none disabled:opacity-40"
+              aria-label="Next card"
+              className={`${pill} px-3`}
             >
-              Next ›
+              ›
             </button>
-          </div>
-        )}
-        {status.kind === "ready" && <div>{inspecting ? INSPECT_HINT : HINTS[mode]}</div>}
-        {effectsUnavailable && (
-          <div className="text-amber-200">
-            Holographic effects are not available on this device, so cards are shown plain.
-          </div>
-        )}
-      </div>
-
-      {isPending && (
-        <div
-          role="status"
-          className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-white/60"
-        >
-          Loading cards…
-        </div>
-      )}
-
-      {error && (
-        <div
-          role="alert"
-          className="pointer-events-none absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-red-300"
-        >
-          Could not load your cards.
-        </div>
-      )}
-
-      {status.kind === "loading" && mode === "single" && cards && cards.length > 0 && (
-        <div
-          role="status"
-          className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-white/60"
-        >
-          Loading card…
-        </div>
-      )}
-
-      {cards?.length === 0 && (
-        <div
-          role="status"
-          className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-white/60"
-        >
-          No cards to show yet.
-        </div>
-      )}
-
-      {status.kind === "error" && (
-        <div
-          role="alert"
-          className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 text-center"
-        >
-          <p className="text-sm text-red-300">Could not show the 3D card: {status.message}</p>
-          {current && (
-            <Image
-              src={current.front}
-              alt={current.name}
-              width={496}
-              height={700}
-              className="h-auto w-full max-w-xs rounded-xl"
-            />
           )}
         </div>
-      )}
+        <div className="text-[10px] text-white/80 capitalize">
+          {current ? `${current.rarity} · ×${current.quantity}` : ""}
+        </div>
+        <div className="text-[10px] text-white/70">
+          {status.kind === "ready" ? (inspecting ? INSPECT_HINT : HINTS[mode]) : ""}
+        </div>
+        {effectsUnavailable && (
+          <div className="text-[10px] text-amber-200">Holo effects unavailable on this device.</div>
+        )}
+      </div>
     </div>
   );
 }

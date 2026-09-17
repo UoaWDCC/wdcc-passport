@@ -47,6 +47,7 @@ export class StackMode implements Mode {
   /** Bumped on every rebuild so textures that finish late are discarded. */
   private generation = 0;
   private wheelAcc = 0;
+  private pulling = false;
   private pointerDownAt: { x: number; y: number; t: number } | null = null;
   /** From the latest tick. */
   private dims: SceneDims = { screenW: 1, screenH: 1, boxD: 1, eyeZ: 1 };
@@ -70,15 +71,21 @@ export class StackMode implements Mode {
     return this.top()?.index ?? null;
   }
 
-  /** Bring a card to the top (buttons): the next card swipes in, anything else rebuilds the pile. */
+  /**
+   * Bring a card to the top (buttons): the next card swipes in, the previous card is
+   * pulled back onto the pile, anything else rebuilds the pile.
+   */
   focus(index: number): void {
-    if (this.animator.isSwiping || this.topIndex() === index) return;
+    const top = this.topIndex();
+    if (this.animator.isSwiping || this.pulling || top === null || top === index) return;
+    const n = this.entries.length;
     if (this.pile.find((e) => e.slot === 1)?.index === index) this.swipe(1);
+    else if (index === (top - 1 + n) % n && this.pile.length > 1) void this.pullBack(index);
     else void this.build(index);
   }
 
   canFlip(): boolean {
-    return this.top() !== undefined && !this.animator.isSwiping;
+    return this.top() !== undefined && !this.animator.isSwiping && !this.pulling;
   }
 
   cards(): CardObject[] {
@@ -179,7 +186,26 @@ export class StackMode implements Mode {
 
   /** pokebox swipe: the top card flies off (up or down) and goes to the bottom of the pile. */
   private swipe(direction: 1 | -1): void {
+    if (this.pulling) return;
     this.animator.swipe(this.pile, direction, performance.now() / 1000);
+  }
+
+  private async pullBack(index: number): Promise<void> {
+    const bottom = this.pile.find((e) => e.slot === this.pile.length - 1);
+    if (!bottom) return;
+    const gen = this.generation;
+    this.pulling = true;
+    await this.reassign(bottom, index);
+    this.pulling = false;
+    if (gen !== this.generation) return;
+    if (!this.pile.includes(bottom) || bottom.index !== index) {
+      void this.build(index);
+      return;
+    }
+    const n = this.entries.length;
+    // The window of cards the pile shows has moved back by one.
+    if (n > STACK_COUNT) this.next = (this.next - 1 + n) % n;
+    this.animator.swipeBack(this.pile, 1, performance.now() / 1000);
   }
 
   /** Replaces the pile with one whose top card is `index`. A build still loading is discarded. */
@@ -281,6 +307,7 @@ export class StackMode implements Mode {
     }
     this.pile = [];
     this.wheelAcc = 0;
+    this.pulling = false;
     this.animator.reset();
   }
 
