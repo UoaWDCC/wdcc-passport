@@ -4,8 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { PackTear } from "@/components/packs/PackTear";
 
-/** Stand-in pack art: the card back, until the real pack design arrives. */
-const PACK_IMAGE = "/packs/pack-front.webp";
+const PACK_IMAGE = "/packs/pack-front.png";
 
 export function PackModal({
   packCount,
