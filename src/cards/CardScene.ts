@@ -1,19 +1,10 @@
-import {
-  Color,
-  PerspectiveCamera,
-  Raycaster,
-  Scene,
-  Vector2,
-  WebGLRenderer,
-  type Group,
-} from "three";
+import { PerspectiveCamera, Raycaster, Scene, Vector2, WebGLRenderer } from "three";
 import { PointerTilt } from "./input/PointerTilt";
 import { FanMode } from "./modes/FanMode";
 import type { Mode, ModeEnv, PointerInfo } from "./modes/Mode";
 import { SingleMode, type CardStatus } from "./modes/SingleMode";
 import { StackMode } from "./modes/StackMode";
 import { CARD_ASPECT, disableShaders, applyFallbackMaterial } from "./three/buildCard";
-import { ROOM_BACKGROUND, buildRoom, disposeRoom } from "./three/buildRoom";
 import { SCREEN_H_CM, VIEW_DISTANCE_CM, computeDims } from "./three/dims";
 import { disposeFxTextures, loadFxTextures } from "./three/fxTextures";
 import { updateCardUniforms } from "./three/shaderUniforms";
@@ -60,7 +51,6 @@ export class CardScene {
   private readonly env: ModeEnv;
 
   private mode: Mode | null = null;
-  private room: Group | null = null;
   private effectsBroken = false;
   private dims: SceneDims = computeDims(1, 1);
   private flipped = false;
@@ -73,12 +63,12 @@ export class CardScene {
     private readonly container: HTMLElement,
     private readonly callbacks: CardSceneCallbacks,
   ) {
-    // Throws if a WebGL context cannot be created
-    this.renderer = new WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+    this.renderer = new WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      powerPreference: "high-performance",
+    });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, MAX_PIXEL_RATIO));
-    // Output stays sRGB (three's default): that only gamma-encodes built-in materials
-    // (the room), never a ShaderMaterial, so the card shaders' gamma-space output
-    // reaches the screen untouched.
     this.renderer.debug.onShaderError = this.onShaderError;
     this.canvas = this.renderer.domElement;
     this.canvas.style.cssText =
@@ -90,7 +80,6 @@ export class CardScene {
     );
     container.appendChild(this.canvas);
 
-    this.scene.background = new Color(ROOM_BACKGROUND);
     this.camera = new PerspectiveCamera(CAMERA_FOV, 1, 1, 1000);
     this.camera.position.z = CAMERA_DISTANCE;
     this.textures = new TextureCache(this.renderer);
@@ -131,7 +120,6 @@ export class CardScene {
     document.removeEventListener("visibilitychange", this.onVisibilityChange);
 
     this.setMode(null);
-    if (this.room) disposeRoom(this.room);
     void this.env.fx.then(disposeFxTextures);
     this.textures.dispose();
     this.renderer.dispose();
@@ -213,10 +201,6 @@ export class CardScene {
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
     this.dims = computeDims(w, h);
-    // The room is sized to the view, so it is rebuilt with it (pokebox rebuilds the box too).
-    if (this.room) disposeRoom(this.room);
-    this.room = buildRoom(this.dims);
-    this.scene.add(this.room);
     if (!this.raf) this.renderer.render(this.scene, this.camera);
   }
 

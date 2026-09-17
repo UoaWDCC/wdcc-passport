@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { CardScene, type CardStatus } from "@/cards/CardScene";
 import { detectMobile } from "@/cards/three/layout";
@@ -91,16 +90,10 @@ export default function CardViewerScene() {
   };
 
   return (
-    <div className="fixed inset-0 overflow-hidden bg-gray-900 text-white">
+    <div className="relative h-full w-full overflow-hidden text-white">
       <div ref={containerRef} className="absolute inset-0" />
 
       <div className="pointer-events-none absolute inset-x-0 top-0 flex items-center gap-2 p-3">
-        <Link
-          href="/home"
-          className="pointer-events-auto rounded-full bg-black/50 px-3 py-1 text-xs font-semibold text-white/80 backdrop-blur transition hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
-        >
-          ← Home
-        </Link>
         {cards &&
           cards.length > 0 &&
           MODES.map((m) => (
