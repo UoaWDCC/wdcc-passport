@@ -26,18 +26,25 @@ export function QrCodeDisplay({ eventName, code, onClose }: QrCodeDisplayProps) 
         {code ? (
           <>
             <p className="text-sm text-white/75">Scan this QR code:</p>
-            <div className="rounded-lg bg-white p-4">
+            <div className="flex flex-col items-center gap-3 rounded-lg bg-white p-4 text-neutral-900">
               <QRCodeSVG
                 value={`${window.location.origin}/home/scan?code=${code}`}
                 size={256}
                 bgColor="#ffffff"
-                fgColor="#000000"
-                level="M"
+                fgColor="#1e3a5f"
+                level="H"
+                imageSettings={{
+                  src: "/asset/pixel/webster-qr.png",
+                  height: 64,
+                  width: 64,
+                  excavate: true,
+                }}
               />
+              <p className="text-sm">
+                Or enter the code manually:{" "}
+                <span className="font-mono text-base font-semibold tracking-wider">{code}</span>
+              </p>
             </div>
-            <p className="text-sm text-white/75">
-              Or enter the code manually: <span className="font-mono font-semibold">{code}</span>
-            </p>
           </>
         ) : (
           <p className="text-sm text-white/75">No badge is linked to this event yet.</p>
