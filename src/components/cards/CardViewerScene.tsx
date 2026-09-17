@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CardScene, type CardStatus } from "@/cards/CardScene";
 import type { ViewMode } from "@/cards/types";
 import { getOwnedCardsQuery } from "@/hooks/cards/query-options";
@@ -17,11 +17,11 @@ const INSPECT_HINT = "Tap to flip · tap outside to return";
 export default function CardViewerScene({
   mode,
   initialId,
-  tabs,
+  onCount,
 }: {
   mode: ViewMode;
   initialId?: string;
-  tabs: ReactNode;
+  onCount: (text: string) => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<CardScene | null>(null);
@@ -65,6 +65,9 @@ export default function CardViewerScene({
 
   const current = cards?.[index];
 
+  const countText = cards && cards.length > 0 ? `${index + 1} / ${cards.length}` : "";
+  useEffect(() => onCount(countText), [onCount, countText]);
+
   useEffect(() => {
     const scene = sceneRef.current;
     if (!scene || !cards || cards.length === 0) return;
@@ -89,16 +92,7 @@ export default function CardViewerScene({
     "pointer-events-auto rounded-full bg-black/50 px-3 py-2 text-[10px] text-white/80 backdrop-blur transition hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none disabled:opacity-40";
 
   return (
-    <div className="flex h-full w-full flex-col gap-3 py-3 text-white [text-shadow:2px_2px_0_#000]">
-      <div className="flex items-start justify-between gap-2">
-        {tabs}
-        {cards && cards.length > 0 && (
-          <span className="text-xs tabular-nums" aria-live="polite">
-            {index + 1} / {cards.length}
-          </span>
-        )}
-      </div>
-
+    <div className="flex h-full w-full flex-col gap-3">
       <div className="relative min-h-0 flex-1">
         <div ref={containerRef} className="absolute inset-0" />
 
