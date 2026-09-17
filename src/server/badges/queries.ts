@@ -1,6 +1,6 @@
 import { db } from "../db/client";
 import { badge, event, userBadge } from "../db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export async function getUserBadges(userId: string) {
   const baseUrl = process.env.R2_PUBLIC_BASE_URL;
@@ -14,12 +14,14 @@ export async function getUserBadges(userId: string) {
       id: badge.id,
       name: badge.name,
       path: badge.path,
+      type: badge.type,
+      eventName: event.name,
       awardedAt: userBadge.awardedAt,
     })
-    .from(userBadge)
-    .innerJoin(badge, eq(userBadge.badgeId, badge.id))
-    .where(eq(userBadge.userId, userId))
-    .orderBy(badge.name);
+    .from(badge)
+    .leftJoin(event, eq(badge.eventId, event.id))
+    .leftJoin(userBadge, and(eq(userBadge.badgeId, badge.id), eq(userBadge.userId, userId)))
+    .orderBy(badge.type, badge.name);
 
   return rows.map((b) => ({
     ...b,
