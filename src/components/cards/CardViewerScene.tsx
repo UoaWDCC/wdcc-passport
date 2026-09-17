@@ -1,18 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { CardScene, type CardStatus } from "@/cards/CardScene";
-import { detectMobile } from "@/cards/three/layout";
 import type { ViewMode } from "@/cards/types";
-import { getUserCardsQuery } from "@/hooks/cards/query-options";
+import { getOwnedCardsQuery } from "@/hooks/cards/query-options";
 import { useQuery } from "@tanstack/react-query";
-
-const MODES: Array<{ id: ViewMode; label: string }> = [
-  { id: "fan", label: "Fan" },
-  { id: "stack", label: "Stack" },
-  { id: "single", label: "Single" },
-];
 
 const HINTS: Record<ViewMode, string> = {
   fan: "Drag to browse · tap a card to inspect",
@@ -21,17 +14,24 @@ const HINTS: Record<ViewMode, string> = {
 };
 const INSPECT_HINT = "Tap to flip · tap outside to return";
 
-export default function CardViewerScene() {
+export default function CardViewerScene({
+  mode,
+  initialId,
+  tabs,
+}: {
+  mode: ViewMode;
+  initialId?: string;
+  tabs: ReactNode;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<CardScene | null>(null);
-  const [index, setIndex] = useState(0);
-  // pokebox: default is stack on mobile, fan on desktop
-  const [mode, setMode] = useState<ViewMode>(() => (detectMobile() ? "stack" : "fan"));
+  const { data: cards, error, isPending } = useQuery(getOwnedCardsQuery());
+  const [index, setIndex] = useState(() =>
+    Math.max(0, cards?.findIndex((c) => c.id === initialId) ?? 0),
+  );
   const [inspecting, setInspecting] = useState(false);
   const [status, setStatus] = useState<CardStatus>({ kind: "loading" });
   const [effectsUnavailable, setEffectsUnavailable] = useState(false);
-
-  const { data: cards, error, isPending } = useQuery(getUserCardsQuery());
 
   useEffect(() => {
     const container = containerRef.current;
@@ -83,11 +83,6 @@ export default function CardViewerScene() {
     ]);
   }, [cards, index, mode]);
 
-  const switchMode = (next: ViewMode) => {
-    setMode(next);
-    setInspecting(false);
-  };
-
   const overlay =
     "pointer-events-none absolute inset-0 flex items-center justify-center p-6 text-center";
   const pill =
@@ -95,22 +90,8 @@ export default function CardViewerScene() {
 
   return (
     <div className="flex h-full w-full flex-col gap-3 py-3 text-white [text-shadow:2px_2px_0_#000]">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          {cards &&
-            cards.length > 0 &&
-            MODES.map((m) => (
-              <button
-                key={m.id}
-                type="button"
-                aria-pressed={mode === m.id}
-                onClick={() => switchMode(m.id)}
-                className={`${pill} ${mode === m.id ? "bg-white/30 text-white ring-2 ring-white/80" : ""}`}
-              >
-                {m.label}
-              </button>
-            ))}
-        </div>
+      <div className="flex items-start justify-between gap-2">
+        {tabs}
         {cards && cards.length > 0 && (
           <span className="text-xs tabular-nums" aria-live="polite">
             {index + 1} / {cards.length}

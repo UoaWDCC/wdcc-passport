@@ -1,6 +1,6 @@
 import { db } from "../db/client";
 import { card, Card, userCard } from "../db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 const CARDS_PER_PACK = 5;
 const CARD_BACK_PATH = "card/backside.webp";
@@ -61,12 +61,11 @@ export async function getUserCards(userId: string) {
       name: card.name,
       rarity: card.rarity,
       imagePath: card.imagePath,
-      quantity: userCard.quantity,
+      quantity: sql<number>`coalesce(${userCard.quantity}, 0)`.mapWith(Number),
     })
-    .from(userCard)
-    .innerJoin(card, eq(userCard.cardId, card.id))
-    .where(eq(userCard.userId, userId))
-    .orderBy(card.rarity);
+    .from(card)
+    .leftJoin(userCard, and(eq(userCard.cardId, card.id), eq(userCard.userId, userId)))
+    .orderBy(card.rarity, card.name);
 
   return rows.map(({ imagePath, ...c }) => ({
     ...c,
