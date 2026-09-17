@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { CardDex } from "@/components/cards/CardDex";
 
@@ -29,6 +29,11 @@ const PILL =
 export function CardViewer() {
   const [tab, setTab] = useState<Tab>("dex");
   const [openId, setOpenId] = useState<string | null>(null);
+  const [count, setCount] = useState("");
+
+  useEffect(() => {
+    void import("./CardViewerScene");
+  }, []);
 
   const tabs = (
     <div className="flex flex-col items-start gap-2">
@@ -61,12 +66,26 @@ export function CardViewer() {
     </div>
   );
 
-  if (tab === "dex" && openId === null) return <CardDex tabs={tabs} onOpen={setOpenId} />;
+
   return (
-    <CardViewerScene
-      mode={tab === "dex" ? "single" : tab}
-      initialId={openId ?? undefined}
-      tabs={tabs}
-    />
+    <div className="flex h-full w-full flex-col gap-3 py-3 text-white [text-shadow:2px_2px_0_#000]">
+      <header className="flex items-start justify-between gap-2">
+        {tabs}
+        <span className="text-xs tabular-nums" aria-live="polite">
+          {count}
+        </span>
+      </header>
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {tab === "dex" && openId === null ? (
+          <CardDex onOpen={setOpenId} onCount={setCount} />
+        ) : (
+          <CardViewerScene
+            mode={tab === "dex" ? "single" : tab}
+            initialId={openId ?? undefined}
+            onCount={setCount}
+          />
+        )}
+      </div>
+    </div>
   );
 }

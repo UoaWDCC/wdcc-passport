@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
-import type { ReactNode } from "react";
+import { useEffect } from "react";
 
 import type { CardRarity } from "@/cards/types";
 import { getUserCardsQuery } from "@/hooks/cards/query-options";
@@ -21,21 +21,21 @@ const RARITIES: Array<{ id: CardRarity; label: string }> = [
  * Every card in the set as a plain image grid. Owned cards show how many the user has and
  * open in the 3D viewer; the rest are blacked out until collected.
  */
-export function CardDex({ tabs, onOpen }: { tabs: ReactNode; onOpen: (id: string) => void }) {
+export function CardDex({
+  onOpen,
+  onCount,
+}: {
+  onOpen: (id: string) => void;
+  onCount: (text: string) => void;
+}) {
   const { data: cards = [], error, isPending } = useQuery(getUserCardsQuery());
   const owned = cards.filter((c) => c.quantity > 0).length;
 
-  return (
-    <div className="flex flex-col gap-6 py-3 text-white [text-shadow:2px_2px_0_#000]">
-      <header className="flex items-center justify-between gap-2">
-        {tabs}
-        {!isPending && !error && (
-          <p className="text-xs">
-            {owned} / {cards.length}
-          </p>
-        )}
-      </header>
+  const countText = isPending || error ? "" : `${owned} / ${cards.length}`;
+  useEffect(() => onCount(countText), [onCount, countText]);
 
+  return (
+    <div className="flex flex-col gap-6">
       {isPending && (
         <ul className="grid grid-cols-3 gap-3" aria-label="Loading cards">
           {Array.from({ length: 9 }).map((_, i) => (
