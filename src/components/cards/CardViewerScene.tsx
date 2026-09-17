@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { CardScene, type CardStatus } from "@/cards/CardScene";
 import type { ViewMode } from "@/cards/types";
+import { pixelButton } from "@/components/ui/pixel";
 import { getOwnedCardsQuery } from "@/hooks/cards/query-options";
 import { useQuery } from "@tanstack/react-query";
 
@@ -88,8 +89,7 @@ export default function CardViewerScene({
 
   const overlay =
     "pointer-events-none absolute inset-0 flex items-center justify-center p-6 text-center";
-  const pill =
-    "pointer-events-auto rounded-full bg-black/50 px-3 py-2 text-[10px] text-white/80 backdrop-blur transition hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none disabled:opacity-40";
+  const arrow = pixelButton({ size: "icon" });
 
   return (
     <div className="flex h-full w-full flex-col gap-3">
@@ -140,7 +140,7 @@ export default function CardViewerScene({
               onClick={() => setIndex((i) => (i - 1 + cards.length) % cards.length)}
               disabled={inspecting}
               aria-label="Previous card"
-              className={`${pill} px-3`}
+              className={arrow}
             >
               ‹
             </button>
@@ -152,7 +152,7 @@ export default function CardViewerScene({
               onClick={() => setIndex((i) => (i + 1) % cards.length)}
               disabled={inspecting}
               aria-label="Next card"
-              className={`${pill} px-3`}
+              className={arrow}
             >
               ›
             </button>
