@@ -1,7 +1,7 @@
 "use client";
 
 import { addUserBadgeMutation } from "@/hooks/badges/query-options";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useRouter } from "next/navigation";
@@ -9,6 +9,7 @@ import { useRef, useState } from "react";
 
 export function ScannerComponent({ initialCode }: { initialCode?: string }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const lastSubmitted = useRef("");
   const [code, setCode] = useState(initialCode ?? "");
   const [cameraError, setCameraError] = useState<string | null>(null);
@@ -19,7 +20,14 @@ export function ScannerComponent({ initialCode }: { initialCode?: string }) {
     error,
     isPending,
     reset,
-  } = useMutation(addUserBadgeMutation());
+  } = useMutation(
+    addUserBadgeMutation({
+      onSuccess: () => {
+        void queryClient.invalidateQueries({ queryKey: ["get-user-badges"] });
+        void queryClient.invalidateQueries({ queryKey: ["get-user-pack-count"] });
+      },
+    }),
+  );
 
   function submitCode(value: string) {
     addUserBadge(value);
