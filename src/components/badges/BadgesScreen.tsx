@@ -28,7 +28,7 @@ function FramedBadge({ badge, className = "" }: { badge: Badge; className?: stri
         src={badge.path}
         alt=""
         fill
-        sizes="(max-width: 430px) 30vw, 130px"
+        sizes="(max-width: 500px) 30vw, 150px"
         className={`object-contain p-[23%] ${badge.awardedAt ? "" : "opacity-30 grayscale"}`}
       />
       <Image
