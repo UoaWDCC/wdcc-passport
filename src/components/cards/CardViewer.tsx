@@ -66,7 +66,6 @@ export function CardViewer() {
     </div>
   );
 
-
   return (
     <div className="flex h-full w-full flex-col gap-3 py-3 text-white [text-shadow:2px_2px_0_#000]">
       <header className="flex items-start justify-between gap-2">
