@@ -4,6 +4,7 @@ import { addUserBadgeMutation } from "@/hooks/badges/query-options";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { PIXEL_ERROR_TEXT, PIXEL_INPUT, PIXEL_PANEL, pixelButton } from "@/components/ui/pixel";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
@@ -63,7 +64,7 @@ export function ScannerComponent({ initialCode }: { initialCode?: string }) {
         }}
       />
 
-      <label htmlFor="code-input" className="text-sm text-white/75">
+      <label htmlFor="code-input" className="text-[10px] text-white [text-shadow:2px_2px_0_#000]">
         Badge code
       </label>
       <input
@@ -72,31 +73,36 @@ export function ScannerComponent({ initialCode }: { initialCode?: string }) {
         value={code}
         onChange={(e) => setCode(e.target.value)}
         placeholder="Or type the code here"
-        className="rounded-lg bg-white/10 px-3 py-2 text-white"
+        className={`${PIXEL_INPUT} max-w-sm text-center tracking-[0.3em] uppercase placeholder:text-[10px] placeholder:tracking-normal placeholder:normal-case`}
       />
 
       <button
         type="button"
         onClick={() => submitCode(code)}
         disabled={isPending || code.trim() === ""}
-        className="rounded-lg bg-gray-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:opacity-50"
+        className={pixelButton({ variant: "gold" })}
       >
         {isPending ? "Adding badge…" : "Add badge"}
       </button>
 
       {cameraError && (
-        <p className="rounded-lg bg-red-100 px-4 py-3 text-sm font-semibold text-red-700">
+        <p
+          className={`max-w-sm px-4 py-3 text-[10px] leading-relaxed ${PIXEL_PANEL} ${PIXEL_ERROR_TEXT}`}
+        >
           {cameraError}
         </p>
       )}
 
       {error && (
-        <p className="rounded-lg bg-red-100 px-4 py-3 text-sm font-semibold text-red-700">
+        <p
+          className={`max-w-sm px-4 py-3 text-[10px] leading-relaxed ${PIXEL_PANEL} ${PIXEL_ERROR_TEXT}`}
+        >
           {error.message || "Could not add badge."}
         </p>
       )}
 
       <ConfirmDialog
+        pixel
         open={data !== undefined}
         message={
           data?.alreadyAwarded ? "You have already scanned this badge." : "Badge and pack added!"

@@ -5,9 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 
 import type { CardRarity } from "@/cards/types";
+import { PIXEL_ERROR_TEXT, PIXEL_PANEL } from "@/components/ui/pixel";
 import { getUserCardsQuery } from "@/hooks/cards/query-options";
-
-const PANEL = "border-4 border-black bg-white text-black shadow-[4px_4px_0_#000]";
 
 /** Section order. */
 const RARITIES: Array<{ id: CardRarity; label: string }> = [
@@ -45,15 +44,13 @@ export function CardDex({
       )}
 
       {error && (
-        <p
-          className={`px-4 py-3 text-[10px] leading-relaxed text-red-700 [text-shadow:none] ${PANEL}`}
-        >
+        <p className={`px-4 py-3 text-[10px] leading-relaxed ${PIXEL_ERROR_TEXT} ${PIXEL_PANEL}`}>
           Could not load your cards.
         </p>
       )}
 
       {!isPending && !error && cards.length === 0 && (
-        <p className={`px-4 py-3 text-[10px] leading-relaxed [text-shadow:none] ${PANEL}`}>
+        <p className={`px-4 py-3 text-[10px] leading-relaxed ${PIXEL_PANEL}`}>
           No cards have been created yet.
         </p>
       )}
