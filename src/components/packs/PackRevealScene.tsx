@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { CardScene, type CardStatus } from "@/cards/CardScene";
 import type { CardEntry } from "@/cards/types";
 
-const HINT = "swipe, scroll or ↑ ↓ for the next card · tap the top card or press Enter to flip";
+const HINT = "Swipe for the next card · tap to flip";
 
 export default function PackRevealScene({
   cards,
@@ -23,6 +23,10 @@ export default function PackRevealScene({
     onCloseRef.current = onClose;
   }, [onClose]);
   const [status, setStatus] = useState<CardStatus>({ kind: "loading" });
+  /** Bumped for each legendary reveal, so the flash overlay remounts and replays. */
+  const [flash, setFlash] = useState(0);
+  /** Highest card index that has had its reveal; a charging legendary's name stays hidden. */
+  const [revealedUpTo, setRevealedUpTo] = useState(-1);
   const [effectsUnavailable, setEffectsUnavailable] = useState(false);
 
   useEffect(() => {
@@ -40,11 +44,17 @@ export default function PackRevealScene({
           onInspect: () => {},
           onEffectsUnavailable: () => setEffectsUnavailable(true),
           onEmpty: () => onCloseRef.current(),
+          onReveal: (i) => {
+            setRevealedUpTo((n) => Math.max(n, i));
+            if (cards[i]?.rarity !== "legendary") return;
+            setFlash((n) => n + 1);
+            navigator.vibrate?.([40, 60, 120]);
+          },
         },
         { room: false },
       );
       // Each swiped card leaves the pile for good, so only these cards are ever shown.
-      scene.showStack(cards, 0, { once: true });
+      scene.showStack(cards, 0, { once: true, reveal: true });
       sceneRef.current = scene;
     } catch {
       // Reported on the next tick, like the scene's own async callbacks.
@@ -68,8 +78,15 @@ export default function PackRevealScene({
     <div className="absolute inset-0 overflow-hidden text-white">
       <div ref={containerRef} className="absolute inset-0" />
 
-      <div className="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-between p-3">
-        <div className="text-sm font-semibold">New cards</div>
+      {flash > 0 && (
+        <div
+          key={flash}
+          aria-hidden
+          className="animate-flash pointer-events-none absolute inset-0 bg-white motion-reduce:hidden"
+        />
+      )}
+
+      <div className="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-end p-3">
         <button
           type="button"
           onClick={onClose}
@@ -84,7 +101,9 @@ export default function PackRevealScene({
         className="pointer-events-none absolute inset-x-0 bottom-4 flex flex-col items-center gap-2 px-4 text-center text-xs text-white/80"
       >
         <div className="text-sm font-semibold text-white">
-          {current ? `${current.name} · ${current.rarity} · ${index + 1} / ${cards.length}` : ""}
+          {current
+            ? `${index <= revealedUpTo ? `${current.name} · ${current.rarity}` : "???"} · ${index + 1} / ${cards.length}`
+            : ""}
         </div>
         <button
           type="button"

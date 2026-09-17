@@ -13,10 +13,10 @@ const RARITY_ORDER: Record<Card["rarity"], number> = {
 };
 
 const RARITY_WEIGHTS: Record<Card["rarity"], number> = {
-  common: 50,
+  common: 54,
   rare: 30,
   epic: 15,
-  legendary: 5,
+  legendary: 1,
 };
 
 function getRandomRarity(): Card["rarity"] {
