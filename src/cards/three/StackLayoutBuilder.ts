@@ -42,3 +42,9 @@ export function stackIntro(cardH: number, dims: SceneDims): StackState {
   const base = basePosition(dims);
   return { x: base.x, y: base.y - cardH * 0.8, z: base.z, scale: cardH * 0.4 };
 }
+
+/** Pack reveal intro start pose: the mouth of the torn pack, tiny, so cards are thrown up out of it. */
+export function stackBurst(cardH: number, dims: SceneDims): StackState {
+  const base = basePosition(dims);
+  return { x: base.x, y: base.y - cardH * 0.3, z: base.z, scale: cardH * 0.22 };
+}

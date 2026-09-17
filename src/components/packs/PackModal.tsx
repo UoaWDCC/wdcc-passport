@@ -30,6 +30,8 @@ export function PackModal({
   const [opening, setOpening] = useState(false);
   /** The reveal is over: fade the whole overlay out, then close for real. */
   const [closing, setClosing] = useState(false);
+  /** The pack was just torn: a flash and a shake sell the rip. */
+  const [torn, setTorn] = useState(false);
 
   function finish() {
     // No transition runs under reduced motion, so onTransitionEnd never would either.
@@ -72,6 +74,13 @@ export function PackModal({
         </button>
       )}
 
+      {torn && (
+        <div
+          aria-hidden
+          className="animate-flash pointer-events-none fixed inset-0 z-20 bg-white motion-reduce:hidden"
+        />
+      )}
+
       {phase === "reveal" && opened ? (
         <PackReveal cards={opened} onClose={finish} />
       ) : (
@@ -99,14 +108,17 @@ export function PackModal({
           )}
 
           {phase === "tear" && (
-            <PackTear
-              image={PACK_IMAGE}
-              onTear={() => {
-                setOpening(true);
-                onOpen();
-              }}
-              onDone={() => setPhase("reveal")}
-            />
+            <div className={torn ? "animate-shake motion-reduce:animate-none" : ""}>
+              <PackTear
+                image={PACK_IMAGE}
+                onTear={() => {
+                  setOpening(true);
+                  setTorn(true);
+                  onOpen();
+                }}
+                onDone={() => setPhase("reveal")}
+              />
+            </div>
           )}
 
           {/* The pack is open but the cards are still on their way, or never arrived. */}

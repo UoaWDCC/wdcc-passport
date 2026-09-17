@@ -30,6 +30,9 @@ body {
 @theme {
   --animate-pack-lid: pack-lid 0.45s 0.15s ease-in forwards;
   --animate-pack-body: pack-body 0.5s 0.45s ease-in forwards;
+  /* A white flash that fades out: the pack tearing, and a legendary being revealed. */
+  --animate-flash: flash 0.7s ease-out forwards;
+  --animate-shake: shake 0.35s ease-in-out;
 
   @keyframes pack-lid {
     0% {
@@ -40,6 +43,34 @@ body {
       transform: translate(calc(var(--tear-dir, 1) * 110%), -30%)
         rotate(calc(var(--tear-dir, 1) * 12deg));
       opacity: 0;
+    }
+  }
+
+  @keyframes flash {
+    0% {
+      opacity: 0.85;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes shake {
+    0%,
+    100% {
+      transform: none;
+    }
+    20% {
+      transform: translate(-6px, 3px) rotate(-0.6deg);
+    }
+    40% {
+      transform: translate(5px, -4px) rotate(0.5deg);
+    }
+    60% {
+      transform: translate(-4px, 2px) rotate(-0.3deg);
+    }
+    80% {
+      transform: translate(3px, -1px) rotate(0.2deg);
     }
   }
 

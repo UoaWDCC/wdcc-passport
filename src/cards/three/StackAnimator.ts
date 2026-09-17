@@ -1,8 +1,14 @@
-import type { SceneDims } from "../types";
+import type { CardRarity, SceneDims } from "../types";
 import { setCardRenderOrder, type CardObject } from "./buildCard";
 import type { TiltState } from "./FanAnimator";
 import { CARD_ASPECT } from "./buildCard";
-import { STACK_INTRO_DURATION, stackIntro, stackRest } from "./StackLayoutBuilder";
+import {
+  STACK_INTRO_DURATION,
+  STACK_Z_STEP,
+  stackBurst,
+  stackIntro,
+  stackRest,
+} from "./StackLayoutBuilder";
 
 export interface StackCardEntry {
   /** 0 = top of the pile. */
@@ -11,6 +17,16 @@ export interface StackCardEntry {
   index: number;
   card: CardObject;
   intro: { startTime: number; delay: number } | null;
+  /** Reveal mode only, from here down. */
+  rarity?: CardRarity;
+  /** The card has reached the top of the pile and had its moment (aura lit, sparkles thrown). */
+  revealed?: boolean;
+  /** Start time (s) of a legendary's charge-up (hidden, trembling) while it plays. */
+  charge?: number | null;
+  /** Start time (s) of the legendary showcase (lift and spin) while it plays. */
+  showcase?: number | null;
+  /** The tremble offset applied last frame, so it can be taken back off before easing. */
+  shake?: { x: number; y: number };
 }
 
 export interface StackTickContext {
@@ -18,6 +34,9 @@ export interface StackTickContext {
   dims: SceneDims;
   tilt: TiltState;
   flipAngle: number;
+  /** Pack reveal: cards are thrown out of the pack, and each gets its moment on reaching the top. */
+  reveal?: boolean;
+  reducedMotion?: boolean;
 }
 
 interface Swipe {
@@ -28,6 +47,20 @@ interface Swipe {
 }
 
 const SWIPE_DURATION = 0.45;
+const NO_SHAKE = { x: 0, y: 0 };
+/**
+ * Fraction of the pointer tilt the pile follows. Every card tilts by the same amount, so the
+ * pile moves as one block and the top card keeps covering the faces beneath it (pokebox tilted
+ * the top card the most, which swung it clear of the cards below).
+ */
+const TILT_X = 0.4;
+const TILT_Y = 0.25;
+/** Legendary reveal: the card lifts off the pile and spins a full turn. */
+export const SHOWCASE_DURATION = 1.3;
+/** Before the showcase a legendary sits hidden under its cover, trembling harder and harder. */
+export const CHARGE_DURATION = 1.1;
+/** Point in the showcase (0..1) where the card counts as revealed: the flash and the sparkle burst. */
+const SHOWCASE_REVEAL_AT = 0.1;
 
 const easeOutBack = (t: number) => {
   const c1 = 1.70158;
@@ -42,6 +75,44 @@ const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2
  */
 export class StackAnimator {
   private swipeState: Swipe | null = null;
+  private justRevealed: StackCardEntry | null = null;
+
+  /** The card that had its reveal moment during the last tick, if any (read once). */
+  takeRevealed(): StackCardEntry | null {
+    const entry = this.justRevealed;
+    this.justRevealed = null;
+    return entry;
+  }
+
+  /** A legendary is charging up or mid-showcase. */
+  isShowcasing(entries: StackCardEntry[]): boolean {
+    return entries.some((e) => e.showcase != null || e.charge != null);
+  }
+
+  /** Jump a playing showcase to its settled state. */
+  skipShowcase(entries: StackCardEntry[]): void {
+    for (const e of entries) {
+      if (e.showcase == null && e.charge == null) continue;
+      e.showcase = null;
+      e.charge = null;
+      if (!e.revealed) {
+        e.revealed = true;
+        this.justRevealed = e;
+      }
+    }
+  }
+
+  /** 0..1 through the charge-up, or null when it is not playing. */
+  chargeProgress(entry: StackCardEntry, now: number): number | null {
+    if (entry.charge == null) return null;
+    return Math.min(1, (now - entry.charge) / CHARGE_DURATION);
+  }
+
+  /** 0..1 through the showcase, or null when it is not playing. */
+  showcaseProgress(entry: StackCardEntry, now: number): number | null {
+    if (entry.showcase == null) return null;
+    return Math.min(1, (now - entry.showcase) / SHOWCASE_DURATION);
+  }
 
   get isSwiping(): boolean {
     return this.swipeState !== null;
@@ -49,6 +120,7 @@ export class StackAnimator {
 
   reset(): void {
     this.swipeState = null;
+    this.justRevealed = null;
   }
 
   isIntroPlaying(entries: StackCardEntry[]): boolean {
@@ -62,6 +134,7 @@ export class StackAnimator {
   swipe(entries: StackCardEntry[], direction: 1 | -1, now: number, allowLast = false): boolean {
     const minPile = allowLast ? 1 : 2;
     if (this.swipeState || entries.length < minPile || this.isIntroPlaying(entries)) return false;
+    if (this.isShowcasing(entries)) return false;
     const departing = entries.find((e) => e.slot === 0);
     if (!departing) return false;
     this.swipeState = { direction, startTime: now, departing };
@@ -89,17 +162,23 @@ export class StackAnimator {
       if (!entry.intro) continue;
       const g = entry.card.group;
       const rest = stackRest(entry.slot, ctx.cardH, ctx.dims);
-      const from = stackIntro(ctx.cardH, ctx.dims);
+      const from = ctx.reveal ? stackBurst(ctx.cardH, ctx.dims) : stackIntro(ctx.cardH, ctx.dims);
       const elapsed = now - entry.intro.startTime - entry.intro.delay;
       const t = elapsed < 0 ? 0 : Math.min(elapsed / STACK_INTRO_DURATION, 1);
       const e = t <= 0 ? 0 : easeOutBack(t);
-      g.visible = true;
+      // Reveal mode: the cards are thrown up out of the pack mouth as one deck, tumbling together,
+      // so only the top card's face is ever seen; the rest stay hidden behind it.
+      const arc = ctx.reveal ? Math.sin(Math.PI * t) * ctx.cardH * 0.22 : 0;
+      const tumble = ctx.reveal ? -0.5 * (1 - e) : 0;
+      // Keep the deck in pile order from the first frame, so the top card always covers the others.
+      const fromZ = ctx.reveal ? from.z - entry.slot * ctx.dims.boxD * 0.01 : from.z;
+      g.visible = t > 0 || !ctx.reveal;
       g.position.set(
         from.x + (rest.x - from.x) * e,
-        from.y + (rest.y - from.y) * e,
-        from.z + (rest.z - from.z) * e,
+        from.y + (rest.y - from.y) * e + arc,
+        fromZ + (rest.z - fromZ) * e,
       );
-      g.rotation.set(tilt.rotateX * 0.75 * e, tilt.rotateY * 0.45 * e, 0);
+      g.rotation.set(tilt.rotateX * TILT_X * e, tilt.rotateY * TILT_Y * e, tumble);
       g.scale.setScalar(from.scale + (rest.scale - from.scale) * e);
       if (t >= 1) entry.intro = null;
     }
@@ -114,7 +193,9 @@ export class StackAnimator {
       const departing = s.departing;
       const rest = stackRest(0, ctx.cardH, ctx.dims);
       const g = departing.card.group;
-      g.position.set(rest.x, rest.y + flyOffY * e, rest.z);
+      // Held in front of the pile, so the card promoting into the top slot never passes through it.
+      const lift = ctx.dims.boxD * STACK_Z_STEP * 2;
+      g.position.set(rest.x, rest.y + flyOffY * e, rest.z + lift);
       g.rotation.set(0, 0, 0);
       g.scale.setScalar(rest.scale * (1 - e * 0.3));
 
@@ -155,15 +236,59 @@ export class StackAnimator {
       for (const entry of entries) {
         const g = entry.card.group;
         const rest = stackRest(entry.slot, ctx.cardH, ctx.dims);
-        const targetZ = rest.z + (entry.slot === 0 ? flipLift : 0);
+        const isTop = entry.slot === 0;
+        let liftZ = isTop ? flipLift : 0;
+        let spin = 0;
+        let shakeX = 0;
+        let shakeY = 0;
+        let shakeRot = 0;
+
+        if (ctx.reveal && isTop) {
+          // Reaching the top of the pile is a card's reveal. A legendary makes a show of it:
+          // it charges up hidden under its cover, trembling harder and harder, then lifts
+          // off the pile and spins a full turn as the cover burns away.
+          const legendary = entry.rarity === "legendary" && !ctx.reducedMotion;
+          if (!entry.revealed && legendary && entry.charge == null && entry.showcase == null) {
+            entry.charge = now;
+          }
+          const c = this.chargeProgress(entry, now);
+          if (c !== null) {
+            const amp = c * c;
+            shakeX = Math.sin(now * 47) * ctx.cardH * 0.012 * amp;
+            shakeY = Math.cos(now * 53) * ctx.cardH * 0.009 * amp;
+            shakeRot = Math.sin(now * 41) * 0.035 * amp;
+            if (c >= 1) {
+              entry.charge = null;
+              entry.showcase = now;
+            }
+          }
+          const p = this.showcaseProgress(entry, now);
+          if (!entry.revealed && (legendary ? p !== null && p >= SHOWCASE_REVEAL_AT : true)) {
+            entry.revealed = true;
+            this.justRevealed = entry;
+          }
+          if (p !== null) {
+            spin = Math.PI * 2 * easeInOutCubic(p);
+            liftZ += Math.sin(Math.PI * p) * ctx.cardH * 0.45;
+            if (p >= 1) entry.showcase = null;
+          }
+        }
+
+        const targetZ = rest.z + liftZ;
         g.visible = true;
-        g.position.x += (rest.x - g.position.x) * lerp;
-        g.position.y += (rest.y - g.position.y) * lerp;
+        // Ease the un-shaken position toward rest, then lay this frame's tremble on top;
+        // easing the tremble itself would smooth it away.
+        const prev = entry.shake ?? NO_SHAKE;
+        const baseX = g.position.x - prev.x;
+        const baseY = g.position.y - prev.y;
+        g.position.x = baseX + (rest.x - baseX) * lerp + shakeX;
+        g.position.y = baseY + (rest.y - baseY) * lerp + shakeY;
+        entry.shake = shakeX || shakeY ? { x: shakeX, y: shakeY } : NO_SHAKE;
+
         g.position.z += (targetZ - g.position.z) * lerp;
         g.scale.setScalar(g.scale.x + (rest.scale - g.scale.x) * lerp);
-        const f = entry.slot === 0 ? 1 : Math.max(0.1, 1 - entry.slot * 0.25);
-        const flip = entry.slot === 0 ? ctx.flipAngle : 0;
-        g.rotation.set(tilt.rotateX * 0.75 * f, tilt.rotateY * 0.45 * f + flip, 0);
+        const flip = isTop ? ctx.flipAngle : 0;
+        g.rotation.set(tilt.rotateX * TILT_X, tilt.rotateY * TILT_Y + flip + spin, shakeRot);
       }
     }
     return null;
