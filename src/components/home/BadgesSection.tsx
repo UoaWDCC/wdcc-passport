@@ -8,7 +8,10 @@ import { useQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 
 export function BadgesSection() {
-  const { data: badges = [], error, isPending } = useQuery(getUserBadgesQuery());
+  const { data, error, isPending } = useQuery(getUserBadgesQuery());
+  const badges = (data ?? []).filter(
+    (b): b is typeof b & { awardedAt: Date } => b.awardedAt !== null,
+  );
 
   let body: ReactNode;
   if (isPending) {
