@@ -5,6 +5,8 @@ import { openPack } from "./mutation";
 import { generateCards } from "../cards/queries";
 import { getUserPackCount } from "./queries";
 
+const CARD_BACK_PATH = "card/backside.webp";
+
 export async function openPackAction() {
   const session = await requireUser();
   const cards = await generateCards();
@@ -14,7 +16,17 @@ export async function openPackAction() {
     throw new Error("No packs available to open.");
   }
 
-  return cards;
+  const baseUrl = process.env.R2_PUBLIC_BASE_URL;
+
+  if (!baseUrl) {
+    throw new Error("R2_PUBLIC_BASE_URL is not set");
+  }
+
+  return cards.map(({ imagePath, ...c }) => ({
+    ...c,
+    front: `${baseUrl}/${imagePath}`,
+    back: `${baseUrl}/${CARD_BACK_PATH}`,
+  }));
 }
 
 export async function getUserPackCountAction() {

@@ -15,6 +15,7 @@ export function PacksSection() {
     mutate: openPack,
     data: opened,
     error: openError,
+    reset: resetOpen,
   } = useMutation(
     openPackMutation({
       onSuccess: () => {
@@ -50,30 +51,18 @@ export function PacksSection() {
             No packs yet — scan a QR code at a WDCC event to earn one.
           </p>
         )}
-
-        {openError && (
-          <p role="alert" className="text-sm font-semibold text-red-300">
-            Could not open the pack. Please try again.
-          </p>
-        )}
-
-        {opened && (
-          <ul aria-label="Cards from the pack" className="flex flex-col gap-1">
-            {opened.map((card, i) => (
-              <li key={`${card.id}-${i}`} className="text-sm text-white/70">
-                <span className="font-semibold text-white">{card.name}</span> ·{" "}
-                <span className="capitalize">{card.rarity}</span>
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
 
       {showPacks && (
         <PackModal
           packCount={packCount}
+          opened={opened}
+          openError={openError !== null}
           onOpen={() => openPack()}
-          onClose={() => setShowPacks(false)}
+          onClose={() => {
+            setShowPacks(false);
+            resetOpen();
+          }}
         />
       )}
     </section>

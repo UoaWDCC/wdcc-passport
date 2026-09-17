@@ -20,6 +20,13 @@ import type { Mode, ModeEnv, PointerInfo, TickContext } from "./Mode";
 export interface StackCallbacks {
   /** A different card is now on top of the pile. */
   onFocus(index: number): void;
+  /** Once mode: the last card has been swiped away. */
+  onEmpty?(): void;
+}
+
+export interface StackOptions {
+  /** Swiped cards leave the pile for good instead of going to the bottom, so each is seen once. */
+  once?: boolean;
 }
 
 // pokebox useSwipeGesture gates
@@ -56,6 +63,7 @@ export class StackMode implements Mode {
     private readonly entries: readonly CardEntry[],
     index: number,
     private readonly callbacks: StackCallbacks,
+    private readonly options: StackOptions = {},
   ) {
     void this.build(index);
   }
@@ -94,9 +102,15 @@ export class StackMode implements Mode {
       flipAngle: ctx.flipAngle,
     });
     if (!departed) return;
-    // The departed card is now at the bottom (mostly hidden): re-point it at the next unseen
-    // card so swiping browses the whole collection, not just the pile.
-    if (this.entries.length > STACK_COUNT) {
+    if (this.options.once) {
+      this.remove(departed);
+      if (this.pile.length === 0) {
+        this.callbacks.onEmpty?.();
+        return;
+      }
+    } else if (this.entries.length > STACK_COUNT) {
+      // The departed card is now at the bottom (mostly hidden): re-point it at the next unseen
+      // card so swiping browses the whole collection, not just the pile.
       void this.reassign(departed, this.next);
       this.next = (this.next + 1) % this.entries.length;
     }
@@ -179,7 +193,7 @@ export class StackMode implements Mode {
 
   /** pokebox swipe: the top card flies off (up or down) and goes to the bottom of the pile. */
   private swipe(direction: 1 | -1): void {
-    this.animator.swipe(this.pile, direction, performance.now() / 1000);
+    this.animator.swipe(this.pile, direction, performance.now() / 1000, this.options.once);
   }
 
   /** Replaces the pile with one whose top card is `index`. A build still loading is discarded. */
