@@ -8,7 +8,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PackModal } from "@/components/packs/PackModal";
 import { getUserPackCountQuery, openPackMutation } from "@/hooks/packs/query-options";
 
-export type NavTarget = "settings" | "achievements" | "scan" | "passport" | "packs";
+export type NavTarget = "settings" | "badges" | "scan" | "passport" | "packs";
 
 const HEXAGON = { src: "/assets/pixel/hexagon.png", w: 18, h: 19, scale: 3 };
 const MEDAL = { src: "/assets/pixel/medal.png", w: 21, h: 20, scale: 3 };
@@ -29,7 +29,7 @@ const ICONS = [
   { key: "packs" as const, sprite: CARD, label: "Packs", href: null },
   { key: "passport" as const, sprite: CARD, label: "Passport", href: "/home/cards" },
   { key: "scan" as const, sprite: SCANNER, label: "Scan", href: "/home/scan" },
-  { key: "achievements" as const, sprite: MEDAL, label: "Achievements", href: null },
+  { key: "badges" as const, sprite: MEDAL, label: "Badges", href: "/home/badges" },
   { key: "settings" as const, sprite: HEXAGON, label: "Settings", href: null },
 ];
 
