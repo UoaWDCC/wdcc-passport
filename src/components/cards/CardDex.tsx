@@ -80,7 +80,7 @@ export function CardDex({
                       fill
                       // Ask for well over the tile's size, at high quality: card art is full
                       // of small print that a tight, default-quality thumbnail smears.
-                      sizes="(max-width: 430px) 50vw, 220px"
+                      sizes="(max-width: 500px) 50vw, 250px"
                       quality={90}
                       // A missing card is its own silhouette: the art blacked out.
                       className={`object-cover ${has ? "" : "opacity-80 brightness-0"}`}
