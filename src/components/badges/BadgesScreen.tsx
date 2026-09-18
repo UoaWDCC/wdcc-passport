@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
+import { PIXEL_ERROR_TEXT, PIXEL_PANEL, pixelButton } from "@/components/ui/pixel";
 import { getUserBadgesQuery } from "@/hooks/badges/query-options";
 
 type Badge = {
@@ -14,8 +15,6 @@ type Badge = {
   eventName: string | null;
   awardedAt: Date | null;
 };
-
-const PANEL = "border-4 border-black bg-white text-black shadow-[4px_4px_0_#000]";
 
 const FRAME = "/assets/pixel/badge-frame.png";
 const pixelated = { imageRendering: "pixelated" } as const;
@@ -64,7 +63,7 @@ function BadgeDetail({ badge, onClose }: { badge: Badge; onClose: () => void }) 
         aria-modal="true"
         aria-label={title}
         onClick={(e) => e.stopPropagation()}
-        className={`relative flex w-full max-w-sm flex-col items-center gap-4 p-6 pt-8 text-center [text-shadow:none] ${PANEL}`}
+        className={`relative flex w-full max-w-sm flex-col items-center gap-4 p-6 pt-8 text-center [text-shadow:none] ${PIXEL_PANEL}`}
       >
         <FramedBadge badge={badge} className="w-40" />
         <div className="flex flex-col gap-3 text-xs leading-relaxed">
@@ -79,9 +78,9 @@ function BadgeDetail({ badge, onClose }: { badge: Badge; onClose: () => void }) 
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="absolute top-1 right-1 flex size-11 items-center justify-center text-lg"
+          className={`absolute top-3 right-3 ${pixelButton({ size: "icon" })}`}
         >
-          ×
+          X
         </button>
       </div>
     </div>
@@ -119,13 +118,13 @@ export function BadgesScreen() {
       )}
 
       {error && (
-        <p className={`px-4 py-3 text-[10px] leading-relaxed text-red-700 ${PANEL}`}>
+        <p className={`px-4 py-3 text-[10px] leading-relaxed ${PIXEL_ERROR_TEXT} ${PIXEL_PANEL}`}>
           Could not load badges.
         </p>
       )}
 
       {!isPending && !error && badges.length === 0 && (
-        <p className={`px-4 py-3 text-[10px] leading-relaxed ${PANEL}`}>
+        <p className={`px-4 py-3 text-[10px] leading-relaxed ${PIXEL_PANEL}`}>
           No badges have been created yet.
         </p>
       )}

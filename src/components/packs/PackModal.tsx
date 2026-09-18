@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { PackTear } from "@/components/packs/PackTear";
+import { pixelButton } from "@/components/ui/pixel";
 
 /** Stand-in pack art: the card back, until the real pack design arrives. */
 const PACK_IMAGE = "/packs/pack-front.webp";
@@ -41,9 +42,9 @@ export function PackModal({
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="fixed top-3 right-3 z-10 flex size-11 items-center justify-center rounded-full text-3xl leading-none text-white/60 transition hover:scale-110 hover:text-white focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+          className={`fixed top-3 right-3 z-10 ${pixelButton({ size: "icon" })}`}
         >
-          ×
+          X
         </button>
       )}
 

@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
 import { CardDex } from "@/components/cards/CardDex";
+import { pixelButton } from "@/components/ui/pixel";
 
 // three.js touches window/document at import time, so the scene is client-only.
 const CardViewerScene = dynamic(() => import("./CardViewerScene"), {
@@ -22,9 +23,6 @@ const TABS: Array<{ id: Tab; label: string }> = [
   { id: "fan", label: "Fan" },
   { id: "stack", label: "Stack" },
 ];
-
-const PILL =
-  "rounded-full bg-black/50 px-3 py-2 text-[10px] text-white/80 backdrop-blur transition hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none";
 
 export function CardViewer() {
   const [tab, setTab] = useState<Tab>("dex");
@@ -47,7 +45,7 @@ export function CardViewer() {
               setTab(t.id);
               setOpenId(null);
             }}
-            className={`${PILL} ${tab === t.id ? "bg-white/30 text-white ring-2 ring-white/80" : ""}`}
+            className={pixelButton({ variant: tab === t.id ? "gold" : "parchment", size: "sm" })}
           >
             {t.label}
           </button>
@@ -58,7 +56,7 @@ export function CardViewer() {
           type="button"
           onClick={() => setOpenId(null)}
           aria-label="Back to the Webdex"
-          className={PILL}
+          className={pixelButton({ size: "icon" })}
         >
           ‹
         </button>
