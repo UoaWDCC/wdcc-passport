@@ -62,6 +62,7 @@ export function SignOutButton() {
         />
       </button>
       <ConfirmDialog
+        pixel
         open={confirming}
         message={confirmMessage}
         onConfirm={handleSignOut}

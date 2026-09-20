@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { HomeNav, NAV_HEIGHT } from "@/components/home/HomeNav";
+import { SCENE_H, SCENE_W } from "@/components/home/scene";
 import { SignOutButton } from "@/components/SignOutButton";
 
 /** The scene backdrop without Webster; the home page places him on top. */
@@ -15,7 +16,7 @@ const WDCC_URL = "https://wdcc.co.nz";
 const LOGO_PAD = 4;
 
 // 500px is the column's max width (max-w-[500px] below).
-const BG_SCALE = "max(500px / 350, 100dvh / 621)";
+const BG_SCALE = `max(500px / ${SCENE_W}, 100dvh / ${SCENE_H})`;
 
 const HEADER_CENTER_Y = 44;
 const HEADER_HEIGHT = HEADER_CENTER_Y * 2;
@@ -37,8 +38,8 @@ export function HomeShell({ children }: { children: ReactNode }) {
         className="absolute -inset-6 bg-repeat-x blur-[6px]"
         style={{
           backgroundImage: `url(${BG_WIDE})`,
-          backgroundSize: `calc(${BG_SCALE} * 700) auto`,
-          backgroundPosition: `calc(50vw + 24px - ${BG_SCALE} * 175) 24px`,
+          backgroundSize: `calc(${BG_SCALE} * ${SCENE_W * 2}) auto`,
+          backgroundPosition: `calc(50vw + 24px - ${BG_SCALE} * ${SCENE_W / 2}) 24px`,
           ...pixelated,
         }}
       />
