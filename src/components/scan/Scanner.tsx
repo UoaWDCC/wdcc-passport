@@ -82,7 +82,7 @@ export function ScannerComponent({ initialCode }: { initialCode?: string }) {
       <button
         type="button"
         onClick={() => submitCode(code)}
-        disabled={isPending || code.trim() === ""}
+        disabled={isPending || code.trim().length !== 6}
         className={pixelButton({ variant: "gold" })}
       >
         {isPending ? "Adding badge…" : "Add badge"}
