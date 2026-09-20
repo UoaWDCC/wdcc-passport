@@ -2,11 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-
-import { PackModal } from "@/components/packs/PackModal";
-import { getUserPackCountQuery, openPackMutation } from "@/hooks/packs/query-options";
 
 export type NavTarget = "home" | "badges" | "scan" | "passport" | "packs";
 
@@ -28,7 +23,7 @@ export const NAV_HEIGHT = BANNER.h * BANNER.scale + BOTTOM_MARGIN;
 const pixelated = { imageRendering: "pixelated" } as const;
 
 const ICONS = [
-  { key: "packs" as const, sprite: PACK, label: "Packs", href: null, gapAfter: 10 },
+  { key: "packs" as const, sprite: PACK, label: "Packs", href: "/home/packs", gapAfter: 10 },
   { key: "passport" as const, sprite: CARD, label: "Cards", href: "/home/cards" },
   { key: "scan" as const, sprite: SCANNER, label: "Scan", href: "/home/scan" },
   { key: "badges" as const, sprite: MEDAL, label: "Badges", href: "/home/badges" },
@@ -42,23 +37,6 @@ type Props = {
 };
 
 export function HomeNav({ onNavigate = (target) => console.log("navigate", target) }: Props) {
-  const queryClient = useQueryClient();
-  const { data: packCount = 0 } = useQuery(getUserPackCountQuery());
-  const [showPacks, setShowPacks] = useState(false);
-  const {
-    mutate: openPack,
-    data: opened,
-    error: openError,
-    reset: resetOpen,
-  } = useMutation(
-    openPackMutation({
-      onSuccess: () => {
-        void queryClient.invalidateQueries({ queryKey: ["get-user-pack-count"] });
-        void queryClient.invalidateQueries({ queryKey: ["get-user-cards"] });
-      },
-    }),
-  );
-
   const bannerW = BANNER.w * BANNER.scale;
   const bannerH = BANNER.h * BANNER.scale;
   const rowW =
@@ -128,7 +106,7 @@ export function HomeNav({ onNavigate = (target) => console.log("navigate", targe
                   <button
                     type="button"
                     aria-label={label}
-                    onClick={() => (key === "packs" ? setShowPacks(true) : onNavigate(key))}
+                    onClick={() => onNavigate(key)}
                     className={className}
                     style={style}
                   >
@@ -140,19 +118,6 @@ export function HomeNav({ onNavigate = (target) => console.log("navigate", targe
           })}
         </ul>
       </nav>
-
-      {showPacks && (
-        <PackModal
-          packCount={packCount}
-          opened={opened}
-          openError={openError !== null}
-          onOpen={() => openPack()}
-          onClose={() => {
-            setShowPacks(false);
-            resetOpen();
-          }}
-        />
-      )}
     </>
   );
 }
