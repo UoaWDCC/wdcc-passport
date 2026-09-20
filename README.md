@@ -31,7 +31,7 @@ Install deps:
 pnpm install
 ```
 
-Get `.env` from WDCC tech document or ask an exec to provide. 
+Get `.env` from WDCC tech document or ask an exec to provide.
 
 Apply the schema to the database:
 
@@ -65,15 +65,15 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Routes
 
-| Route          | Access | What it is                                               |
-| -------------- | ------ | -------------------------------------------------------- |
-| `/`            | Public | Landing page with Google sign-in |
-| `/home`        | User   | Home screen                                              |
-| `/home/packs`  | User   | Pack count and pack opening                              |
-| `/home/cards`  | User   | Card collection                  |
-| `/home/scan`   | User   | QR scanner / manual badge code entry                     |
-| `/home/badges` | User   | Badges the user has earned                               |
-| `/admin`       | Admin  | Create and manage events and badges, show QR codes       |
+| Route          | Access | What it is                                         |
+| -------------- | ------ | -------------------------------------------------- |
+| `/`            | Public | Landing page with Google sign-in                   |
+| `/home`        | User   | Home screen                                        |
+| `/home/packs`  | User   | Pack count and pack opening                        |
+| `/home/cards`  | User   | Card collection                                    |
+| `/home/scan`   | User   | QR scanner / manual badge code entry               |
+| `/home/badges` | User   | Badges the user has earned                         |
+| `/admin`       | Admin  | Create and manage events and badges, show QR codes |
 
 Admins are redirected from `/home/*` to `/admin`, and non-admins from `/admin` to `/home`.
 
