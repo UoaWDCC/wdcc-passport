@@ -2,13 +2,14 @@
 
 import { authClient } from "@/lib/auth-client";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const redirectTo = "/";
 const confirmMessage = "Do you want to sign out?";
-const buttonClassName =
-  "shrink-0 rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-50";
+
+const SPRITE = { src: "/assets/pixel/signout.png", w: 20, h: 18, scale: 2 };
 
 export function SignOutButton() {
   const router = useRouter();
@@ -37,15 +38,28 @@ export function SignOutButton() {
     }
   }
 
+  const label = loading ? "Signing out..." : failed ? "Sign out failed. Try again." : "Sign out";
+
   return (
     <>
       <button
         type="button"
+        aria-label={label}
+        title={label}
         onClick={() => setConfirming(true)}
         disabled={loading}
-        className={buttonClassName}
+        className="absolute right-3 flex size-11 items-center justify-center disabled:opacity-50"
+        style={{ top: "calc(22px + env(safe-area-inset-top))" }}
       >
-        {loading ? "Signing out..." : failed ? "Sign out failed. Try again." : "Sign out"}
+        <Image
+          src={SPRITE.src}
+          alt=""
+          width={SPRITE.w * SPRITE.scale}
+          height={SPRITE.h * SPRITE.scale}
+          unoptimized
+          priority
+          style={{ imageRendering: "pixelated" }}
+        />
       </button>
       <ConfirmDialog
         open={confirming}
