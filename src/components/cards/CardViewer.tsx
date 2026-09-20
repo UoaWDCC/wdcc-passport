@@ -66,12 +66,13 @@ export function CardViewer() {
 
   return (
     <div className="flex h-full w-full flex-col gap-3 py-3 text-white [text-shadow:2px_2px_0_#000]">
-      <header className="flex items-start justify-between gap-2">
-        {tabs}
+      <header className="flex items-center justify-between gap-2">
+        <h1 className="text-sm">Cards</h1>
         <span className="text-xs tabular-nums" aria-live="polite">
           {count}
         </span>
       </header>
+      {tabs}
       <div className="min-h-0 flex-1 overflow-y-auto">
         {tab === "dex" && openId === null ? (
           <CardDex onOpen={setOpenId} onCount={setCount} />

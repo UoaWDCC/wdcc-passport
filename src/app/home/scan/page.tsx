@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { ScannerComponent } from "@/components/scan/Scanner";
 import { requireUser } from "@/lib/access";
 
@@ -10,13 +9,10 @@ export default async function ScanPage({
   await requireUser();
   const { code } = await searchParams;
   return (
-    <div className="flex flex-col gap-6">
-      <Link
-        href="/home"
-        className="self-start rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
-      >
-        ← Back
-      </Link>
+    <div className="flex flex-col gap-3 py-3 text-white [text-shadow:2px_2px_0_#000]">
+      <header className="flex items-center justify-between gap-2">
+        <h1 className="text-sm">Scan</h1>
+      </header>
       <ScannerComponent initialCode={typeof code === "string" ? code : undefined} />
     </div>
   );

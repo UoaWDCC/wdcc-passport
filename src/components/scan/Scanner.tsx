@@ -44,7 +44,7 @@ export function ScannerComponent({ initialCode }: { initialCode?: string }) {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4">
+    <div className="flex flex-col items-center justify-center gap-2">
       <Scanner
         paused={isPending || data !== undefined}
         onScan={(codes) => {
@@ -61,7 +61,8 @@ export function ScannerComponent({ initialCode }: { initialCode?: string }) {
         }
         components={{ finder: false }}
         classNames={{
-          container: "w-full max-w-sm overflow-hidden rounded-3xl border-4 border-black",
+          container:
+            "aspect-square w-full max-w-[min(340px,40dvh)] overflow-hidden rounded-3xl border-4 border-black",
         }}
       />
 
