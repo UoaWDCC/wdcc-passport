@@ -59,8 +59,9 @@ export function ScannerComponent({ initialCode }: { initialCode?: string }) {
               : "Camera unavailable — type the code below instead.",
           )
         }
+        components={{ finder: false }}
         classNames={{
-          container: "w-full max-w-sm overflow-hidden rounded-3xl",
+          container: "w-full max-w-sm overflow-hidden rounded-3xl border-4 border-black",
         }}
       />
 
@@ -72,6 +73,7 @@ export function ScannerComponent({ initialCode }: { initialCode?: string }) {
         type="text"
         value={code}
         onChange={(e) => setCode(e.target.value)}
+        maxLength={6}
         placeholder="Or type the code here"
         className={`${PIXEL_INPUT} max-w-sm text-center tracking-[0.3em] uppercase placeholder:text-[10px] placeholder:tracking-normal placeholder:normal-case`}
       />
