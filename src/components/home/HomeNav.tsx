@@ -45,7 +45,12 @@ export function HomeNav({ onNavigate = (target) => console.log("navigate", targe
   const queryClient = useQueryClient();
   const { data: packCount = 0 } = useQuery(getUserPackCountQuery());
   const [showPacks, setShowPacks] = useState(false);
-  const { mutate: openPack } = useMutation(
+  const {
+    mutate: openPack,
+    data: opened,
+    error: openError,
+    reset: resetOpen,
+  } = useMutation(
     openPackMutation({
       onSuccess: () => {
         void queryClient.invalidateQueries({ queryKey: ["get-user-pack-count"] });
@@ -139,8 +144,13 @@ export function HomeNav({ onNavigate = (target) => console.log("navigate", targe
       {showPacks && (
         <PackModal
           packCount={packCount}
+          opened={opened}
+          openError={openError !== null}
           onOpen={() => openPack()}
-          onClose={() => setShowPacks(false)}
+          onClose={() => {
+            setShowPacks(false);
+            resetOpen();
+          }}
         />
       )}
     </>
