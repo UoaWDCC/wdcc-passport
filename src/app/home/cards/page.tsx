@@ -1,7 +1,7 @@
 import { CardViewer } from "@/components/cards/CardViewer";
+import { requireUser } from "@/lib/access";
 
-export const metadata = { title: "Cards · WDCC Passport" };
-
-export default function CardsPage() {
+export default async function CardsPage() {
+  await requireUser();
   return <CardViewer />;
 }

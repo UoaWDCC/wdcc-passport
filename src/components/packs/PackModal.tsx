@@ -32,6 +32,7 @@ export function PackModal({
   const [closing, setClosing] = useState(false);
   /** The pack was just torn: a flash and a shake sell the rip. */
   const [torn, setTorn] = useState(false);
+  const isChoosing = phase === "choose";
 
   function finish() {
     // No transition runs under reduced motion, so onTransitionEnd never would either.
@@ -43,27 +44,27 @@ export function PackModal({
   }
 
   useEffect(() => {
-    if (opening) return;
+    if (opening || isChoosing) return;
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [opening, onClose]);
+  }, [opening, isChoosing, onClose]);
 
   return (
     <div
-      role="dialog"
-      aria-modal="true"
+      role={isChoosing ? "region" : "dialog"}
+      aria-modal={isChoosing ? undefined : true}
       aria-label="Your packs"
       onTransitionEnd={(e) => {
         if (closing && e.target === e.currentTarget) onClose();
       }}
-      className={`fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-black/85 backdrop-blur-md transition-opacity duration-500 ease-out motion-reduce:transition-none ${
+      className={`${isChoosing ? "h-full" : "fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-black/85 backdrop-blur-md"} transition-opacity duration-500 ease-out motion-reduce:transition-none ${
         closing ? "pointer-events-none opacity-0" : ""
       }`}
     >
-      {!opening && (
+      {!opening && !isChoosing && (
         <button
           type="button"
           onClick={onClose}
@@ -84,16 +85,16 @@ export function PackModal({
       {phase === "reveal" && opened ? (
         <PackReveal cards={opened} onClose={finish} />
       ) : (
-        <div className="flex min-h-full items-center justify-center p-4 sm:p-6">
+        <div className="flex min-h-full items-center justify-center p-4">
           {phase === "choose" && (
-            <div className="flex max-w-5xl flex-wrap items-center justify-center gap-4 sm:gap-6">
+            <div className="grid w-full max-w-[336px] grid-cols-2 items-center gap-4">
               {Array.from({ length: packCount }).map((_, index) => (
                 <button
                   key={index}
                   type="button"
                   aria-label={`Open pack ${index + 1}`}
                   onClick={() => setPhase("tear")}
-                  className="w-40 shrink-0 transition duration-200 hover:scale-105 hover:drop-shadow-[0_0_16px_#4da3ff] focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none sm:w-52 md:w-60"
+                  className="w-full min-w-0 transition duration-200 hover:scale-105 hover:drop-shadow-[0_0_16px_#4da3ff] focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
                 >
                   <Image
                     src={PACK_IMAGE}
