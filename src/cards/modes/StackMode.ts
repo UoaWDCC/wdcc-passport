@@ -7,6 +7,7 @@ import {
   type CardObject,
 } from "../three/buildCard";
 import { acquireCardTextures, releaseCardTextures, type LoadedCard } from "../three/cardTextures";
+import { RevealEffects } from "../three/revealFx";
 import { StackAnimator, type StackCardEntry } from "../three/StackAnimator";
 import {
   STACK_COUNT,
@@ -22,11 +23,18 @@ export interface StackCallbacks {
   onFocus(index: number): void;
   /** Once mode: the last card has been swiped away. */
   onEmpty?(): void;
+  /** Reveal mode: this card just reached the top of the pile and had its reveal moment. */
+  onReveal?(index: number): void;
 }
 
 export interface StackOptions {
   /** Swiped cards leave the pile for good instead of going to the bottom, so each is seen once. */
   once?: boolean;
+  /**
+   * Pack reveal: the pile is thrown out of the pack, and each card gets its rarity's aura on
+   * reaching the top (a legendary, a whole show).
+   */
+  reveal?: boolean;
 }
 
 // pokebox useSwipeGesture gates
@@ -48,6 +56,7 @@ const STEP_WHEEL_PX = 80;
  */
 export class StackMode implements Mode {
   private readonly animator = new StackAnimator();
+  private readonly fx: RevealEffects | null;
   private pile: StackCardEntry[] = [];
   /** Manifest index that the next card to reach the bottom of the pile will show. */
   private next = 0;
@@ -66,12 +75,14 @@ export class StackMode implements Mode {
     private readonly callbacks: StackCallbacks,
     private readonly options: StackOptions = {},
   ) {
+    this.fx = options.reveal ? new RevealEffects(env.scene, env.reducedMotion) : null;
     void this.build(index);
   }
 
   dispose(): void {
     this.generation++;
     this.clear();
+    this.fx?.dispose();
   }
 
   /** Index of the top card, or null while the pile is (re)building. */
@@ -93,7 +104,12 @@ export class StackMode implements Mode {
   }
 
   canFlip(): boolean {
-    return this.top() !== undefined && !this.animator.isSwiping && !this.pulling;
+    return (
+      this.top() !== undefined &&
+      !this.animator.isSwiping &&
+      !this.pulling &&
+      !this.animator.isShowcasing(this.pile)
+    );
   }
 
   cards(): CardObject[] {
@@ -107,7 +123,26 @@ export class StackMode implements Mode {
       dims: ctx.dims,
       tilt: ctx.tilt,
       flipAngle: ctx.flipAngle,
+      reveal: this.options.reveal,
+      reducedMotion: this.env.reducedMotion,
     });
+    const revealed = this.animator.takeRevealed();
+    if (revealed) {
+      this.fx?.burst(revealed.card, revealed.rarity ?? "common");
+      this.callbacks.onReveal?.(revealed.index);
+    }
+    this.fx?.tick(
+      ctx.now,
+      ctx.dt,
+      this.pile.map((e) => ({
+        card: e.card,
+        slot: e.slot,
+        rarity: e.rarity ?? "common",
+        revealed: e.revealed === true,
+        charge: this.animator.chargeProgress(e, ctx.now),
+        showcase: this.animator.showcaseProgress(e, ctx.now),
+      })),
+    );
     if (!departed) return;
     if (this.options.once) {
       this.remove(departed);
@@ -143,6 +178,11 @@ export class StackMode implements Mode {
     const ms = (p.t - down.t) * 1000;
 
     if (Math.hypot(dx, dy) <= CLICK_MAX_PX) {
+      // A tap during a legendary's showcase skips to the settled card.
+      if (this.animator.isShowcasing(this.pile)) {
+        this.animator.skipShowcase(this.pile);
+        return null;
+      }
       const top = this.top();
       const tap = ms <= CLICK_MAX_MS && top !== undefined && this.canFlip();
       return tap && this.hit(p.ray, top.card) ? "flip" : null;
@@ -259,11 +299,15 @@ export class StackMode implements Mode {
       card.group.position.set(rest.x, rest.y, rest.z);
       card.group.visible = false;
       this.env.scene.add(card.group);
-      // Staggered intro: bottom card pops first, top card last.
+      const rarity = this.entries[i].rarity;
+      this.fx?.attach(card, rarity);
+      // Staggered intro: bottom card pops first, top card last. A pack's cards leave it as one
+      // deck, a hair apart, so the top card hides the others' faces.
+      const stagger = this.options.reveal ? STACK_INTRO_DELAY * 0.25 : STACK_INTRO_DELAY;
       const intro = this.env.reducedMotion
         ? null
-        : { startTime: now, delay: (ready.length - 1 - slot) * STACK_INTRO_DELAY };
-      this.pile.push({ slot, index: i, card, intro });
+        : { startTime: now, delay: (ready.length - 1 - slot) * stagger };
+      this.pile.push({ slot, index: i, card, intro, rarity });
     });
     const top = this.topIndex();
     if (top !== null) this.callbacks.onFocus(top);
@@ -300,6 +344,7 @@ export class StackMode implements Mode {
   }
 
   private remove(entry: StackCardEntry): void {
+    this.fx?.detach(entry.card);
     disposeCardObject(entry.card);
     this.releaseTextures(entry.index);
     this.pile = this.pile.filter((e) => e !== entry);
@@ -316,6 +361,7 @@ export class StackMode implements Mode {
 
   private clear(): void {
     for (const e of this.pile) {
+      this.fx?.detach(e.card);
       disposeCardObject(e.card);
       this.releaseTextures(e.index);
     }
