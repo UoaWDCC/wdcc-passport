@@ -26,6 +26,8 @@ export interface CardSceneCallbacks {
   onEffectsUnavailable(): void;
   /** Stack mode with `once`: the last card has been swiped away. */
   onEmpty?(): void;
+  /** Stack mode with `reveal`: this card just reached the top of the pile. */
+  onReveal?(index: number): void;
 }
 
 /** World units are pokebox's centimetres: the eye sits 60 cm from a 24.81 cm-tall screen at z = 0. */
@@ -175,6 +177,7 @@ export class CardScene {
         {
           onFocus: (i) => this.callbacks.onFocus(i),
           onEmpty: () => this.callbacks.onEmpty?.(),
+          onReveal: (i) => this.callbacks.onReveal?.(i),
         },
         options,
       ),
