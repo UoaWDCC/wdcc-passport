@@ -22,14 +22,15 @@ const pixelated = { imageRendering: "pixelated" } as const;
 function FramedBadge({ badge, className = "" }: { badge: Badge; className?: string }) {
   return (
     <span className={`relative block aspect-square ${className}`}>
-      <span className="absolute inset-[18.75%] bg-black/40" />
-      <Image
-        src={badge.path}
-        alt=""
-        fill
-        sizes="(max-width: 500px) 30vw, 150px"
-        className={`object-contain p-[23%] ${badge.awardedAt ? "" : "opacity-30 grayscale"}`}
-      />
+      <span className="absolute inset-[18.75%] bg-black/40">
+        <Image
+          src={badge.path}
+          alt=""
+          fill
+          sizes="(max-width: 500px) 20vw, 100px"
+          className={`object-cover ${badge.awardedAt ? "" : "opacity-30 grayscale"}`}
+        />
+      </span>
       <Image
         src={FRAME}
         alt=""
