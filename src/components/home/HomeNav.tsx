@@ -8,15 +8,17 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PackModal } from "@/components/packs/PackModal";
 import { getUserPackCountQuery, openPackMutation } from "@/hooks/packs/query-options";
 
-export type NavTarget = "settings" | "badges" | "scan" | "passport" | "packs";
+export type NavTarget = "home" | "badges" | "scan" | "passport" | "packs";
 
-const HEXAGON = { src: "/assets/pixel/hexagon.png", w: 18, h: 19, scale: 3 };
+const HOME = { src: "/assets/pixel/home.png", w: 21, h: 20, scale: 3 };
 const MEDAL = { src: "/assets/pixel/medal.png", w: 21, h: 20, scale: 3 };
 const SCANNER = { src: "/assets/pixel/scanner.png", w: 40, h: 28, scale: 2 };
 const CARD = { src: "/assets/pixel/card.png", w: 46, h: 62, scale: 1 };
+const PACK = { src: "/assets/pixel/pack.png", w: 40, h: 62, scale: 1 };
 const BANNER = { src: "/assets/pixel/banner.png", w: 64, h: 24, scale: 6 };
 
 const TOUCH = 44;
+const cellWidth = (w: number) => Math.ceil(Math.max(w, TOUCH) / 2) * 2;
 const ICON_GAP = 6;
 const BOTTOM_MARGIN = 16;
 
@@ -26,12 +28,14 @@ export const NAV_HEIGHT = BANNER.h * BANNER.scale + BOTTOM_MARGIN;
 const pixelated = { imageRendering: "pixelated" } as const;
 
 const ICONS = [
-  { key: "packs" as const, sprite: CARD, label: "Packs", href: null },
-  { key: "passport" as const, sprite: CARD, label: "Passport", href: "/home/cards" },
+  { key: "packs" as const, sprite: PACK, label: "Packs", href: null, gapAfter: 10 },
+  { key: "passport" as const, sprite: CARD, label: "Cards", href: "/home/cards" },
   { key: "scan" as const, sprite: SCANNER, label: "Scan", href: "/home/scan" },
   { key: "badges" as const, sprite: MEDAL, label: "Badges", href: "/home/badges" },
-  { key: "settings" as const, sprite: HEXAGON, label: "Settings", href: null },
+  { key: "home" as const, sprite: HOME, label: "Home", href: "/home" },
 ];
+
+const ICON_BOX_H = Math.max(...ICONS.map(({ sprite }) => sprite.h * sprite.scale));
 
 type Props = {
   onNavigate?: (target: NavTarget) => void;
@@ -53,7 +57,10 @@ export function HomeNav({ onNavigate = (target) => console.log("navigate", targe
   const bannerW = BANNER.w * BANNER.scale;
   const bannerH = BANNER.h * BANNER.scale;
   const rowW =
-    ICONS.reduce((sum, { sprite }) => sum + Math.max(sprite.w * sprite.scale, TOUCH), 0) +
+    ICONS.reduce(
+      (sum, icon) => sum + cellWidth(icon.sprite.w * icon.sprite.scale) + (icon.gapAfter ?? 0),
+      0,
+    ) +
     ICON_GAP * (ICONS.length - 1);
   const rowLeft = Math.floor((bannerW - rowW) / 2);
 
@@ -61,8 +68,9 @@ export function HomeNav({ onNavigate = (target) => console.log("navigate", targe
     <>
       <nav
         aria-label="Main"
-        className="absolute left-1/2 z-10 -translate-x-1/2"
+        className="absolute left-[calc(50%_-_192px)] z-10"
         style={{
+          left: `round(down, calc(50% - ${bannerW / 2}px), 1px)`,
           bottom: `calc(${BOTTOM_MARGIN}px + env(safe-area-inset-bottom))`,
           width: bannerW,
           height: bannerH,
@@ -79,27 +87,34 @@ export function HomeNav({ onNavigate = (target) => console.log("navigate", targe
           style={pixelated}
         />
         <ul
-          className="absolute top-0 flex h-full items-center"
+          className="absolute top-0 flex h-full items-center select-none"
           style={{ left: rowLeft, gap: ICON_GAP }}
         >
-          {ICONS.map(({ key, sprite, label, href }) => {
+          {ICONS.map(({ key, sprite, label, href, gapAfter }) => {
             const w = sprite.w * sprite.scale;
             const h = sprite.h * sprite.scale;
-            const className = "flex items-center justify-center";
-            const style = { width: Math.max(w, TOUCH), height: Math.max(h, TOUCH) };
+            const className = "flex flex-col items-center gap-1.5";
+            const style = { width: cellWidth(w) };
             const image = (
-              <Image
-                src={sprite.src}
-                alt=""
-                width={w}
-                height={h}
-                unoptimized
-                priority
-                style={pixelated}
-              />
+              <>
+                <span className="flex items-center justify-center" style={{ height: ICON_BOX_H }}>
+                  <Image
+                    src={sprite.src}
+                    alt=""
+                    width={w}
+                    height={h}
+                    unoptimized
+                    priority
+                    style={pixelated}
+                  />
+                </span>
+                <span className="text-[8px] leading-none font-normal tracking-normal whitespace-nowrap text-[#4a3a24]">
+                  {label}
+                </span>
+              </>
             );
             return (
-              <li key={key}>
+              <li key={key} style={{ marginRight: gapAfter }}>
                 {href ? (
                   <Link href={href} aria-label={label} className={className} style={style}>
                     {image}
