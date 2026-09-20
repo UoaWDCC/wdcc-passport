@@ -1,5 +1,7 @@
 import { CardViewer } from "@/components/cards/CardViewer";
+import { requireUser } from "@/lib/access";
 
-export default function CardsPage() {
+export default async function CardsPage() {
+  await requireUser();
   return <CardViewer />;
 }
