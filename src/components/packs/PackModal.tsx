@@ -7,8 +7,7 @@ import { PackReveal } from "@/components/packs/PackReveal";
 import { PackTear } from "@/components/packs/PackTear";
 import { pixelButton } from "@/components/ui/pixel";
 
-/** Stand-in pack art: the card back, until the real pack design arrives. */
-const PACK_IMAGE = "/packs/pack-front.webp";
+const PACK_IMAGE = "/packs/pack-front.png";
 
 type Phase = "choose" | "tear" | "reveal";
 
