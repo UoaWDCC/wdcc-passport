@@ -1,3 +1,4 @@
+import { normalizeEntry } from "@/cards/manifest";
 import { getUserPackCountAction, openPackAction } from "@/server/packs/action";
 
 export const getUserPackCountQuery = () => ({
@@ -6,6 +7,6 @@ export const getUserPackCountQuery = () => ({
 });
 
 export const openPackMutation = (options?: { onSuccess?: () => void }) => ({
-  mutationFn: openPackAction,
+  mutationFn: async () => (await openPackAction()).map(normalizeEntry),
   onSuccess: options?.onSuccess,
 });

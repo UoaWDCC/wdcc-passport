@@ -55,9 +55,13 @@ export class StackAnimator {
     return entries.some((e) => e.intro);
   }
 
-  /** Start a swipe. Always swipes the top card (slot 0). Returns false if busy. */
-  swipe(entries: StackCardEntry[], direction: 1 | -1, now: number): boolean {
-    if (this.swipeState || entries.length < 2 || this.isIntroPlaying(entries)) return false;
+  /**
+   * Start a swipe. Always swipes the top card (slot 0). Returns false if busy.
+   * A lone card only swipes when `allowLast` is set (it is being removed, not recycled).
+   */
+  swipe(entries: StackCardEntry[], direction: 1 | -1, now: number, allowLast = false): boolean {
+    const minPile = allowLast ? 1 : 2;
+    if (this.swipeState || entries.length < minPile || this.isIntroPlaying(entries)) return false;
     const moving = entries.find((e) => e.slot === 0);
     if (!moving) return false;
     this.swipeState = { direction, startTime: now, moving, reverse: false };

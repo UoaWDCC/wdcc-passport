@@ -3,7 +3,7 @@ import { PointerTilt } from "./input/PointerTilt";
 import { FanMode } from "./modes/FanMode";
 import type { Mode, ModeEnv, PointerInfo } from "./modes/Mode";
 import { SingleMode, type CardStatus } from "./modes/SingleMode";
-import { StackMode } from "./modes/StackMode";
+import { StackMode, type StackOptions } from "./modes/StackMode";
 import { CARD_ASPECT, disableShaders, applyFallbackMaterial } from "./three/buildCard";
 import { SCREEN_H_CM, VIEW_DISTANCE_CM, computeDims } from "./three/dims";
 import { disposeFxTextures, loadFxTextures } from "./three/fxTextures";
@@ -24,6 +24,8 @@ export interface CardSceneCallbacks {
   onInspect(inspecting: boolean): void;
   /** A holo shader failed to compile; cards are shown as plain images from now on. */
   onEffectsUnavailable(): void;
+  /** Stack mode with `once`: the last card has been swiped away. */
+  onEmpty?(): void;
 }
 
 /** World units are pokebox's centimetres: the eye sits 60 cm from a 24.81 cm-tall screen at z = 0. */
@@ -160,13 +162,22 @@ export class CardScene {
   }
 
   /** Stack mode with a card on top. Repeated calls with a new index bring that card to the top. */
-  showStack(entries: readonly CardEntry[], index: number): void {
+  showStack(entries: readonly CardEntry[], index: number, options?: StackOptions): void {
     if (this.mode instanceof StackMode) {
       this.mode.focus(index);
       return;
     }
     this.setMode(
-      new StackMode(this.env, entries, index, { onFocus: (i) => this.callbacks.onFocus(i) }),
+      new StackMode(
+        this.env,
+        entries,
+        index,
+        {
+          onFocus: (i) => this.callbacks.onFocus(i),
+          onEmpty: () => this.callbacks.onEmpty?.(),
+        },
+        options,
+      ),
     );
     this.callbacks.onStatus({ kind: "ready" });
   }
