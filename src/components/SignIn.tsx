@@ -84,7 +84,7 @@ export default function SignIn({
           )}
           <button type="button" onClick={handleSignIn} disabled={loading} className={pixelButton()}>
             {loading ? "Signing in..." : "Sign in with Google"}
-            <Image src={GOOGLE_ICON} alt="" width={24} height={24} unoptimized />
+            {!loading && <Image src={GOOGLE_ICON} alt="" width={24} height={24} unoptimized />}
           </button>
         </div>
       </main>
