@@ -1,7 +1,19 @@
 "use client";
 
+import { pixelFont } from "@/components/home/font";
+import { SCENE_H, SCENE_W } from "@/components/home/scene";
+import { PIXEL_ERROR_TEXT, PIXEL_PANEL, pixelButton } from "@/components/ui/pixel";
 import { authClient } from "@/lib/auth-client";
+import Image from "next/image";
 import { useState } from "react";
+
+const BG = "/assets/pixel/scene-background.png";
+const BG_WIDE = "/assets/pixel/scene-wide.png";
+const GOOGLE_ICON = "/assets/google-color.svg";
+
+const BG_SCALE = `max(500px / ${SCENE_W}, 100dvh / ${SCENE_H})`;
+
+const pixelated = { imageRendering: "pixelated" } as const;
 
 export default function SignIn({
   error: initialError,
@@ -34,28 +46,48 @@ export default function SignIn({
   }
 
   return (
-    <div className="relative flex min-h-screen flex-1 items-center justify-center overflow-hidden bg-gray-900 px-6 py-10 text-white">
-      <div className="max-w-3xl">
-        {error && (
-          <div className="rounded-lg bg-red-100 px-4 py-3 text-center text-red-700">
-            <p className="text-sm font-semibold">Sign in failed. Please try again.</p>
-          </div>
-        )}
-        <h1 className="mt-5 text-5xl leading-none font-semibold text-white md:text-7xl">
-          WDCC Passport
+    <div
+      className={`fixed inset-0 touch-manipulation overflow-hidden overscroll-none bg-black text-white ${pixelFont.className}`}
+    >
+      <div
+        aria-hidden
+        className="absolute -inset-6 bg-repeat-x blur-[6px]"
+        style={{
+          backgroundImage: `url(${BG_WIDE})`,
+          backgroundSize: `calc(${BG_SCALE} * ${SCENE_W * 2}) auto`,
+          backgroundPosition: `calc(50vw + 24px - ${BG_SCALE} * ${SCENE_W / 2}) 24px`,
+          ...pixelated,
+        }}
+      />
+      <div aria-hidden className="absolute inset-0 bg-black/45" />
+
+      <main
+        className="relative mx-auto flex h-full w-full max-w-[500px] flex-col items-center justify-center gap-10 bg-cover bg-top px-6 shadow-[0_0_0_4px_rgba(0,0,0,0.85),0_0_60px_rgba(0,0,0,0.7)]"
+        style={{ backgroundImage: `url(${BG})`, ...pixelated }}
+      >
+        <div aria-hidden className="absolute inset-0 bg-black/30" />
+
+        <h1 className="relative -translate-y-6 text-center text-3xl leading-snug [text-shadow:4px_4px_0_#000]">
+          WDCC
+          <br />
+          Passport
         </h1>
-        <p className="mt-4 text-base leading-7 text-white/75">
-          Sign in with your Google account to continue to the app.
-        </p>
-        <button
-          type="button"
-          onClick={handleSignIn}
-          disabled={loading}
-          className="mt-8 inline-flex items-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90 disabled:opacity-50"
-        >
-          {loading ? "Signing in..." : "Sign in with Google"}
-        </button>
-      </div>
+
+        <div className="relative flex w-full translate-y-10 flex-col items-center gap-4">
+          {error && (
+            <p
+              role="alert"
+              className={`${PIXEL_PANEL} ${PIXEL_ERROR_TEXT} px-4 py-3 text-center text-[10px] leading-relaxed`}
+            >
+              Sign in failed. Please try again.
+            </p>
+          )}
+          <button type="button" onClick={handleSignIn} disabled={loading} className={pixelButton()}>
+            {loading ? "Signing in..." : "Sign in with Google"}
+            <Image src={GOOGLE_ICON} alt="" width={24} height={24} unoptimized />
+          </button>
+        </div>
+      </main>
     </div>
   );
 }
