@@ -51,7 +51,7 @@ export function HomeShell({ children }: { children: ReactNode }) {
 
         {!isHome && (
           <div
-            className="absolute inset-x-0 overflow-y-auto px-4"
+            className="absolute inset-x-0 overflow-y-auto px-4 [image-rendering:auto]"
             style={{
               top: `calc(${HEADER_HEIGHT}px + env(safe-area-inset-top))`,
               bottom: `calc(${NAV_HEIGHT}px + env(safe-area-inset-bottom))`,

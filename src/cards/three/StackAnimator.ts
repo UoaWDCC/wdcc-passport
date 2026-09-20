@@ -2,7 +2,7 @@ import type { SceneDims } from "../types";
 import { setCardRenderOrder, type CardObject } from "./buildCard";
 import type { TiltState } from "./FanAnimator";
 import { CARD_ASPECT } from "./buildCard";
-import { STACK_INTRO_DURATION, stackIntro, stackRest } from "./StackLayoutBuilder";
+import { STACK_INTRO_DURATION, STACK_Z_STEP, stackIntro, stackRest } from "./StackLayoutBuilder";
 
 export interface StackCardEntry {
   /** 0 = top of the pile. */
@@ -21,10 +21,10 @@ export interface StackTickContext {
 }
 
 interface Swipe {
-  /** +1 = swipe up, -1 = swipe down. The top card always flies off and goes to the bottom. */
   direction: 1 | -1;
   startTime: number;
-  departing: StackCardEntry;
+  moving: StackCardEntry;
+  reverse: boolean;
 }
 
 const SWIPE_DURATION = 0.45;
@@ -58,10 +58,19 @@ export class StackAnimator {
   /** Start a swipe. Always swipes the top card (slot 0). Returns false if busy. */
   swipe(entries: StackCardEntry[], direction: 1 | -1, now: number): boolean {
     if (this.swipeState || entries.length < 2 || this.isIntroPlaying(entries)) return false;
-    const departing = entries.find((e) => e.slot === 0);
-    if (!departing) return false;
-    this.swipeState = { direction, startTime: now, departing };
-    setCardRenderOrder(departing.card, 200);
+    const moving = entries.find((e) => e.slot === 0);
+    if (!moving) return false;
+    this.swipeState = { direction, startTime: now, moving, reverse: false };
+    setCardRenderOrder(moving.card, 200);
+    return true;
+  }
+
+  swipeBack(entries: StackCardEntry[], direction: 1 | -1, now: number): boolean {
+    if (this.swipeState || entries.length < 2 || this.isIntroPlaying(entries)) return false;
+    const moving = entries.find((e) => e.slot === entries.length - 1);
+    if (!moving) return false;
+    this.swipeState = { direction, startTime: now, moving, reverse: true };
+    setCardRenderOrder(moving.card, 200);
     return true;
   }
 
@@ -105,20 +114,24 @@ export class StackAnimator {
       const s = this.swipeState;
       const raw = Math.min((now - s.startTime) / SWIPE_DURATION, 1);
       const e = easeInOutCubic(raw);
+      const k = s.reverse ? 1 - e : e;
       const flyOffY = ctx.cardH * 1.5 * s.direction;
+      const lift = ctx.dims.boxD * STACK_Z_STEP * 2;
 
-      const departing = s.departing;
+      const moving = s.moving;
       const rest = stackRest(0, ctx.cardH, ctx.dims);
-      const g = departing.card.group;
-      g.position.set(rest.x, rest.y + flyOffY * e, rest.z);
+      const g = moving.card.group;
+      g.visible = true;
+      g.position.set(rest.x, rest.y + flyOffY * k, rest.z + lift);
       g.rotation.set(0, 0, 0);
-      g.scale.setScalar(rest.scale * (1 - e * 0.3));
+      g.scale.setScalar(rest.scale * (1 - k * 0.3));
 
-      // Remaining cards shift toward their promoted positions
+      // Remaining cards shift one slot: up on a forward swipe, down on a pull-back.
       for (const entry of entries) {
-        if (entry === departing) continue;
+        if (entry === moving) continue;
         const from = stackRest(entry.slot, ctx.cardH, ctx.dims);
-        const to = stackRest(Math.max(0, entry.slot - 1), ctx.cardH, ctx.dims);
+        const toSlot = s.reverse ? entry.slot + 1 : Math.max(0, entry.slot - 1);
+        const to = stackRest(toSlot, ctx.cardH, ctx.dims);
         const eg = entry.card.group;
         eg.position.set(
           from.x + (to.x - from.x) * e,
@@ -129,13 +142,19 @@ export class StackAnimator {
       }
 
       if (raw >= 1) {
-        // Reorder: departed card goes to the bottom, everyone else moves up one slot
-        for (const entry of entries) entry.slot = entry === departing ? n - 1 : entry.slot - 1;
-        const bottom = stackRest(departing.slot, ctx.cardH, ctx.dims);
-        g.position.set(bottom.x, bottom.y, bottom.z);
-        g.scale.setScalar(bottom.scale);
-        setCardRenderOrder(departing.card, 0);
-        completed = departing;
+        if (s.reverse) {
+          for (const entry of entries) entry.slot = entry === moving ? 0 : entry.slot + 1;
+          g.position.set(rest.x, rest.y, rest.z);
+          g.scale.setScalar(rest.scale);
+        } else {
+          // Departed card goes to the bottom, everyone else moves up one slot
+          for (const entry of entries) entry.slot = entry === moving ? n - 1 : entry.slot - 1;
+          const bottom = stackRest(moving.slot, ctx.cardH, ctx.dims);
+          g.position.set(bottom.x, bottom.y, bottom.z);
+          g.scale.setScalar(bottom.scale);
+          completed = moving;
+        }
+        setCardRenderOrder(moving.card, 0);
         this.swipeState = null;
       }
       return completed;
