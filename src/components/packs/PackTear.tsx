@@ -127,6 +127,12 @@ export function PackTear({
           }}
           className="relative w-72 drop-shadow-[0_24px_40px_rgba(0,0,0,0.6)] select-none sm:w-80 md:w-96"
         >
+          {!torn && (
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 animate-pulse rounded-xl shadow-[0_0_24px_8px_rgba(168,85,247,0.5),0_0_64px_16px_rgba(126,34,206,0.3)] ring-2 ring-purple-400/60 motion-reduce:animate-none"
+            />
+          )}
           {/* Body: everything below the tear line; sizes the box and ends the sequence. */}
           <div
             onAnimationEnd={onDone}
