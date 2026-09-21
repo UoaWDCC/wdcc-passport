@@ -134,7 +134,7 @@ export default function CardViewerScene({
 
       <div aria-live="polite" className="flex shrink-0 flex-col items-center gap-1 text-center">
         <div className="flex items-center justify-center gap-3">
-          {cards && cards.length > 1 && (
+          {mode !== "stack" && cards && cards.length > 1 && (
             <button
               type="button"
               onClick={() => setIndex((i) => (i - 1 + cards.length) % cards.length)}
@@ -151,7 +151,7 @@ export default function CardViewerScene({
               {current ? `${current.rarity} · ×${current.quantity}` : ""}
             </div>
           </div>
-          {cards && cards.length > 1 && (
+          {mode !== "stack" && cards && cards.length > 1 && (
             <button
               type="button"
               onClick={() => setIndex((i) => (i + 1) % cards.length)}
