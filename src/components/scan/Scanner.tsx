@@ -13,6 +13,7 @@ export function ScannerComponent({ initialCode }: { initialCode?: string }) {
   const queryClient = useQueryClient();
   const lastSubmitted = useRef("");
   const [code, setCode] = useState(initialCode ?? "");
+  const [isEnteringCode, setIsEnteringCode] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
 
   const {
@@ -31,6 +32,8 @@ export function ScannerComponent({ initialCode }: { initialCode?: string }) {
   );
 
   function submitCode(value: string) {
+    if (isPending || value.trim().length !== 6) return;
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
     addUserBadge(value);
   }
 
@@ -44,49 +47,73 @@ export function ScannerComponent({ initialCode }: { initialCode?: string }) {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center gap-2">
-      <Scanner
-        paused={isPending || data !== undefined}
-        onScan={(codes) => {
-          if (codes[0]) {
-            handleScan(codes[0].rawValue);
+    <div className="flex min-h-0 flex-1 flex-col items-center gap-2 sm:flex-none sm:justify-center">
+      <div className="scan-camera [container-type:size] flex min-h-0 w-full max-w-[340px] flex-1 justify-center overflow-hidden sm:[container-type:normal] sm:aspect-square sm:w-[min(340px,40dvh)] sm:flex-none">
+        <Scanner
+          paused={isEnteringCode || isPending || data !== undefined}
+          onScan={(codes) => {
+            if (codes[0]) {
+              handleScan(codes[0].rawValue);
+            }
+          }}
+          onError={(scannerError) =>
+            setCameraError(
+              scannerError.kind === "permission-denied"
+                ? "Camera access was denied — allow it in your browser, or type the code below."
+                : "Camera unavailable — type the code below instead.",
+            )
           }
-        }}
-        onError={(scannerError) =>
-          setCameraError(
-            scannerError.kind === "permission-denied"
-              ? "Camera access was denied — allow it in your browser, or type the code below."
-              : "Camera unavailable — type the code below instead.",
-          )
-        }
-        components={{ finder: false }}
-        classNames={{
-          container:
-            "aspect-square w-full max-w-[min(340px,40dvh)] overflow-hidden rounded-3xl border-4 border-black",
-        }}
-      />
+          components={{ finder: false }}
+          styles={{
+            container: {
+              width: "var(--scanner-size, min(340px, 40dvh))",
+              height: "var(--scanner-size, min(340px, 40dvh))",
+            },
+          }}
+          classNames={{
+            container: "overflow-hidden rounded-3xl border-4 border-black",
+          }}
+        />
+      </div>
 
-      <label htmlFor="code-input" className="text-[10px] text-white [text-shadow:2px_2px_0_#000]">
-        Badge code
-      </label>
-      <input
-        id="code-input"
-        type="text"
-        value={code}
-        onChange={(e) => setCode(e.target.value)}
-        maxLength={6}
-        placeholder="Or type the code here"
-        className={`${PIXEL_INPUT} max-w-sm text-center tracking-[0.3em] uppercase placeholder:text-[10px] placeholder:tracking-normal placeholder:normal-case`}
-      />
-
-      <button
-        type="button"
-        onClick={() => submitCode(code)}
-        disabled={isPending || code.trim().length !== 6}
-        className={pixelButton({ variant: "gold" })}
+      <form
+        data-code-form
+        className="flex w-full shrink-0 flex-col items-center gap-2"
+        onFocusCapture={() => setIsEnteringCode(true)}
+        onBlurCapture={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget)) setIsEnteringCode(false);
+        }}
+        onSubmit={(event) => {
+          event.preventDefault();
+          submitCode(code);
+        }}
       >
-        {isPending ? "Adding badge…" : "Add badge"}
-      </button>
+        <label htmlFor="code-input" className="text-[10px] text-white [text-shadow:2px_2px_0_#000]">
+          Badge code
+        </label>
+        <input
+          id="code-input"
+          type="text"
+          autoComplete="off"
+          autoCapitalize="characters"
+          spellCheck={false}
+          enterKeyHint="done"
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+          maxLength={6}
+          placeholder="Or type the code here"
+          className={`${PIXEL_INPUT} max-w-sm text-center tracking-[0.3em] uppercase placeholder:text-[10px] placeholder:tracking-normal placeholder:normal-case max-sm:text-base!`}
+        />
+
+        <button
+          type="submit"
+          onPointerDown={(event) => event.preventDefault()}
+          disabled={isPending || code.trim().length !== 6}
+          className={pixelButton({ variant: "gold" })}
+        >
+          {isPending ? "Adding badge…" : "Add badge"}
+        </button>
+      </form>
 
       {cameraError && (
         <p

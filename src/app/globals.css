@@ -25,6 +25,26 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Keep this breakpoint in sync with HomeShell's visual viewport listener. */
+@media (max-width: 639px) {
+  .home-shell {
+    --nav-occupied-height: 128px;
+    --nav-bottom-margin: 12px;
+    --nav-row-left: 50%;
+    --nav-row-offset: -50%;
+    --scanner-size: min(100cqw, 100cqh);
+  }
+
+  /* Release the nav's space only while the phone keyboard reduces the visible screen. */
+  .scan-shell[data-keyboard-open] {
+    --home-content-bottom: 8px;
+  }
+
+  .scan-shell[data-keyboard-open] .home-nav {
+    display: none;
+  }
+}
+
 /* Pack opening (Pokémon TCG Pocket style): once the slit crosses the pack the top strip
    slides off sideways in the swipe direction (--tear-dir), then the body drops away. */
 @theme {
