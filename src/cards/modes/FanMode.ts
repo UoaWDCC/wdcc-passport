@@ -13,6 +13,7 @@ export interface FanCallbacks {
   onFocus(index: number): void;
   /** A card was zoomed in (true) or sent back to the hand (false). */
   onInspect(inspecting: boolean): void;
+  onError(message: string): void;
 }
 
 // CardScene fan constants
@@ -33,6 +34,7 @@ export class FanMode implements Mode {
   private readonly fanAnimator = new FanAnimator();
   private readonly fanCards = new Map<number, FanCardEntry>();
   private readonly pendingFan = new Set<number>();
+  private readonly failedFan = new Set<number>();
   private fanIntroUntil: number;
   private scrollPos: number;
   private scrollVel = 0;
@@ -272,7 +274,7 @@ export class FanMode implements Mode {
     }
 
     for (let idx = lo; idx <= hi; idx++) {
-      if (this.fanCards.has(idx) || this.pendingFan.has(idx)) continue;
+      if (this.fanCards.has(idx) || this.pendingFan.has(idx) || this.failedFan.has(idx)) continue;
       this.pendingFan.add(idx);
       const entry = this.entries[idx];
       const introDelay = (idx - lo) * FAN_INTRO_DELAY;
@@ -298,8 +300,12 @@ export class FanMode implements Mode {
         },
         (err: unknown) => {
           this.pendingFan.delete(idx);
+          this.failedFan.add(idx);
           this.releaseTextures(idx);
           console.warn(`[cards] fan card ${entry.id} skipped:`, err);
+          if (!this.disposed && this.fanCards.size === 0 && this.pendingFan.size === 0) {
+            this.callbacks.onError(err instanceof Error ? err.message : String(err));
+          }
         },
       );
     }
@@ -315,6 +321,7 @@ export class FanMode implements Mode {
       this.releaseTextures(idx);
     }
     this.fanCards.clear();
+    this.failedFan.clear();
     this.hoveredFan = null;
     this.fanAnimator.reset();
   }

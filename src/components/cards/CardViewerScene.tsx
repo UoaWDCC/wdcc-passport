@@ -125,7 +125,7 @@ export default function CardViewerScene({
                 alt={current.name}
                 width={496}
                 height={700}
-                className="h-auto w-full max-w-xs rounded-xl"
+                className="h-auto max-h-[70%] w-auto max-w-xs rounded-xl"
               />
             )}
           </div>
