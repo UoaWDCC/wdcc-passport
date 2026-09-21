@@ -65,13 +65,12 @@ export function HomeShell({ children }: { children: ReactNode }) {
       if (!inputFocused && !wasOpen) {
         fullHeight = Math.max(document.documentElement.clientHeight, viewport.height);
       }
-      
+
       const keyboardOpen = (inputFocused || wasOpen) && fullHeight - viewport.height > 120;
       shell.toggleAttribute("data-keyboard-open", keyboardOpen);
       shell.style.height = `${viewport.height}px`;
       shell.style.top = `${viewport.offsetTop}px`;
 
-      
       if (wasOpen && !keyboardOpen && inputFocused) input.blur();
     };
     updateViewport();
