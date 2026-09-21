@@ -15,6 +15,12 @@ export function singleCardSize(dims: SceneDims): number {
   return Math.min(0.92, (aspect / CARD_ASPECT) * 0.94);
 }
 
+export type SwipeAxis = "x" | "y";
+
+export function swipeFlyOff(axis: SwipeAxis, cardH: number, dims: SceneDims): number {
+  return axis === "y" ? cardH * 1.5 : ((dims.screenW + cardH * CARD_ASPECT) / 2) * 1.1;
+}
+
 export function basePosition(dims: SceneDims): { x: number; y: number; z: number } {
   return {
     x: (DEFAULT_CARD.x / 100) * dims.screenW,
