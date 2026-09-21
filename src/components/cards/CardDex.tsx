@@ -29,6 +29,11 @@ export function CardDex({
 }) {
   const { data: cards = [], error, isPending } = useQuery(getUserCardsQuery());
   const owned = cards.filter((c) => c.quantity > 0).length;
+  const eagerIds = new Set(
+    RARITIES.flatMap((r) => cards.filter((c) => c.rarity === r.id))
+      .slice(0, 6)
+      .map((c) => c.id),
+  );
 
   const countText = isPending || error ? "" : `${owned} / ${cards.length}`;
   useEffect(() => onCount(countText), [onCount, countText]);
@@ -79,6 +84,8 @@ export function CardDex({
                       // of small print that a tight, default-quality thumbnail smears.
                       sizes="(max-width: 500px) 50vw, 250px"
                       quality={90}
+                      crossOrigin="anonymous"
+                      loading={eagerIds.has(card.id) ? "eager" : undefined}
                       // A missing card is its own silhouette: the art blacked out.
                       className={`object-cover ${has ? "" : "opacity-80 brightness-0"}`}
                     />

@@ -157,6 +157,7 @@ export class CardScene {
         this.flipped = false;
         this.callbacks.onInspect(v);
       },
+      onError: (message) => this.callbacks.onStatus({ kind: "error", message }),
     });
     this.setMode(fan);
     this.callbacks.onStatus({ kind: "ready" });

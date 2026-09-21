@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { PackModal } from "@/components/packs/PackModal";
-import { pixelButton } from "@/components/ui/pixel";
+import { PIXEL_PANEL, pixelButton } from "@/components/ui/pixel";
 import { getUserPackCountQuery, openPackMutation } from "@/hooks/packs/query-options";
 
 export function PacksViewer() {
@@ -30,7 +30,7 @@ export function PacksViewer() {
       <header className="flex items-center justify-between gap-2">
         <h1 className="text-sm">Packs</h1>
       </header>
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="relative min-h-0 flex-1 overflow-y-auto">
         {isPending ? (
           <p role="status" className="py-6 text-center text-xs text-white/60">
             Loading packs...
@@ -51,9 +51,13 @@ export function PacksViewer() {
         ) : (
           <>
             {packCount === 0 && (
-              <p className="py-6 text-center text-xs leading-relaxed text-white/60">
-                No packs yet. Scan a QR code at a WDCC event to earn one.
-              </p>
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-4">
+                <p
+                  className={`max-w-xs px-4 py-3 text-center text-[10px] leading-relaxed ${PIXEL_PANEL}`}
+                >
+                  No packs yet. Scan a QR code at a WDCC event to earn one.
+                </p>
+              </div>
             )}
             <PackModal
               key={session}
