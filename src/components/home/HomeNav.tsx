@@ -99,7 +99,13 @@ export function HomeNav({ onNavigate = (target) => console.log("navigate", targe
             return (
               <li key={key} style={{ marginRight: gapAfter }}>
                 {href ? (
-                  <Link href={href} aria-label={label} className={className} style={style}>
+                  <Link
+                    href={href}
+                    prefetch={true}
+                    aria-label={label}
+                    className={className}
+                    style={style}
+                  >
                     {image}
                   </Link>
                 ) : (
