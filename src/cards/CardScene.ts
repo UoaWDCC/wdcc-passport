@@ -4,9 +4,10 @@ import { FanMode } from "./modes/FanMode";
 import type { Mode, ModeEnv, PointerInfo } from "./modes/Mode";
 import { SingleMode, type CardStatus } from "./modes/SingleMode";
 import { StackMode, type StackOptions } from "./modes/StackMode";
-import { CARD_ASPECT, disableShaders, applyFallbackMaterial } from "./three/buildCard";
+import { disableShaders, applyFallbackMaterial } from "./three/buildCard";
 import { SCREEN_H_CM, VIEW_DISTANCE_CM, computeDims } from "./three/dims";
 import { disposeFxTextures, loadFxTextures } from "./three/fxTextures";
+import { singleCardSize } from "./three/layout";
 import { updateCardUniforms } from "./three/shaderUniforms";
 import { TextureCache } from "./three/textures";
 import type { CardEntry, SceneDims } from "./types";
@@ -33,8 +34,6 @@ export interface CardSceneCallbacks {
 /** World units are pokebox's centimetres: the eye sits 60 cm from a 24.81 cm-tall screen at z = 0. */
 const CAMERA_DISTANCE = VIEW_DISTANCE_CM;
 const CAMERA_FOV = (2 * Math.atan(SCREEN_H_CM / 2 / CAMERA_DISTANCE) * 180) / Math.PI;
-/** Card height as a fraction of the visible height, capped so it never exceeds 90% of the width. */
-const CARD_FILL = 0.85;
 const MAX_PIXEL_RATIO = 2;
 const FLIP_LERP = 0.08;
 
@@ -204,8 +203,7 @@ export class CardScene {
   }
 
   private singleHeight(): number {
-    const { width, height } = this.view();
-    return Math.min(height * CARD_FILL, (width * 0.9) / CARD_ASPECT);
+    return this.dims.screenH * singleCardSize(this.dims);
   }
 
   private onResize(): void {

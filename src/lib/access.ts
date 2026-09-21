@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { cache } from "react";
 import { auth } from "@/lib/auth";
 
 export type UserRole = "admin" | "user";
@@ -9,7 +10,8 @@ export function safeRedirectPath(value: string | undefined) {
   return value && value.startsWith("/") && !value.startsWith("//") ? value : null;
 }
 
-export async function requireUser() {
+// Share the session check between layouts and pages within one server render only.
+export const requireUser = cache(async () => {
   const requestHeaders = await headers();
   const session = await auth.api.getSession({ headers: requestHeaders });
 
@@ -21,7 +23,7 @@ export async function requireUser() {
   }
 
   return session;
-}
+});
 
 export async function requireAdmin() {
   const session = await requireUser();

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 
 import { HomeNav, NAV_HEIGHT } from "@/components/home/HomeNav";
 import { SCENE_H, SCENE_W } from "@/components/home/scene";
@@ -29,10 +29,71 @@ const pixelated = { imageRendering: "pixelated" } as const;
  * space between; any page other than home dims the backdrop behind it.
  */
 export function HomeShell({ children }: { children: ReactNode }) {
-  const isHome = usePathname() === "/home";
+  const pathname = usePathname();
+  const isHome = pathname === "/home";
+  const isScan = pathname === "/home/scan";
+  const shellRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const shell = shellRef.current;
+    const viewport = window.visualViewport;
+    if (!isScan || !shell || !viewport) return;
+    const phone = window.matchMedia("(max-width: 639px)");
+    let fullHeight = Math.max(document.documentElement.clientHeight, viewport.height);
+    let viewportWidth = window.innerWidth;
+
+    const resetViewport = () => {
+      shell.style.removeProperty("height");
+      shell.style.removeProperty("top");
+      shell.removeAttribute("data-keyboard-open");
+    };
+
+    const updateViewport = () => {
+      if (!phone.matches) {
+        resetViewport();
+        return;
+      }
+      if (viewport.scale !== 1) return;
+      if (window.innerWidth !== viewportWidth) {
+        viewportWidth = window.innerWidth;
+        fullHeight = Math.max(document.documentElement.clientHeight, viewport.height);
+      }
+
+      const input = shell.querySelector<HTMLInputElement>("#code-input");
+      const inputFocused = input !== null && document.activeElement === input;
+      const wasOpen = shell.hasAttribute("data-keyboard-open");
+      if (!inputFocused && !wasOpen) {
+        fullHeight = Math.max(document.documentElement.clientHeight, viewport.height);
+      }
+
+      const keyboardOpen = (inputFocused || wasOpen) && fullHeight - viewport.height > 120;
+      shell.toggleAttribute("data-keyboard-open", keyboardOpen);
+      shell.style.height = `${viewport.height}px`;
+      shell.style.top = `${viewport.offsetTop}px`;
+
+      if (wasOpen && !keyboardOpen && inputFocused) input.blur();
+    };
+    updateViewport();
+    viewport.addEventListener("resize", updateViewport);
+    viewport.addEventListener("scroll", updateViewport);
+    phone.addEventListener("change", updateViewport);
+    shell.addEventListener("focusin", updateViewport);
+    shell.addEventListener("focusout", updateViewport);
+    return () => {
+      viewport.removeEventListener("resize", updateViewport);
+      viewport.removeEventListener("scroll", updateViewport);
+      phone.removeEventListener("change", updateViewport);
+      shell.removeEventListener("focusin", updateViewport);
+      shell.removeEventListener("focusout", updateViewport);
+      resetViewport();
+    };
+  }, [isScan]);
 
   return (
-    <div className="relative h-dvh w-full touch-manipulation overflow-hidden overscroll-none bg-black">
+    <div
+      ref={shellRef}
+      className={`home-shell relative h-dvh w-full touch-manipulation overflow-hidden overscroll-none bg-black ${isScan ? "scan-shell" : ""}`}
+    >
       <div
         aria-hidden
         className="absolute -inset-6 bg-repeat-x blur-[6px]"
@@ -56,7 +117,7 @@ export function HomeShell({ children }: { children: ReactNode }) {
           target="_blank"
           rel="noopener noreferrer"
           aria-label="WDCC website (opens in a new tab)"
-          className="absolute left-3 z-10 block"
+          className="home-header absolute left-3 z-10 block"
           style={{
             top: `calc(${HEADER_CENTER_Y - Math.floor((LOGO.h * LOGO.scale) / 2) - LOGO_PAD}px + env(safe-area-inset-top))`,
             paddingBlock: LOGO_PAD,
@@ -73,21 +134,25 @@ export function HomeShell({ children }: { children: ReactNode }) {
           />
         </a>
 
-        <SignOutButton />
+        <div className="home-header">
+          <SignOutButton />
+        </div>
 
         {!isHome && (
           <div
-            className="absolute inset-x-0 overflow-y-auto px-4 [image-rendering:auto]"
+            className={`absolute inset-x-0 px-4 [image-rendering:auto] ${isScan ? "overflow-hidden sm:overflow-y-auto" : "overflow-y-auto"}`}
             style={{
-              top: `calc(${HEADER_HEIGHT}px + env(safe-area-inset-top))`,
-              bottom: `calc(${NAV_HEIGHT}px + env(safe-area-inset-bottom))`,
+              top: `var(--home-content-top, calc(${HEADER_HEIGHT}px + env(safe-area-inset-top)))`,
+              bottom: `var(--home-content-bottom, calc(var(--nav-occupied-height, ${NAV_HEIGHT}px) + env(safe-area-inset-bottom)))`,
             }}
           >
             {children}
           </div>
         )}
 
-        <HomeNav />
+        <div className="home-nav">
+          <HomeNav />
+        </div>
       </div>
     </div>
   );

@@ -21,12 +21,11 @@ export const FAN_INTRO_DELAY = 0.07;
 export const FAN_INTRO_DURATION = 0.35;
 
 /**
- * Fan cards are slightly smaller than single mode: cardSize * 0.85. On narrow
- * (portrait phone) screens that would overflow the width, so the height is also
- * capped at a fraction of the screen width; desktop sizes never hit the cap.
+ * Enlarge both the cards and their arc while keeping the focused card readable
+ * on narrow screens. Neighbouring cards extend to either side for drag browsing.
  */
 export function fanCardHeight(dims: SceneDims): number {
-  return Math.min(dims.screenH * CARD_SIZE * 0.85, dims.screenW * 0.65);
+  return Math.min(dims.screenH * CARD_SIZE, dims.screenW * 0.8);
 }
 
 function pivot(cardH: number, dims: SceneDims) {

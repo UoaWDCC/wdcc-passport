@@ -92,7 +92,7 @@ export default function CardViewerScene({
   const arrow = pixelButton({ size: "icon" });
 
   return (
-    <div className="flex h-full w-full flex-col gap-3">
+    <div className="flex h-full w-full flex-col gap-2">
       <div className="relative min-h-0 flex-1">
         <div ref={containerRef} className="absolute inset-0" />
 
@@ -132,7 +132,7 @@ export default function CardViewerScene({
         )}
       </div>
 
-      <div aria-live="polite" className="flex flex-col items-center gap-2 text-center">
+      <div aria-live="polite" className="flex shrink-0 flex-col items-center gap-1 text-center">
         <div className="flex items-center justify-center gap-3">
           {cards && cards.length > 1 && (
             <button
@@ -145,7 +145,12 @@ export default function CardViewerScene({
               ‹
             </button>
           )}
-          <div className="text-xs">{current ? current.name : ""}</div>
+          <div className="flex min-w-0 flex-col gap-1">
+            <div className="text-xs">{current ? current.name : ""}</div>
+            <div className="text-[10px] text-white/80 capitalize">
+              {current ? `${current.rarity} · ×${current.quantity}` : ""}
+            </div>
+          </div>
           {cards && cards.length > 1 && (
             <button
               type="button"
@@ -157,9 +162,6 @@ export default function CardViewerScene({
               ›
             </button>
           )}
-        </div>
-        <div className="text-[10px] text-white/80 capitalize">
-          {current ? `${current.rarity} · ×${current.quantity}` : ""}
         </div>
         <div className="text-[10px] text-white/70">
           {status.kind === "ready" ? (inspecting ? INSPECT_HINT : HINTS[mode]) : ""}

@@ -14,9 +14,9 @@ export const STACK_COUNT = 5;
 export const STACK_INTRO_DELAY = 0.06;
 export const STACK_INTRO_DURATION = 0.45;
 
-/** Same sizing as single mode (full mobile viewport). */
+/** Enlarge the pile but reserve vertical room for the top card lifting toward the camera on a flip. */
 export function stackCardHeight(dims: SceneDims): number {
-  return dims.screenH * singleCardSize(dims);
+  return dims.screenH * Math.min(singleCardSize(dims), 0.89);
 }
 
 /** Depth gap between pile slots, as a fraction of the box depth (pokebox uses 0.02; wider so a flip clears the pile). */

@@ -2,17 +2,17 @@ import type { SceneDims } from "../types";
 import { CARD_ASPECT } from "./buildCard";
 import type { Transform } from "./Tween";
 
-/** pokebox DEFAULT_CONFIG.cardSize — fan/wall card height as a fraction of screen height. */
-export const CARD_SIZE = 0.5;
+/** Fan card height as a fraction of the available scene height. */
+export const CARD_SIZE = 0.58;
 /** pokebox DEFAULT_CARD transform: x/y in % of screen size, z in % of box depth. */
 export const DEFAULT_CARD = { x: 0, y: -2, z: 25 };
 /** Z (in front of the screen plane) for a zoomed fan card (pokebox ZOOMED_Z_OFFSET). */
 export const ZOOMED_Z_OFFSET = 4;
 
-/** pokebox singleCardSize: 85% of screen height, capped so the card is at most 90% of the width. */
+/** Fill the viewer while leaving room for tilt and the inspection card's vertical offset. */
 export function singleCardSize(dims: SceneDims): number {
   const aspect = dims.screenW / dims.screenH;
-  return Math.min(0.85, (aspect / CARD_ASPECT) * 0.9);
+  return Math.min(0.92, (aspect / CARD_ASPECT) * 0.94);
 }
 
 export function basePosition(dims: SceneDims): { x: number; y: number; z: number } {

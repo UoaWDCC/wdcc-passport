@@ -51,10 +51,10 @@ export function HomeNav({ onNavigate = (target) => console.log("navigate", targe
     <>
       <nav
         aria-label="Main"
-        className="absolute left-[calc(50%_-_192px)] z-10"
+        className="absolute left-[calc(50%_-_192px)] z-10 origin-bottom max-sm:scale-80"
         style={{
           left: `round(down, calc(50% - ${bannerW / 2}px), 1px)`,
-          bottom: `calc(${BOTTOM_MARGIN}px + env(safe-area-inset-bottom))`,
+          bottom: `calc(var(--nav-bottom-margin, ${BOTTOM_MARGIN}px) + env(safe-area-inset-bottom))`,
           width: bannerW,
           height: bannerH,
         }}
@@ -71,12 +71,19 @@ export function HomeNav({ onNavigate = (target) => console.log("navigate", targe
         />
         <ul
           className="absolute top-0 flex h-full items-center select-none"
-          style={{ left: rowLeft, gap: ICON_GAP }}
+          style={{
+            left: `var(--nav-row-left, ${rowLeft}px)`,
+            transform: "translateX(var(--nav-row-offset, 0px))",
+            gap: ICON_GAP,
+          }}
         >
           {ICONS.map(({ key, sprite, label, href, gapAfter }) => {
             const w = sprite.w * sprite.scale;
             const h = sprite.h * sprite.scale;
-            const className = "flex flex-col items-center gap-1.5";
+            // Balance the visible artwork gaps, including the wider phone tap targets.
+            const className = `flex flex-col items-center gap-1.5 max-sm:min-w-[55px] ${
+              key === "passport" ? "-translate-x-1.5 max-sm:-translate-x-[9px]" : ""
+            }`;
             const style = { width: cellWidth(w) };
             const image = (
               <>
@@ -91,7 +98,7 @@ export function HomeNav({ onNavigate = (target) => console.log("navigate", targe
                     style={pixelated}
                   />
                 </span>
-                <span className="text-[8px] leading-none font-normal tracking-normal whitespace-nowrap text-[#4a3a24]">
+                <span className="text-[8px] leading-none font-normal tracking-normal whitespace-nowrap text-[#4a3a24] max-sm:text-[10px]">
                   {label}
                 </span>
               </>
@@ -99,7 +106,13 @@ export function HomeNav({ onNavigate = (target) => console.log("navigate", targe
             return (
               <li key={key} style={{ marginRight: gapAfter }}>
                 {href ? (
-                  <Link href={href} aria-label={label} className={className} style={style}>
+                  <Link
+                    href={href}
+                    prefetch={true}
+                    aria-label={label}
+                    className={className}
+                    style={style}
+                  >
                     {image}
                   </Link>
                 ) : (

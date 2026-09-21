@@ -2,6 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
+    // Serve source images directly so Vercel's optimization quota cannot break artwork.
+    unoptimized: true,
     // 90 is for card art in the dex grid, where the default 75 smears the small print.
     qualities: [75, 90],
     remotePatterns: process.env.R2_PUBLIC_BASE_URL
