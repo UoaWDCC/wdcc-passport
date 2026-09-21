@@ -226,6 +226,28 @@ export function PackTear({
             })}
           </button>
 
+          {!torn && !drag && (
+            <div
+              aria-hidden
+              style={{ top: `${TEAR_LINE}%` }}
+              className="pointer-events-none absolute -right-3 -left-9 z-10 flex -translate-y-1/2 items-center gap-1"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                className="h-5 w-5 shrink-0 text-neutral-300/80 drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]"
+              >
+                <circle cx="5" cy="7" r="2.5" />
+                <circle cx="5" cy="17" r="2.5" />
+                <path d="M7 8.6 21 16M7 15.4 21 8" />
+              </svg>
+              <div className="flex-1 border-t-2 border-dotted border-neutral-300/60 drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]" />
+            </div>
+          )}
+
           {/* The slit: grows from the side the swipe started on, showing the dark inside,
               and fades out as the strip slides away. */}
           <div

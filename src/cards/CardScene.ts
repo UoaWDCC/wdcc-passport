@@ -58,6 +58,7 @@ export class CardScene {
   private dims: SceneDims = computeDims(1, 1);
   private flipped = false;
   private flipAngle = 0;
+  private startFlipped = false;
   private raf = 0;
   private lastTime = 0;
   private disposed = false;
@@ -181,6 +182,7 @@ export class CardScene {
         options,
       ),
     );
+    this.startFlipped = options?.backFirst === true;
     this.callbacks.onStatus({ kind: "ready" });
   }
 
@@ -235,6 +237,11 @@ export class CardScene {
     this.lastTime = now;
 
     this.pointerTilt.update(dt);
+    if (this.startFlipped && this.mode?.canFlip()) {
+      this.startFlipped = false;
+      this.flipped = true;
+      this.flipAngle = Math.PI;
+    }
     // The flip belongs to the focused card; once it moves on (stack swipe, fan return) unflip.
     if (this.flipped && !this.mode?.canFlip()) this.flipped = false;
     const target = this.flipped ? Math.PI : 0;

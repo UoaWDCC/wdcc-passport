@@ -36,6 +36,7 @@ export interface StackOptions {
    * reaching the top (a legendary, a whole show).
    */
   reveal?: boolean;
+  backFirst?: boolean;
 }
 
 // pokebox useSwipeGesture gates

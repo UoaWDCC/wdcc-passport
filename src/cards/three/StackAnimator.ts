@@ -197,7 +197,8 @@ export class StackAnimator {
         from.y + (rest.y - from.y) * e + arc,
         fromZ + (rest.z - fromZ) * e,
       );
-      g.rotation.set(tilt.rotateX * TILT_X * e, tilt.rotateY * TILT_Y * e, tumble);
+      const flip = entry.slot === 0 ? ctx.flipAngle : 0;
+      g.rotation.set(tilt.rotateX * TILT_X * e, tilt.rotateY * TILT_Y * e + flip, tumble);
       g.scale.setScalar(from.scale + (rest.scale - from.scale) * e);
       if (t >= 1) entry.intro = null;
     }
@@ -275,7 +276,7 @@ export class StackAnimator {
         let shakeY = 0;
         let shakeRot = 0;
 
-        if (ctx.reveal && isTop) {
+        if (ctx.reveal && isTop && (entry.revealed || Math.cos(ctx.flipAngle) > 0)) {
           // Reaching the top of the pile is a card's reveal. A legendary makes a show of it:
           // it charges up hidden under its cover, trembling harder and harder, then lifts
           // off the pile and spins a full turn as the cover burns away.
