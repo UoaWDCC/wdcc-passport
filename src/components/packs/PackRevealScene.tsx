@@ -50,7 +50,7 @@ export default function PackRevealScene({
         },
       });
       // Each swiped card leaves the pile for good, so only these cards are ever shown.
-      scene.showStack(cards, 0, { once: true, reveal: true });
+      scene.showStack(cards, 0, { once: true, reveal: true, backFirst: true });
       sceneRef.current = scene;
     } catch {
       // Reported on the next tick, like the scene's own async callbacks.

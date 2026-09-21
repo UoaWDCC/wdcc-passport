@@ -15,6 +15,7 @@ import {
   stackCardHeight,
   stackRest,
 } from "../three/StackLayoutBuilder";
+import { type SwipeAxis } from "../three/layout";
 import type { CardEntry, SceneDims } from "../types";
 import type { Mode, ModeEnv, PointerInfo, TickContext } from "./Mode";
 
@@ -35,6 +36,7 @@ export interface StackOptions {
    * reaching the top (a legendary, a whole show).
    */
   reveal?: boolean;
+  backFirst?: boolean;
 }
 
 // pokebox useSwipeGesture gates
@@ -187,15 +189,11 @@ export class StackMode implements Mode {
       const tap = ms <= CLICK_MAX_MS && top !== undefined && this.canFlip();
       return tap && this.hit(p.ray, top.card) ? "flip" : null;
     }
-    // pokebox useSwipeGesture: vertical travel with distance, duration and velocity gates.
-    const dist = Math.abs(dy);
-    if (
-      dist >= Math.abs(dx) &&
-      dist >= SWIPE_MIN_PX &&
-      ms <= SWIPE_MAX_MS &&
-      dist / ms >= SWIPE_MIN_VELOCITY
-    ) {
-      this.swipe(dy < 0 ? 1 : -1);
+    const horizontal = Math.abs(dx) > Math.abs(dy);
+    const dist = horizontal ? Math.abs(dx) : Math.abs(dy);
+    if (dist >= SWIPE_MIN_PX && ms <= SWIPE_MAX_MS && dist / ms >= SWIPE_MIN_VELOCITY) {
+      if (horizontal) this.swipe(dx < 0 ? -1 : 1, "x");
+      else this.swipe(dy < 0 ? 1 : -1, "y");
     }
     return null;
   }
@@ -223,12 +221,16 @@ export class StackMode implements Mode {
       case " ":
         return this.canFlip() ? "flip" : "handled";
       case "ArrowUp":
-      case "ArrowRight":
         this.swipe(1);
         return "handled";
       case "ArrowDown":
-      case "ArrowLeft":
         this.swipe(-1);
+        return "handled";
+      case "ArrowRight":
+        this.swipe(1, "x");
+        return "handled";
+      case "ArrowLeft":
+        this.swipe(-1, "x");
         return "handled";
     }
     return null;
@@ -238,10 +240,9 @@ export class StackMode implements Mode {
     return this.pile.find((e) => e.slot === 0);
   }
 
-  /** pokebox swipe: the top card flies off (up or down) and goes to the bottom of the pile. */
-  private swipe(direction: 1 | -1): void {
+  private swipe(direction: 1 | -1, axis: SwipeAxis = "y"): void {
     if (this.pulling) return;
-    this.animator.swipe(this.pile, direction, performance.now() / 1000, this.options.once);
+    this.animator.swipe(this.pile, direction, performance.now() / 1000, this.options.once, axis);
   }
 
   private async pullBack(index: number): Promise<void> {

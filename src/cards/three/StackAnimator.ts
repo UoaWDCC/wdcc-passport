@@ -2,6 +2,7 @@ import type { CardRarity, SceneDims } from "../types";
 import { setCardRenderOrder, type CardObject } from "./buildCard";
 import type { TiltState } from "./FanAnimator";
 import { CARD_ASPECT } from "./buildCard";
+import { swipeFlyOff, type SwipeAxis } from "./layout";
 import {
   STACK_INTRO_DURATION,
   STACK_Z_STEP,
@@ -41,12 +42,13 @@ export interface StackTickContext {
 
 interface Swipe {
   direction: 1 | -1;
+  axis: SwipeAxis;
   startTime: number;
   moving: StackCardEntry;
   reverse: boolean;
 }
 
-const SWIPE_DURATION = 0.45;
+export const SWIPE_DURATION = 0.45;
 const NO_SHAKE = { x: 0, y: 0 };
 /**
  * Fraction of the pointer tilt the pile follows. Every card tilts by the same amount, so the
@@ -66,7 +68,8 @@ const easeOutBack = (t: number) => {
   const c1 = 1.70158;
   return 1 + (c1 + 1) * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
 };
-const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+export const easeInOutCubic = (t: number) =>
+  t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
 /**
  * Stack mode animation (pokebox StackAnimator): staggered intro, swipe
@@ -131,13 +134,19 @@ export class StackAnimator {
    * Start a swipe. Always swipes the top card (slot 0). Returns false if busy.
    * A lone card only swipes when `allowLast` is set (it is being removed, not recycled).
    */
-  swipe(entries: StackCardEntry[], direction: 1 | -1, now: number, allowLast = false): boolean {
+  swipe(
+    entries: StackCardEntry[],
+    direction: 1 | -1,
+    now: number,
+    allowLast = false,
+    axis: SwipeAxis = "y",
+  ): boolean {
     const minPile = allowLast ? 1 : 2;
     if (this.swipeState || entries.length < minPile || this.isIntroPlaying(entries)) return false;
     if (this.isShowcasing(entries)) return false;
     const moving = entries.find((e) => e.slot === 0);
     if (!moving) return false;
-    this.swipeState = { direction, startTime: now, moving, reverse: false };
+    this.swipeState = { direction, axis, startTime: now, moving, reverse: false };
     setCardRenderOrder(moving.card, 200);
     return true;
   }
@@ -147,7 +156,7 @@ export class StackAnimator {
     if (this.isShowcasing(entries)) return false;
     const moving = entries.find((e) => e.slot === entries.length - 1);
     if (!moving) return false;
-    this.swipeState = { direction, startTime: now, moving, reverse: true };
+    this.swipeState = { direction, axis: "y", startTime: now, moving, reverse: true };
     setCardRenderOrder(moving.card, 200);
     return true;
   }
@@ -188,7 +197,8 @@ export class StackAnimator {
         from.y + (rest.y - from.y) * e + arc,
         fromZ + (rest.z - fromZ) * e,
       );
-      g.rotation.set(tilt.rotateX * TILT_X * e, tilt.rotateY * TILT_Y * e, tumble);
+      const flip = entry.slot === 0 ? ctx.flipAngle : 0;
+      g.rotation.set(tilt.rotateX * TILT_X * e, tilt.rotateY * TILT_Y * e + flip, tumble);
       g.scale.setScalar(from.scale + (rest.scale - from.scale) * e);
       if (t >= 1) entry.intro = null;
     }
@@ -199,7 +209,7 @@ export class StackAnimator {
       const raw = Math.min((now - s.startTime) / SWIPE_DURATION, 1);
       const e = easeInOutCubic(raw);
       const k = s.reverse ? 1 - e : e;
-      const flyOffY = ctx.cardH * 1.5 * s.direction;
+      const fly = swipeFlyOff(s.axis, ctx.cardH, ctx.dims) * s.direction * k;
       const lift = ctx.dims.boxD * STACK_Z_STEP * 2;
 
       const moving = s.moving;
@@ -207,7 +217,11 @@ export class StackAnimator {
       const g = moving.card.group;
       g.visible = true;
       // Held in front of the pile, so the card promoting into the top slot never passes through it.
-      g.position.set(rest.x, rest.y + flyOffY * k, rest.z + lift);
+      g.position.set(
+        rest.x + (s.axis === "x" ? fly : 0),
+        rest.y + (s.axis === "y" ? fly : 0),
+        rest.z + lift,
+      );
       g.rotation.set(0, 0, 0);
       g.scale.setScalar(rest.scale * (1 - k * 0.3));
 
@@ -262,7 +276,7 @@ export class StackAnimator {
         let shakeY = 0;
         let shakeRot = 0;
 
-        if (ctx.reveal && isTop) {
+        if (ctx.reveal && isTop && (entry.revealed || Math.cos(ctx.flipAngle) > 0)) {
           // Reaching the top of the pile is a card's reveal. A legendary makes a show of it:
           // it charges up hidden under its cover, trembling harder and harder, then lifts
           // off the pile and spins a full turn as the cover burns away.
