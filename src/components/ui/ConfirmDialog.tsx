@@ -63,7 +63,7 @@ export function ConfirmDialog({
         >
           {message}
         </p>
-        <div className={`mt-6 flex justify-end gap-3 ${pixel ? "flex-wrap" : ""}`}>
+        <div className={`mt-6 flex justify-center gap-3 ${pixel ? "flex-wrap" : ""}`}>
           <button
             ref={cancelRef}
             type="button"
