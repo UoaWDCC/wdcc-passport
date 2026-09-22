@@ -4,6 +4,7 @@ import { addUserBadgeMutation } from "@/hooks/badges/query-options";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { usePackAdded } from "@/components/home/HomeNav";
 import { PIXEL_ERROR_TEXT, PIXEL_INPUT, PIXEL_PANEL, pixelButton } from "@/components/ui/pixel";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
@@ -12,6 +13,7 @@ export function ScannerComponent({ initialCode }: { initialCode?: string }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const lastSubmitted = useRef("");
+  const { setPackAdded } = usePackAdded();
   const [code, setCode] = useState(initialCode ?? "");
   const [isEnteringCode, setIsEnteringCode] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
@@ -22,14 +24,14 @@ export function ScannerComponent({ initialCode }: { initialCode?: string }) {
     error,
     isPending,
     reset,
-  } = useMutation(
-    addUserBadgeMutation({
-      onSuccess: () => {
-        void queryClient.invalidateQueries({ queryKey: ["get-user-badges"] });
-        void queryClient.invalidateQueries({ queryKey: ["get-user-pack-count"] });
-      },
-    }),
-  );
+  } = useMutation({
+    ...addUserBadgeMutation(),
+    onSuccess: (result) => {
+      void queryClient.invalidateQueries({ queryKey: ["get-user-badges"] });
+      void queryClient.invalidateQueries({ queryKey: ["get-user-pack-count"] });
+      if (!result.alreadyAwarded) setPackAdded(true);
+    },
+  });
 
   function submitCode(value: string) {
     if (isPending || value.trim().length !== 6) return;
@@ -137,14 +139,10 @@ export function ScannerComponent({ initialCode }: { initialCode?: string }) {
         message={
           data?.alreadyAwarded ? "You have already scanned this badge." : "Badge and pack added!"
         }
-        confirmLabel="Go home"
-        cancelLabel="Scan another"
-        onConfirm={() => router.push("/home")}
-        onCancel={() => {
-          reset();
-          setCode("");
-          lastSubmitted.current = "";
-        }}
+        confirmLabel="Go to packs"
+        cancelLabel="Go to badges"
+        onConfirm={() => router.push("/home/packs")}
+        onCancel={() => router.push("/home/badges")}
       />
     </div>
   );

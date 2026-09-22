@@ -2,8 +2,16 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { createContext, useContext } from "react";
 
 export type NavTarget = "home" | "badges" | "scan" | "passport" | "packs";
+
+export const PackAddedContext = createContext<{
+  packAdded: boolean;
+  setPackAdded: (added: boolean) => void;
+}>({ packAdded: false, setPackAdded: () => {} });
+
+export const usePackAdded = () => useContext(PackAddedContext);
 
 const HOME = { src: "/assets/pixel/home.png", w: 21, h: 20, scale: 3 };
 const MEDAL = { src: "/assets/pixel/medal.png", w: 21, h: 20, scale: 3 };
@@ -11,6 +19,7 @@ const SCANNER = { src: "/assets/pixel/scanner.png", w: 40, h: 28, scale: 2 };
 const CARD = { src: "/assets/pixel/card.png", w: 46, h: 62, scale: 1 };
 const PACK = { src: "/assets/pixel/pack.png", w: 40, h: 62, scale: 1 };
 const BANNER = { src: "/assets/pixel/banner.png", w: 64, h: 24, scale: 6 };
+const ALERT = { src: "/assets/pixel/alert.png", w: 13, h: 13, scale: 2 };
 
 const TOUCH = 44;
 const cellWidth = (w: number) => Math.ceil(Math.max(w, TOUCH) / 2) * 2;
@@ -37,6 +46,7 @@ type Props = {
 };
 
 export function HomeNav({ onNavigate = (target) => console.log("navigate", target) }: Props) {
+  const { packAdded } = usePackAdded();
   const bannerW = BANNER.w * BANNER.scale;
   const bannerH = BANNER.h * BANNER.scale;
   const rowW =
@@ -104,7 +114,18 @@ export function HomeNav({ onNavigate = (target) => console.log("navigate", targe
               </>
             );
             return (
-              <li key={key} style={{ marginRight: gapAfter }}>
+              <li key={key} className="relative" style={{ marginRight: gapAfter }}>
+                {key === "packs" && packAdded && (
+                  <Image
+                    src={ALERT.src}
+                    alt=""
+                    width={ALERT.w * ALERT.scale}
+                    height={ALERT.h * ALERT.scale}
+                    unoptimized
+                    className="animate-pack-pop absolute -top-1 -right-1 z-10 motion-reduce:animate-none"
+                    style={pixelated}
+                  />
+                )}
                 {href ? (
                   <Link
                     href={href}

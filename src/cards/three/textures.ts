@@ -42,7 +42,7 @@ export class TextureCache {
       },
       () => {
         if (this.entries.get(url)?.promise === promise) this.entries.delete(url);
-        throw new Error(`Could not load image ${url}`);
+        throw new Error(`Could not load image`);
       },
     );
     this.entries.set(url, { refs: 1, texture: null, promise });

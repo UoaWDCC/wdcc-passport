@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
-import { HomeNav, NAV_HEIGHT } from "@/components/home/HomeNav";
+import { HomeNav, NAV_HEIGHT, PackAddedContext } from "@/components/home/HomeNav";
 import { SCENE_H, SCENE_W } from "@/components/home/scene";
 import { SignOutButton } from "@/components/SignOutButton";
 
@@ -32,7 +32,11 @@ export function HomeShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isHome = pathname === "/home";
   const isScan = pathname === "/home/scan";
+  const isPacks = pathname === "/home/packs";
   const shellRef = useRef<HTMLDivElement>(null);
+  const [packAdded, setPackAdded] = useState(false);
+
+  if (packAdded && isPacks) setPackAdded(false);
 
   useEffect(() => {
     const shell = shellRef.current;
@@ -90,70 +94,72 @@ export function HomeShell({ children }: { children: ReactNode }) {
   }, [isScan]);
 
   return (
-    <div
-      ref={shellRef}
-      className={`home-shell relative h-dvh w-full touch-manipulation overflow-hidden overscroll-none bg-black ${isScan ? "scan-shell" : ""}`}
-    >
+    <PackAddedContext value={{ packAdded, setPackAdded }}>
       <div
-        aria-hidden
-        className="absolute -inset-6 bg-repeat-x blur-[6px]"
-        style={{
-          backgroundImage: `url(${BG_WIDE})`,
-          backgroundSize: `calc(${BG_SCALE} * ${SCENE_W * 2}) auto`,
-          backgroundPosition: `calc(50vw + 24px - ${BG_SCALE} * ${SCENE_W / 2}) 24px`,
-          ...pixelated,
-        }}
-      />
-      <div aria-hidden className="absolute inset-0 bg-black/45" />
-
-      <div
-        className="[container-type:size] relative mx-auto h-full w-full max-w-[500px] bg-cover bg-top shadow-[0_0_0_4px_rgba(0,0,0,0.85),0_0_60px_rgba(0,0,0,0.7)]"
-        style={{ backgroundImage: `url(${BG})`, ...pixelated }}
+        ref={shellRef}
+        className={`home-shell relative h-dvh w-full touch-manipulation overflow-hidden overscroll-none bg-black ${isScan ? "scan-shell" : ""}`}
       >
-        {isHome ? children : <div className="absolute inset-0 bg-black/60" />}
-
-        <a
-          href={WDCC_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="WDCC website (opens in a new tab)"
-          className="home-header absolute left-3 z-10 block"
+        <div
+          aria-hidden
+          className="absolute -inset-6 bg-repeat-x blur-[6px]"
           style={{
-            top: `calc(${HEADER_CENTER_Y - Math.floor((LOGO.h * LOGO.scale) / 2) - LOGO_PAD}px + env(safe-area-inset-top))`,
-            paddingBlock: LOGO_PAD,
+            backgroundImage: `url(${BG_WIDE})`,
+            backgroundSize: `calc(${BG_SCALE} * ${SCENE_W * 2}) auto`,
+            backgroundPosition: `calc(50vw + 24px - ${BG_SCALE} * ${SCENE_W / 2}) 24px`,
+            ...pixelated,
           }}
+        />
+        <div aria-hidden className="absolute inset-0 bg-black/45" />
+
+        <div
+          className="[container-type:size] relative mx-auto h-full w-full max-w-[500px] bg-cover bg-top shadow-[0_0_0_4px_rgba(0,0,0,0.85),0_0_60px_rgba(0,0,0,0.7)]"
+          style={{ backgroundImage: `url(${BG})`, ...pixelated }}
         >
-          <Image
-            src={LOGO.src}
-            alt="WDCC"
-            width={LOGO.w * LOGO.scale}
-            height={LOGO.h * LOGO.scale}
-            unoptimized
-            priority
-            style={pixelated}
-          />
-        </a>
+          {isHome ? children : <div className="absolute inset-0 bg-black/60" />}
 
-        <div className="home-header">
-          <SignOutButton />
-        </div>
-
-        {!isHome && (
-          <div
-            className={`absolute inset-x-0 px-4 [image-rendering:auto] ${isScan ? "overflow-hidden sm:overflow-y-auto" : "overflow-y-auto"}`}
+          <a
+            href={WDCC_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="WDCC website (opens in a new tab)"
+            className="home-header absolute left-3 z-10 block"
             style={{
-              top: `var(--home-content-top, calc(${HEADER_HEIGHT}px + env(safe-area-inset-top)))`,
-              bottom: `var(--home-content-bottom, calc(var(--nav-occupied-height, ${NAV_HEIGHT}px) + env(safe-area-inset-bottom)))`,
+              top: `calc(${HEADER_CENTER_Y - Math.floor((LOGO.h * LOGO.scale) / 2) - LOGO_PAD}px + env(safe-area-inset-top))`,
+              paddingBlock: LOGO_PAD,
             }}
           >
-            {children}
-          </div>
-        )}
+            <Image
+              src={LOGO.src}
+              alt="WDCC"
+              width={LOGO.w * LOGO.scale}
+              height={LOGO.h * LOGO.scale}
+              unoptimized
+              priority
+              style={pixelated}
+            />
+          </a>
 
-        <div className="home-nav">
-          <HomeNav />
+          <div className="home-header">
+            <SignOutButton />
+          </div>
+
+          {!isHome && (
+            <div
+              className={`absolute inset-x-0 px-4 [image-rendering:auto] ${isScan ? "overflow-hidden sm:overflow-y-auto" : "overflow-y-auto"}`}
+              style={{
+                top: `var(--home-content-top, calc(${HEADER_HEIGHT}px + env(safe-area-inset-top)))`,
+                bottom: `var(--home-content-bottom, calc(var(--nav-occupied-height, ${NAV_HEIGHT}px) + env(safe-area-inset-bottom)))`,
+              }}
+            >
+              {children}
+            </div>
+          )}
+
+          <div className="home-nav">
+            <HomeNav />
+          </div>
         </div>
       </div>
-    </div>
+    </PackAddedContext>
   );
 }
