@@ -40,9 +40,12 @@ export function QrCodeDisplay({ eventName, code, onClose }: QrCodeDisplayProps) 
                   excavate: true,
                 }}
               />
-              <p className="text-sm">
+              <p className="text-center text-sm">
                 Or enter the code manually:{" "}
                 <span className="font-mono text-base font-semibold tracking-wider">{code}</span>
+                <span className="block">
+                  at <span className="font-bold">passport.wdcc.co.nz</span>
+                </span>
               </p>
             </div>
           </>
